@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>4层家装 3D 实时协作设计与量尺平台</title>
+  <title>4层家装 3D 实时协作设计与量尺空间</title>
   <script type="importmap">
   {
     "imports": {
@@ -13,460 +13,902 @@
   }
   </script>
   <style>
+    :root {
+      --bg-canvas: #121214;
+      --surface-glass: rgba(20, 20, 22, 0.80);
+      --surface-elevated: rgba(26, 26, 30, 0.92);
+      --surface-subtle: rgba(255, 255, 255, 0.06);
+      --surface-hover: rgba(255, 255, 255, 0.11);
+      --border-hairline: rgba(255, 255, 255, 0.11);
+      --border-gold: rgba(201, 162, 75, 0.45);
+      --text-primary: #F7F6F2;
+      --text-secondary: #A3A3AD;
+      --accent-gold: #C9A24B;
+      --accent-gold-hover: #D8B665;
+      --on-gold: #141416;
+      --accent-emerald: #34D399;
+      --accent-amber: #EAB308;
+      --accent-teal: #2DD4BF;
+      --accent-danger: #EF4444;
+      --font-display: "Songti SC", "Noto Serif SC", "Cinzel", Georgia, serif;
+      --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-pill: 999px;
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --shadow-glass: 0 18px 42px rgba(0, 0, 0, 0.52);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       width: 100%; height: 100%; overflow: hidden;
-      background: #14171c; color: #f1f5f9;
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+      background: var(--bg-canvas); color: var(--text-primary);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
     }
+
+    button { font-family: inherit; color: inherit; cursor: pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent-gold-hover);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
     #canvas-container { position: fixed; inset: 0; width: 100%; height: 100%; }
     canvas { display: block; width: 100%; height: 100%; outline: none; }
     canvas.tool-crosshair { cursor: crosshair; }
 
-    /* Top Collaboration Bar */
+    .svg-icon {
+      width: 15px; height: 15px; flex-shrink: 0;
+      fill: none; stroke: currentColor; stroke-width: 1.75;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-amber); flex-shrink: 0; }
+    .dot.ready { background: var(--accent-emerald); }
+    .dot.error { background: var(--accent-danger); }
+    .dot.ws-ok { background: var(--accent-teal); box-shadow: 0 0 8px rgba(45, 212, 191, 0.65); }
+
+    /* =====================================================================
+       ULTRA-MINIMALIST INITIAL LANDING HUD (Shown cleanly by default)
+       ===================================================================== */
+    #minimal-brief-card {
+      position: fixed; top: 16px; left: 16px;
+      width: min(344px, calc(100vw - 260px));
+      background: var(--surface-glass);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-lg);
+      padding: 13px 15px;
+      box-shadow: var(--shadow-glass);
+      z-index: 26;
+      display: flex; flex-direction: column; gap: 9px;
+      transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out), visibility 0.22s;
+    }
+    body.collab-open #minimal-brief-card {
+      opacity: 0; pointer-events: none; visibility: hidden; transform: translateY(-8px);
+    }
+
+    .brief-brand-line {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border-hairline);
+    }
+    .brief-brand-title {
+      font-family: var(--font-display); font-size: 14px; font-weight: 600;
+      letter-spacing: 0.04em; color: var(--text-primary);
+    }
+    .brief-online-badge {
+      font-size: 11px; color: var(--text-secondary);
+      background: var(--surface-subtle); border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-pill); padding: 2px 8px; white-space: nowrap;
+    }
+    .brief-row {
+      display: flex; align-items: center; gap: 8px; font-size: 12.5px; line-height: 1.4;
+      min-height: 22px;
+    }
+    .brief-k {
+      font-size: 11px; letter-spacing: 0.06em; color: var(--text-secondary);
+      width: 34px; flex-shrink: 0; font-weight: 500;
+    }
+    .brief-v {
+      flex: 1; min-width: 0; color: var(--text-primary);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .brief-ellipsis {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .brief-role-tag {
+      font-size: 11px; color: var(--accent-gold-hover);
+      background: rgba(201, 162, 75, 0.14);
+      border: 1px solid var(--border-gold);
+      padding: 1px 7px; border-radius: var(--radius-pill);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .brief-link-btn {
+      background: var(--surface-subtle); border: 1px solid var(--border-hairline);
+      color: var(--text-secondary); border-radius: var(--radius-pill);
+      padding: 2px 8px; font-size: 11px; white-space: nowrap; flex-shrink: 0;
+      transition: background 0.18s var(--ease-out), color 0.18s;
+    }
+    .brief-link-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
+
+    /* Goal Full Detail Popover (triggered strictly on demand) */
+    #goal-popover {
+      position: fixed; top: 148px; left: 16px; width: min(360px, calc(100vw - 32px));
+      max-height: 360px; overflow-y: auto;
+      background: var(--surface-elevated);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-gold); border-radius: var(--radius-md);
+      padding: 14px; box-shadow: var(--shadow-glass); z-index: 44;
+      display: none; flex-direction: column; gap: 8px;
+    }
+    #goal-popover.open { display: flex; }
+    .popover-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border-hairline);
+      font-size: 13px; font-weight: 600; color: var(--accent-gold-hover);
+    }
+
+    /* Top-Right Minimal Actions (View/Floors + Enter/Close Collab) */
+    #minimal-actions {
+      position: fixed; top: 16px; right: 16px; z-index: 36;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .hud-pill-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 36px; padding: 0 13px; border-radius: var(--radius-pill);
+      background: var(--surface-glass);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border-hairline);
+      color: var(--text-primary); font-size: 12.5px; font-weight: 500;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.42);
+      transition: all 0.2s var(--ease-out); white-space: nowrap;
+    }
+    .hud-pill-btn:hover { background: var(--surface-elevated); border-color: rgba(255, 255, 255, 0.24); }
+    .hud-pill-btn[aria-expanded="true"] { border-color: var(--accent-gold); color: var(--accent-gold-hover); }
+
+    .cta-gold-btn {
+      background: var(--accent-gold); border-color: var(--accent-gold);
+      color: var(--on-gold); font-weight: 600;
+    }
+    .cta-gold-btn:hover { background: var(--accent-gold-hover); border-color: var(--accent-gold-hover); }
+    body.collab-open .cta-gold-btn {
+      background: var(--surface-elevated); color: var(--text-primary);
+      border-color: var(--border-gold);
+    }
+    body.collab-open .cta-gold-btn:hover {
+      background: rgba(201, 162, 75, 0.16); color: var(--accent-gold-hover);
+    }
+
+    /* Floating View & Floor Popover (replaces permanent left sidebar clutter) */
+    #view-popover {
+      position: fixed; top: 60px; right: 16px; width: min(300px, calc(100vw - 32px));
+      max-height: calc(100vh - 152px); overflow-y: auto;
+      background: var(--surface-elevated);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-hairline); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-glass); z-index: 45;
+      display: none; flex-direction: column;
+    }
+    #view-popover.open { display: flex; }
+    .section { padding: 12px 14px; border-bottom: 1px solid var(--border-hairline); }
+    .section:last-child { border-bottom: none; }
+    .section-title {
+      font-size: 11px; letter-spacing: 0.08em; color: var(--text-secondary);
+      margin-bottom: 8px; font-weight: 600; text-transform: uppercase;
+    }
+    .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 10px; }
+    .check-item {
+      display: flex; align-items: center; gap: 7px; font-size: 12.5px;
+      cursor: pointer; user-select: none; color: var(--text-primary);
+    }
+    .check-item input { accent-color: var(--accent-gold); width: 14px; height: 14px; cursor: pointer; }
+    .check-full { grid-column: 1 / -1; padding-top: 6px; border-top: 1px dashed var(--border-hairline); }
+    .preset-list { display: flex; flex-direction: column; gap: 4px; }
+    .preset-btn {
+      width: 100%; text-align: left; background: var(--surface-subtle);
+      border: 1px solid transparent; color: var(--text-primary);
+      padding: 7px 10px; border-radius: var(--radius-sm); font-size: 12px;
+      transition: all 0.16s var(--ease-out);
+    }
+    .preset-btn:hover { background: var(--surface-hover); border-color: var(--border-hairline); }
+    .preset-btn.active {
+      background: rgba(201, 162, 75, 0.16); border-color: var(--border-gold);
+      color: var(--accent-gold-hover); font-weight: 600;
+    }
+
+    /* =====================================================================
+       COLLABORATION MODE WORKSPACE (Hidden until "开始协作" is activated)
+       ===================================================================== */
     #collab-topbar {
-      position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
-      max-width: calc(100vw - 24px);
-      background: rgba(15, 20, 28, 0.88);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 12px; padding: 7px 12px;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
-      z-index: 30; font-size: 12px;
+      position: fixed; top: 16px; left: 16px;
+      max-width: calc(100vw - 262px);
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      background: var(--surface-glass);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border-hairline); border-radius: var(--radius-pill);
+      padding: 5px 10px; box-shadow: var(--shadow-glass);
+      z-index: 32; font-size: 12px;
+      opacity: 0; pointer-events: none; visibility: hidden; transform: translateY(-10px);
+      transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out), visibility 0.22s;
     }
-    .conn-pill { display: flex; align-items: center; gap: 6px; padding-right: 8px; border-right: 1px solid rgba(255,255,255,0.12); white-space: nowrap; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; }
-    .dot.ready { background: #10b981; }
-    .dot.error { background: #ef4444; }
-    .dot.ws-ok { background: #22d3ee; box-shadow: 0 0 8px #22d3ee; }
+    body.collab-open #collab-topbar {
+      opacity: 1; pointer-events: auto; visibility: visible; transform: translateY(0);
+    }
 
-    .mode-group { display: flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.06); padding: 3px; border-radius: 8px; }
+    .conn-pill {
+      display: flex; align-items: center; gap: 6px; padding: 0 8px 0 4px;
+      border-right: 1px solid var(--border-hairline); white-space: nowrap; color: var(--text-secondary);
+    }
+    .mode-group {
+      display: flex; align-items: center; gap: 3px;
+      background: rgba(255, 255, 255, 0.04); padding: 3px; border-radius: var(--radius-pill);
+    }
     .mode-btn {
-      border: none; background: transparent; color: #cbd5e1;
-      padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 500;
-      transition: all 0.15s; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 5px;
+      border: none; background: transparent; color: var(--text-secondary);
+      padding: 5px 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 500;
+      transition: all 0.16s var(--ease-out); white-space: nowrap;
     }
-    .mode-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    .mode-btn.active { background: #0284c7; color: #fff; box-shadow: 0 2px 8px rgba(2,132,199,0.45); }
-    .mode-btn.pin-active { background: #d97706; color: #fff; box-shadow: 0 2px 8px rgba(217,119,6,0.45); }
-    .mode-btn.measure-active { background: #0d9488; color: #fff; box-shadow: 0 2px 8px rgba(13,148,136,0.45); }
+    .mode-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .mode-btn.active { background: var(--accent-gold); color: var(--on-gold); font-weight: 600; }
+    .mode-btn.pin-active { background: var(--accent-amber); color: var(--on-gold); font-weight: 600; }
+    .mode-btn.measure-active { background: var(--accent-teal); color: var(--on-gold); font-weight: 600; }
 
-    .roster-row { display: flex; align-items: center; gap: 6px; max-width: 340px; overflow-x: auto; padding: 1px 0; }
+    .roster-row { display: flex; align-items: center; gap: 5px; max-width: 240px; overflow-x: auto; }
     .user-chip {
       display: inline-flex; align-items: center; gap: 5px;
-      padding: 3px 8px; border-radius: 999px; font-size: 11.5px;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-      cursor: pointer; white-space: nowrap; transition: all 0.15s; color: #e2e8f0;
+      padding: 3px 9px; border-radius: var(--radius-pill); font-size: 11.5px;
+      background: var(--surface-subtle); border: 1px solid var(--border-hairline);
+      white-space: nowrap; transition: all 0.16s; color: var(--text-primary);
     }
-    .user-chip:hover { background: rgba(255,255,255,0.16); }
-    .user-chip.following { border-color: #38bdf8; background: rgba(56,189,248,0.22); color: #fff; }
+    .user-chip:hover { background: var(--surface-hover); }
+    .user-chip.following { border-color: var(--accent-teal); background: rgba(45, 212, 191, 0.16); }
     .user-chip .swatch { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .top-btn {
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
-      color: #e2e8f0; padding: 4px 9px; border-radius: 7px; font-size: 11.5px; cursor: pointer; white-space: nowrap;
+      background: var(--surface-subtle); border: 1px solid var(--border-hairline);
+      color: var(--text-primary); padding: 4px 10px; border-radius: var(--radius-pill);
+      font-size: 11.5px; white-space: nowrap; transition: background 0.16s;
     }
-    .top-btn:hover { background: rgba(255,255,255,0.16); }
+    .top-btn:hover { background: var(--surface-hover); }
 
-    /* Left Model Control Sidebar */
-    #sidebar {
-      position: fixed; top: 64px; left: 14px; width: 264px;
-      max-height: calc(100vh - 134px); overflow-y: auto;
-      background: rgba(18, 22, 29, 0.84);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-      z-index: 20; transition: transform 0.22s ease;
-    }
-    #sidebar.collapsed { transform: translateX(calc(-100% + 42px)); }
-    .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .panel-title { font-size: 13.5px; font-weight: 600; }
-    .panel-toggle-btn {
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
-      color: #e2e8f0; border-radius: 6px; padding: 3px 8px; font-size: 11.5px; cursor: pointer;
-    }
-    .panel-toggle-btn:hover { background: rgba(255,255,255,0.16); }
-
-    .section { padding: 11px 13px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .section:last-child { border-bottom: none; }
-    .section-title { font-size: 11px; letter-spacing: 0.6px; color: #94a3b8; margin-bottom: 7px; font-weight: 600; }
-    .status-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1; }
-    .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
-    .check-item { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; user-select: none; color: #e2e8f0; }
-    .check-item input { accent-color: #38bdf8; width: 14px; height: 14px; cursor: pointer; }
-    .check-full { grid-column: 1 / -1; margin-top: 3px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.1); }
-    .preset-list { display: flex; flex-direction: column; gap: 5px; }
-    .preset-btn {
-      width: 100%; text-align: left; background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0;
-      padding: 6px 9px; border-radius: 7px; font-size: 12px; cursor: pointer; transition: background 0.15s, border-color 0.15s;
-    }
-    .preset-btn:hover { background: rgba(56,189,248,0.16); border-color: rgba(56,189,248,0.45); }
-    .preset-btn.active { background: rgba(56,189,248,0.24); border-color: #38bdf8; color: #fff; font-weight: 500; }
-
-    /* Right Collaborative Panel (Chat + Modification Pins + Measurements) */
+    /* Right Collaboration Panel */
     #collab-panel {
-      position: fixed; top: 64px; right: 14px; width: 320px; height: calc(100vh - 116px);
+      position: fixed; top: 64px; right: 16px; bottom: 16px;
+      width: min(368px, calc(100vw - 32px));
       display: flex; flex-direction: column;
-      background: rgba(18, 22, 29, 0.88);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,0.14); border-radius: 12px;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
-      z-index: 22; transition: transform 0.22s ease; overflow: hidden;
+      background: var(--surface-glass);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-hairline); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-glass);
+      z-index: 28; overflow: hidden;
+      opacity: 0; pointer-events: none; visibility: hidden; transform: translateX(24px);
+      transition: opacity 0.24s var(--ease-out), transform 0.24s var(--ease-out), visibility 0.24s;
     }
-    #collab-panel.collapsed { transform: translateX(calc(100% + 20px)); }
-    .tab-bar { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); }
+    body.collab-open #collab-panel {
+      opacity: 1; pointer-events: auto; visibility: visible; transform: translateX(0);
+    }
+
+    .tab-bar {
+      display: flex; border-bottom: 1px solid var(--border-hairline);
+      background: rgba(255, 255, 255, 0.025); overflow-x: auto; flex-wrap: nowrap;
+    }
     .tab-btn {
-      flex: 1; background: transparent; border: none; color: #94a3b8;
-      padding: 10px 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;
-      border-bottom: 2px solid transparent; transition: all 0.15s;
+      flex: 1 0 auto; background: transparent; border: none; color: var(--text-secondary);
+      padding: 10px 9px; font-size: 12px; font-weight: 500; white-space: nowrap;
+      border-bottom: 2px solid transparent; transition: all 0.16s;
     }
-    .tab-btn.active { color: #f8fafc; border-bottom-color: #38bdf8; background: rgba(56,189,248,0.08); }
-    .tab-body { flex: 1; overflow-y: auto; padding: 10px 12px; display: none; flex-direction: column; gap: 8px; }
+    .tab-btn:hover { color: var(--text-primary); }
+    .tab-btn.active {
+      color: var(--accent-gold-hover); border-bottom-color: var(--accent-gold);
+      background: rgba(201, 162, 75, 0.08); font-weight: 600;
+    }
+    .tab-body { flex: 1; overflow-y: auto; padding: 12px; display: none; flex-direction: column; gap: 9px; }
     .tab-body.active { display: flex; }
 
     .chat-msg {
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 9px; padding: 8px 10px; font-size: 12.5px; line-height: 1.45;
+      background: var(--surface-subtle); border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-md); padding: 9px 11px; font-size: 12.5px; line-height: 1.5;
     }
     .chat-msg.pin-card {
-      border-color: rgba(245, 158, 11, 0.45); background: rgba(245, 158, 11, 0.11); cursor: pointer;
+      border-color: rgba(234, 179, 8, 0.45); background: rgba(234, 179, 8, 0.10); cursor: pointer;
     }
-    .chat-msg.pin-card:hover { background: rgba(245, 158, 11, 0.2); }
-    .chat-meta { display: flex; align-items: center; justify-content: space-between; font-size: 11px; margin-bottom: 3px; color: #94a3b8; }
-    .chat-author { font-weight: 600; display: flex; align-items: center; gap: 5px; }
-    .chat-text { color: #f1f5f9; word-break: break-word; }
-    .pin-jump-hint { margin-top: 4px; font-size: 11px; color: #fbbf24; display: flex; justify-content: space-between; }
+    .chat-msg.pin-card:hover { background: rgba(234, 179, 8, 0.17); }
+    .chat-meta { display: flex; align-items: center; justify-content: space-between; font-size: 11px; margin-bottom: 4px; color: var(--text-secondary); }
+    .chat-author { font-weight: 600; display: flex; align-items: center; gap: 5px; color: var(--text-primary); }
+    .chat-text { color: var(--text-primary); word-break: break-word; }
+    .pin-jump-hint { margin-top: 5px; font-size: 11px; color: var(--accent-gold-hover); display: flex; justify-content: space-between; }
 
     .chat-input-bar {
-      display: flex; gap: 6px; padding: 9px 10px; border-top: 1px solid rgba(255,255,255,0.1);
-      background: rgba(10, 14, 20, 0.55);
+      display: flex; gap: 7px; padding: 10px 12px; border-top: 1px solid var(--border-hairline);
+      background: rgba(14, 14, 16, 0.65);
     }
-    .chat-input-bar input {
-      flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 8px; padding: 7px 10px; color: #fff; font-size: 12.5px; outline: none;
+    .chat-input-bar input, .clean-input, .clean-textarea {
+      background: rgba(255, 255, 255, 0.07); border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-sm); padding: 7px 10px; color: var(--text-primary); font-size: 12.5px;
     }
-    .chat-input-bar input:focus { border-color: #38bdf8; }
+    .chat-input-bar input { flex: 1; }
+    .chat-input-bar input:focus, .clean-input:focus, .clean-textarea:focus { border-color: var(--accent-gold); }
     .send-btn {
-      background: #0284c7; border: none; color: #fff; border-radius: 8px;
-      padding: 0 12px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+      background: var(--accent-gold); border: none; color: var(--on-gold); border-radius: var(--radius-sm);
+      padding: 6px 13px; font-size: 12px; font-weight: 600; transition: background 0.16s;
     }
-    .send-btn:hover { background: #0369a1; }
+    .send-btn:hover { background: var(--accent-gold-hover); }
 
     .list-card {
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 9px; padding: 9px 10px; font-size: 12px; display: flex; flex-direction: column; gap: 5px;
+      background: var(--surface-subtle); border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-md); padding: 10px 11px; font-size: 12px; display: flex; flex-direction: column; gap: 6px;
     }
     .list-card-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-    .badge-status { font-size: 10.5px; padding: 2px 6px; border-radius: 999px; font-weight: 600; }
-    .badge-open { background: rgba(245,158,11,0.22); color: #fbbf24; }
-    .badge-resolved { background: rgba(16,185,129,0.22); color: #34d399; }
-    .card-actions { display: flex; gap: 6px; margin-top: 2px; }
+    .badge-status, .status-pill {
+      font-size: 10.5px; padding: 2px 7px; border-radius: var(--radius-pill); font-weight: 600;
+      background: rgba(234, 179, 8, 0.18); color: #FDE047; white-space: nowrap;
+    }
+    .badge-resolved, .status-pill.resolved { background: rgba(52, 211, 153, 0.18); color: #6EE7B7; }
+    .card-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
     .mini-btn {
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
-      color: #cbd5e1; border-radius: 5px; padding: 3px 7px; font-size: 11px; cursor: pointer;
+      background: var(--surface-subtle); border: 1px solid var(--border-hairline);
+      color: var(--text-primary); border-radius: 6px; padding: 4px 8px; font-size: 11px;
+      transition: all 0.16s; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
     }
-    .mini-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
-    .mini-btn.danger:hover { background: rgba(239,68,68,0.28); border-color: #ef4444; }
-    .empty-hint { color: #64748b; font-size: 12px; text-align: center; padding: 24px 10px; line-height: 1.6; }
+    .mini-btn:hover { background: var(--surface-hover); border-color: rgba(255, 255, 255, 0.24); }
+    .mini-btn.danger:hover { background: rgba(239, 68, 68, 0.24); border-color: var(--accent-danger); }
+    .empty-hint { color: var(--text-secondary); font-size: 12px; text-align: center; padding: 22px 10px; line-height: 1.6; }
 
-    /* Bottom HUDs */
-    #inspect-hud {
-      position: fixed; bottom: 12px; left: 14px;
-      background: rgba(18, 22, 29, 0.84); backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
-      padding: 8px 12px; font-size: 12px; line-height: 1.45; color: #cbd5e1;
-      z-index: 15; max-width: 480px; pointer-events: none;
+    /* =====================================================================
+       UNIFIED BOTTOM DOCK (Contextual Object Bar + Smart House Q&A)
+       ===================================================================== */
+    #bottom-dock {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      width: min(650px, calc(100vw - 32px));
+      display: flex; flex-direction: column; align-items: center; gap: 9px;
+      z-index: 30; pointer-events: none;
+      transition: left 0.24s var(--ease-out);
     }
-    #inspect-hud .label { color: #94a3b8; font-size: 11px; }
-    #inspect-hud .val { color: #f8fafc; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (min-width: 980px) {
+      body.collab-open #bottom-dock {
+        left: calc(50% - 190px);
+        width: min(600px, calc(100vw - 412px));
+      }
+    }
+    #bottom-dock > * { pointer-events: auto; }
 
-    #help-hud {
-      position: fixed; bottom: 12px; right: 14px;
-      background: rgba(18, 22, 29, 0.78); backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
-      padding: 7px 11px; font-size: 11.5px; color: #94a3b8; z-index: 15; pointer-events: none;
+    /* Contextual Object Action Bar (shown ONLY when clicking a 3D object) */
+    #object-context-bar {
+      width: 100%;
+      background: var(--surface-elevated);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-gold); border-radius: var(--radius-lg);
+      padding: 10px 12px; box-shadow: var(--shadow-glass);
+      display: none; flex-direction: column; gap: 8px;
+    }
+    #object-context-bar.open { display: flex; }
+    .ctx-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .ctx-meta {
+      display: flex; align-items: center; gap: 7px; min-width: 0; flex: 1;
+    }
+    .ctx-floor {
+      font-size: 11px; font-weight: 700; color: var(--on-gold);
+      background: var(--accent-gold); border-radius: var(--radius-pill);
+      padding: 1px 7px; flex-shrink: 0;
+    }
+    .ctx-name {
+      font-size: 12.5px; font-weight: 600; color: var(--text-primary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .ctx-dims {
+      font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .ctx-close {
+      background: transparent; border: none; color: var(--text-secondary);
+      width: 24px; height: 24px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center; font-size: 15px;
+    }
+    .ctx-close:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .ctx-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ctx-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 10px; border-radius: var(--radius-pill);
+      background: var(--surface-subtle); border: 1px solid var(--border-hairline);
+      color: var(--text-primary); font-size: 12px; font-weight: 500;
+      transition: all 0.16s var(--ease-out);
+    }
+    .ctx-btn:hover { background: var(--surface-hover); border-color: rgba(255, 255, 255, 0.24); }
+    .ctx-btn[aria-pressed="true"] {
+      background: rgba(201, 162, 75, 0.2); border-color: var(--accent-gold);
+      color: var(--accent-gold-hover); font-weight: 600;
     }
 
-    /* Projected 3D Overlays (Remote Cursors, Pin Badges, Tape Measure Labels) */
+    /* Bottom Smart House Q&A Answer Card */
+    #house-qa-answer {
+      width: 100%;
+      background: var(--surface-elevated);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-hairline); border-radius: var(--radius-lg);
+      padding: 12px 14px; box-shadow: var(--shadow-glass);
+      display: none; flex-direction: column; gap: 8px;
+      max-height: 240px; overflow-y: auto;
+    }
+    #house-qa-answer.open { display: flex; }
+    .qa-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      font-size: 12px; color: var(--accent-gold-hover); font-weight: 600;
+    }
+    .qa-body {
+      font-size: 12.5px; line-height: 1.6; color: var(--text-primary);
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .qa-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .qa-chip {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-hairline);
+      border-radius: var(--radius-sm); padding: 3px 8px; font-size: 11px; color: var(--text-secondary);
+    }
+    .qa-chip strong { color: var(--text-primary); font-family: var(--font-mono); margin-left: 4px; }
+    .qa-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .qa-jump-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(201, 162, 75, 0.16); border: 1px solid var(--border-gold);
+      color: var(--accent-gold-hover); border-radius: var(--radius-pill);
+      padding: 4px 11px; font-size: 11.5px; font-weight: 600;
+    }
+    .qa-jump-btn:hover { background: rgba(201, 162, 75, 0.28); }
+
+    /* Q&A Quick Suggestion Chips (only when focused with empty input) */
+    #house-qa-suggestions {
+      display: none; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%;
+    }
+    #house-qa-suggestions.open { display: flex; }
+    .qa-sugg-btn {
+      background: var(--surface-glass); backdrop-filter: blur(12px);
+      border: 1px solid var(--border-hairline); border-radius: var(--radius-pill);
+      color: var(--text-secondary); padding: 4px 10px; font-size: 11.5px;
+      transition: all 0.16s;
+    }
+    .qa-sugg-btn:hover { color: var(--accent-gold-hover); border-color: var(--border-gold); }
+
+    /* Bottom Smart House Q&A Input Bar */
+    #house-qa-form {
+      width: 100%; display: flex; align-items: center; gap: 8px;
+      background: var(--surface-glass);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-hairline); border-radius: var(--radius-pill);
+      padding: 5px 6px 5px 14px; box-shadow: var(--shadow-glass);
+      transition: border-color 0.2s var(--ease-out);
+    }
+    #house-qa-form:focus-within { border-color: var(--border-gold); }
+    #house-qa-input {
+      flex: 1; background: transparent; border: none; color: var(--text-primary);
+      font-size: 13px; padding: 6px 2px; min-width: 0;
+    }
+    #house-qa-input::placeholder { color: var(--text-secondary); }
+    #house-qa-submit {
+      height: 32px; padding: 0 15px; border-radius: var(--radius-pill); border: none;
+      background: var(--accent-gold); color: var(--on-gold); font-size: 12.5px; font-weight: 600;
+      white-space: nowrap; transition: background 0.16s;
+    }
+    #house-qa-submit:hover { background: var(--accent-gold-hover); }
+
+    /* Non-Intrusive Toast Feedback */
+    #toast-banner {
+      position: fixed; top: 64px; left: 50%; transform: translateX(-50%) translateY(-8px);
+      background: var(--surface-elevated); border: 1px solid var(--border-gold);
+      color: var(--text-primary); border-radius: var(--radius-pill);
+      padding: 7px 14px; font-size: 12px; z-index: 55;
+      box-shadow: var(--shadow-glass); pointer-events: none;
+      opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    }
+    #toast-banner.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Projected 3D Overlays */
     #overlay-layer { position: fixed; inset: 0; pointer-events: none; z-index: 18; overflow: hidden; }
     .remote-cursor-tag {
       position: absolute; transform: translate(10px, -110%);
-      padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
-      color: #0f172a; white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,0.45);
+      padding: 3px 9px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 600;
+      color: #0F172A; white-space: nowrap; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
       border: 1.5px solid #fff; pointer-events: none;
     }
     .pin-3d-tag {
       position: absolute; transform: translate(-50%, -125%);
-      padding: 3px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700;
+      padding: 3px 8px; border-radius: var(--radius-pill); font-size: 11.5px; font-weight: 700;
       color: #fff; white-space: nowrap; cursor: pointer; pointer-events: auto;
-      border: 1.5px solid rgba(255,255,255,0.9); box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border: 1.5px solid rgba(255, 255, 255, 0.9); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
       transition: transform 0.12s;
     }
-    .pin-3d-tag:hover { transform: translate(-50%, -135%) scale(1.08); }
+    .pin-3d-tag:hover { transform: translate(-50%, -135%) scale(1.06); }
     .measure-3d-tag {
       position: absolute; transform: translate(-50%, -50%);
-      background: rgba(10, 15, 24, 0.9); border: 1.5px solid #2dd4bf; color: #f8fafc;
-      padding: 4px 8px; border-radius: 7px; font-size: 11.5px; line-height: 1.3;
-      white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.55); pointer-events: auto;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: rgba(14, 15, 18, 0.92); border: 1.5px solid var(--accent-teal); color: var(--text-primary);
+      padding: 4px 8px; border-radius: var(--radius-sm); font-size: 11.5px; line-height: 1.3;
+      white-space: nowrap; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55); pointer-events: auto;
+      font-family: var(--font-mono);
     }
-    .measure-3d-tag .sub { font-size: 10px; color: #94a3b8; display: block; }
-    .measure-3d-del { margin-left: 6px; color: #fca5a5; cursor: pointer; font-weight: 700; }
+    .measure-3d-tag .sub { font-size: 10px; color: var(--text-secondary); display: block; }
+    .measure-3d-del { margin-left: 6px; color: #FCA5A5; cursor: pointer; font-weight: 700; background: transparent; border: none; }
 
-    /* Pin Comment Input Popover */
+    /* Pin Comment Popover */
     #pin-popover {
-      position: fixed; z-index: 40; width: 290px; display: none;
-      background: rgba(15, 20, 28, 0.96); backdrop-filter: blur(14px);
-      border: 1px solid #f59e0b; border-radius: 12px; padding: 12px;
-      box-shadow: 0 14px 36px rgba(0,0,0,0.6);
+      position: fixed; z-index: 48; width: 295px; display: none;
+      background: var(--surface-elevated); backdrop-filter: blur(18px);
+      border: 1px solid var(--accent-gold); border-radius: var(--radius-md); padding: 13px;
+      box-shadow: var(--shadow-glass);
     }
-    #pin-popover .pop-head { font-size: 12px; font-weight: 600; color: #fbbf24; margin-bottom: 4px; }
-    #pin-popover .pop-loc { font-size: 11px; color: #94a3b8; margin-bottom: 8px; word-break: break-all; }
+    #pin-popover .pop-head { font-size: 12.5px; font-weight: 600; color: var(--accent-gold-hover); margin-bottom: 4px; }
+    #pin-popover .pop-loc { font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; word-break: break-all; }
     #pin-popover textarea {
-      width: 100%; height: 68px; resize: none; border-radius: 8px; padding: 8px;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16);
-      color: #fff; font-size: 12.5px; outline: none; margin-bottom: 8px;
+      width: 100%; height: 68px; resize: none; border-radius: var(--radius-sm); padding: 8px;
+      background: rgba(255, 255, 255, 0.07); border: 1px solid var(--border-hairline);
+      color: var(--text-primary); font-size: 12.5px; margin-bottom: 9px;
     }
-    #pin-popover textarea:focus { border-color: #fbbf24; }
     #pin-popover .pop-btns { display: flex; justify-content: flex-end; gap: 6px; }
 
     /* Login Modal */
     #login-modal {
       position: fixed; inset: 0; z-index: 60;
-      background: rgba(8, 11, 16, 0.78); backdrop-filter: blur(10px);
+      background: rgba(10, 10, 12, 0.78); backdrop-filter: blur(14px);
       display: flex; align-items: center; justify-content: center; padding: 16px;
     }
     #login-modal.hidden { display: none; }
     .login-card {
-      width: 100%; max-width: 390px;
-      background: #141922; border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;
-      padding: 22px; box-shadow: 0 20px 50px rgba(0,0,0,0.65);
+      width: 100%; max-width: 400px;
+      background: #17171B; border: 1px solid var(--border-hairline); border-radius: var(--radius-lg);
+      padding: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.72);
     }
-    .login-card h2 { font-size: 17px; margin-bottom: 6px; }
-    .login-card p { font-size: 12.5px; color: #94a3b8; margin-bottom: 16px; line-height: 1.5; }
-    .field-lbl { font-size: 11.5px; color: #cbd5e1; margin-bottom: 6px; display: block; font-weight: 600; }
+    .login-card h2 {
+      font-family: var(--font-display); font-size: 19px; font-weight: 600;
+      letter-spacing: 0.04em; margin-bottom: 6px; color: var(--text-primary);
+    }
+    .login-card p { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.55; }
+    .field-lbl { font-size: 11.5px; color: var(--text-secondary); margin-bottom: 7px; display: block; font-weight: 600; }
     .login-input {
-      width: 100%; padding: 9px 12px; border-radius: 9px; margin-bottom: 14px;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16);
-      color: #fff; font-size: 14px; outline: none;
+      width: 100%; padding: 9px 12px; border-radius: var(--radius-sm); margin-bottom: 15px;
+      background: rgba(255, 255, 255, 0.07); border: 1px solid var(--border-hairline);
+      color: var(--text-primary); font-size: 14px;
     }
-    .login-input:focus { border-color: #38bdf8; }
-    .role-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .login-input:focus { border-color: var(--accent-gold); }
+    .role-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
     .role-pill {
-      padding: 5px 11px; border-radius: 999px; font-size: 12px; cursor: pointer;
-      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1;
+      padding: 5px 11px; border-radius: var(--radius-pill); font-size: 12px;
+      background: var(--surface-subtle); border: 1px solid var(--border-hairline); color: var(--text-secondary);
+      transition: all 0.16s;
     }
-    .role-pill.active { background: rgba(56,189,248,0.22); border-color: #38bdf8; color: #fff; font-weight: 600; }
-    .color-row { display: flex; gap: 8px; margin-bottom: 18px; }
+    .role-pill:hover { color: var(--text-primary); border-color: rgba(255, 255, 255, 0.25); }
+    .role-pill.active {
+      background: rgba(201, 162, 75, 0.2); border-color: var(--accent-gold);
+      color: var(--accent-gold-hover); font-weight: 600;
+    }
+    .color-row { display: flex; gap: 9px; margin-bottom: 18px; }
     .color-dot {
-      width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
-      border: 2px solid transparent; transition: transform 0.12s;
+      width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent;
+      transition: transform 0.14s;
     }
-    .color-dot.active { border-color: #fff; transform: scale(1.16); box-shadow: 0 0 0 2px #0284c7; }
+    .color-dot.active { border-color: #fff; transform: scale(1.16); box-shadow: 0 0 0 2px var(--accent-gold); }
     .login-submit {
-      width: 100%; padding: 10px; border-radius: 10px; border: none;
-      background: #0284c7; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+      width: 100%; padding: 10px; border-radius: var(--radius-sm); border: none;
+      background: var(--accent-gold); color: var(--on-gold); font-size: 14px; font-weight: 600;
+      transition: background 0.16s;
     }
-    .login-submit:hover { background: #0369a1; }
+    .login-submit:hover { background: var(--accent-gold-hover); }
 
-    @media (max-width: 900px) {
-      #sidebar { width: 220px; }
-      #collab-panel { width: 275px; }
-      .roster-row { max-width: 150px; }
+    @media (max-width: 979px) {
+      #minimal-brief-card { top: 58px; left: 12px; right: 12px; width: auto; }
+      #minimal-actions { top: 12px; right: 12px; }
+      #collab-topbar { top: 56px; left: 12px; right: 12px; max-width: calc(100vw - 24px); border-radius: var(--radius-md); }
+      #collab-panel { top: 112px; right: 12px; left: 12px; width: auto; height: 46vh; bottom: auto; }
+      #bottom-dock { bottom: 12px; width: calc(100vw - 24px); }
     }
   </style>
 </head>
 <body>
   <div id="canvas-container"></div>
   <div id="overlay-layer"></div>
+  <div id="toast-banner" role="status" aria-live="polite"></div>
 
-  <!-- Top Collaborative Bar -->
-  <header id="collab-topbar">
-    <div class="conn-pill">
-      <span id="ws-dot" class="dot"></span>
-      <span id="ws-status">未登录协作</span>
+  <!-- Minimal Initial Landing Card (ONLY User / Goal / House Status) -->
+  <section id="minimal-brief-card" aria-label="空间概览">
+    <div class="brief-brand-line">
+      <span class="brief-brand-title">四层当代中式宅邸</span>
+      <span class="brief-online-badge" id="brief-online-count">0 人在线</span>
     </div>
-    <div class="mode-group">
-      <button type="button" class="mode-btn active" data-mode="orbit" title="漫游/旋转查看 (快捷键 1)">漫游</button>
-      <button type="button" class="mode-btn" data-mode="peek" title="拖动任意物件移开查看内部，松手自动回原位 (快捷键 2)">拖动透视</button>
-      <button type="button" class="mode-btn" data-mode="interact" title="点击家具打开柜门或触发组件动作 (快捷键 3)">开关柜门</button>
-      <button type="button" class="mode-btn" data-mode="pin" title="点击模型任意处添加修改标注 (快捷键 4)">标注</button>
-      <button type="button" class="mode-btn" data-mode="measure" title="点击两点实时量尺寸 (快捷键 5)">量尺</button>
+    <div class="brief-row">
+      <span class="brief-k">用户</span>
+      <div class="brief-v">
+        <span class="dot" id="brief-user-dot" style="background:#C9A24B;"></span>
+        <strong class="brief-ellipsis" id="brief-user-name">未登录</strong>
+        <span class="brief-role-tag" id="brief-user-role">访客</span>
+      </div>
+      <button type="button" class="brief-link-btn" id="brief-switch-btn">切换</button>
     </div>
-    <div class="roster-row" id="user-roster"></div>
-    <button type="button" class="top-btn" id="switch-user-btn">切换身份</button>
-    <button type="button" class="top-btn" id="toggle-collab-btn">隐藏群聊</button>
-  </header>
-
-  <!-- Left Controls Sidebar -->
-  <aside id="sidebar">
-    <div class="panel-header">
-      <div class="panel-title">4层家装 3D 交互模型</div>
-      <button id="toggle-btn" class="panel-toggle-btn" type="button" title="收起/展开面板">收起</button>
+    <div class="brief-row">
+      <span class="brief-k">目标</span>
+      <div class="brief-v">
+        <span class="brief-ellipsis" id="brief-goal-text">B1夹层1.9m · 双楼梯稳固衔接 · 定制柜与原样平铺</span>
+      </div>
+      <button type="button" class="brief-link-btn" id="brief-goal-expand-btn" aria-expanded="false">详情</button>
     </div>
-
-    <div class="section">
-      <div class="status-row">
-        <span id="status-dot" class="dot"></span>
-        <span id="status-text">加载中...</span>
+    <div class="brief-row">
+      <span class="brief-k">状态</span>
+      <div class="brief-v">
+        <span class="dot" id="brief-status-dot"></span>
+        <span class="brief-ellipsis" id="brief-house-status">正在加载 4 层 3D 模型...</span>
       </div>
     </div>
+  </section>
 
+  <!-- Progressive-Disclosure Customer Goal Detail Popover -->
+  <div id="goal-popover" role="dialog" aria-label="顾客目标明细">
+    <div class="popover-head">
+      <span>顾客目标与对齐状态</span>
+      <button type="button" class="brief-link-btn" id="goal-pop-close">关闭</button>
+    </div>
+    <div id="goal-pop-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+  </div>
+
+  <!-- Top-Right Minimal Actions (View/Floors + Start Collaboration) -->
+  <div id="minimal-actions">
+    <button type="button" class="hud-pill-btn" id="btn-view-popover" aria-expanded="false">
+      <svg class="svg-icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      <span>视角 / 楼层</span>
+    </button>
+    <button type="button" class="hud-pill-btn cta-gold-btn" id="btn-enter-collab" aria-pressed="false">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span id="btn-enter-collab-txt">开始协作</span>
+    </button>
+  </div>
+
+  <!-- On-Demand Floors & Camera Presets Popover -->
+  <div id="view-popover" role="dialog" aria-label="楼层与房间视角">
     <div class="section">
-      <div class="section-title">楼层显示 / 层级控制</div>
+      <div class="section-title">楼层与结构显示</div>
       <div class="check-grid">
         <label class="check-item"><input type="checkbox" data-floor="2F" checked /> 2F 二层</label>
         <label class="check-item"><input type="checkbox" data-floor="1F" checked /> 1F 一层</label>
         <label class="check-item"><input type="checkbox" data-floor="B1" checked /> B1 夹层</label>
         <label class="check-item"><input type="checkbox" data-floor="B2" checked /> B2 地下室</label>
-        <label class="check-item check-full"><input type="checkbox" id="hide-ceilings" checked /> 隐藏吊顶 (Hide Ceilings)</label>
-        <label class="check-item check-full" style="border-top:none;margin-top:0;padding-top:2px;"><input type="checkbox" id="hide-walls" /> 隐藏四周墙壁 (Hide Walls)</label>
+        <label class="check-item check-full"><input type="checkbox" id="hide-ceilings" checked /> 隐藏吊顶</label>
+        <label class="check-item check-full" style="border-top:none;padding-top:0;"><input type="checkbox" id="hide-walls" /> 隐藏四周墙壁</label>
       </div>
     </div>
-
     <div class="section">
       <div class="section-title">房间视角预设</div>
       <div class="preset-list" id="preset-list"></div>
     </div>
-  </aside>
+  </div>
 
-  <!-- Right Collaborative Sidebar -->
-  <aside id="collab-panel" style="width:360px;">
-    <div class="tab-bar" style="overflow-x:auto;flex-wrap:nowrap;">
-      <button type="button" class="tab-btn active" data-tab="home" style="white-space:nowrap;padding:8px 8px;">主页</button>
-      <button type="button" class="tab-btn" data-tab="chat" style="white-space:nowrap;padding:8px 8px;">群聊(<span id="cnt-chat">0</span>)</button>
-      <button type="button" class="tab-btn" data-tab="create" style="white-space:nowrap;padding:8px 8px;">造物</button>
-      <button type="button" class="tab-btn" data-tab="versions" style="white-space:nowrap;padding:8px 8px;">版本(<span id="cnt-ver">0</span>)</button>
-      <button type="button" class="tab-btn" data-tab="bom" style="white-space:nowrap;padding:8px 8px;">造价</button>
-      <button type="button" class="tab-btn" data-tab="pins" style="white-space:nowrap;padding:8px 8px;">标注(<span id="cnt-pins">0</span>)</button>
-      <button type="button" class="tab-btn" data-tab="measures" style="white-space:nowrap;padding:8px 8px;">量尺(<span id="cnt-measures">0</span>)</button>
+  <!-- Top Collaborative Mode & Roster Bar (Visible ONLY in Collab Mode) -->
+  <header id="collab-topbar" aria-label="协作工具栏">
+    <div class="conn-pill">
+      <span id="ws-dot" class="dot"></span>
+      <span id="ws-status">未连接</span>
+    </div>
+    <div class="mode-group">
+      <button type="button" class="mode-btn active" data-mode="orbit" title="漫游/旋转视角 (1)">
+        <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36z"/></svg>
+        <span>漫游</span>
+      </button>
+      <button type="button" class="mode-btn" data-mode="peek" title="拖动任意物件查看内部，松手自动弹回原位 (2)">
+        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+        <span>拖动透视</span>
+      </button>
+      <button type="button" class="mode-btn" data-mode="interact" title="点击柜门/抽屉原地开合 (3)">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/><path d="M9 12h.01"/></svg>
+        <span>开关柜门</span>
+      </button>
+      <button type="button" class="mode-btn" data-mode="pin" title="点击模型任意处添加修改标注 (4)">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>标注</span>
+      </button>
+      <button type="button" class="mode-btn" data-mode="measure" title="两点精确量尺 mm (5)">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>
+        <span>量尺</span>
+      </button>
+    </div>
+    <div class="roster-row" id="user-roster"></div>
+    <button type="button" class="top-btn" id="switch-user-btn">切换身份</button>
+  </header>
+
+  <!-- Right Collaborative Workspace Panel (Visible ONLY in Collab Mode) -->
+  <aside id="collab-panel" aria-label="团队协作面板">
+    <div class="tab-bar">
+      <button type="button" class="tab-btn active" data-tab="home">需求</button>
+      <button type="button" class="tab-btn" data-tab="chat">群聊(<span id="cnt-chat">0</span>)</button>
+      <button type="button" class="tab-btn" data-tab="create">造物</button>
+      <button type="button" class="tab-btn" data-tab="versions">版本(<span id="cnt-ver">0</span>)</button>
+      <button type="button" class="tab-btn" data-tab="bom">造价</button>
+      <button type="button" class="tab-btn" data-tab="pins">标注(<span id="cnt-pins">0</span>)</button>
+      <button type="button" class="tab-btn" data-tab="measures">量尺(<span id="cnt-measures">0</span>)</button>
     </div>
 
-    <!-- Home Tab: Customer Requirements & Supplier Confirmation Tasks -->
     <div class="tab-body active" id="tab-home">
-      <div style="font-size:11px;font-weight:700;color:#7dd3fc;margin-bottom:4px;">客户最新需求清单</div>
+      <div style="font-size:11px;font-weight:700;color:var(--accent-gold-hover);">客户最新需求清单</div>
       <div id="req-list" style="display:flex;flex-direction:column;gap:6px;"></div>
-      <div style="display:flex;gap:5px;margin-top:6px;">
-        <input type="text" id="new-req-input" placeholder="新增客户需求..." style="flex:1;padding:5px 8px;border-radius:6px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:11px;" />
+      <div style="display:flex;gap:5px;">
+        <input type="text" id="new-req-input" class="clean-input" placeholder="新增客户需求..." style="flex:1;" />
         <button type="button" class="mini-btn" id="add-req-btn">添加</button>
       </div>
-      <div style="font-size:11px;font-weight:700;color:#fcd34d;margin:12px 0 4px;">供应商细节待办与确认事项</div>
+      <div style="font-size:11px;font-weight:700;color:#FDE047;margin-top:8px;">供应商细节待办与确认事项</div>
       <div id="sup-list" style="display:flex;flex-direction:column;gap:6px;"></div>
-      <div style="display:flex;gap:5px;margin-top:6px;">
-        <input type="text" id="new-sup-input" placeholder="供应商提交待确认细节..." style="flex:1;padding:5px 8px;border-radius:6px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:11px;" />
+      <div style="display:flex;gap:5px;">
+        <input type="text" id="new-sup-input" class="clean-input" placeholder="供应商提交待确认细节..." style="flex:1;" />
         <button type="button" class="mini-btn" id="add-sup-btn">提交</button>
       </div>
     </div>
 
     <div class="tab-body" id="tab-chat">
-      <div class="empty-hint" id="chat-empty">登录后可发送群聊消息（支持 @小伙伴），点击“标注”也会自动生成带定位的讨论卡片。</div>
+      <div class="empty-hint" id="chat-empty">登录后可群聊（输入 @ 可提醒群里成员），或点选任意构件添加修改标注。</div>
     </div>
 
-    <!-- Create Tab: Image + Description -> 3D Model or Tiled Texture -->
     <div class="tab-body" id="tab-create">
-      <div style="font-size:11px;font-weight:700;color:#7dd3fc;">图生 3D 物件 / 纹理原样平铺</div>
-      <label style="font-size:11px;color:#cbd5e1;">上传参考图片或材质纹理：</label>
-      <input type="file" id="asset-img-input" accept="image/*" style="font-size:11px;color:#cbd5e1;" />
-      <textarea id="asset-desc-input" placeholder="描述要生成的3D物品或纹理用途（例如：当代中式石狮子、黑金边几、水波纹贴图...）" style="width:100%;height:56px;padding:6px 8px;border-radius:8px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:12px;resize:none;"></textarea>
+      <div style="font-size:11.5px;font-weight:700;color:var(--accent-gold-hover);">图生 3D 物件 / 纹理原样平铺</div>
+      <div id="apply-tex-target" style="font-size:11px;color:var(--text-secondary);">未选中构件（点击模型任意处即可选定贴图表面）</div>
+      <label style="font-size:11px;color:var(--text-secondary);" for="asset-img-input">上传参考图片或材质纹理：</label>
+      <input type="file" id="asset-img-input" accept="image/*" style="font-size:11px;color:var(--text-secondary);" />
+      <textarea id="asset-desc-input" class="clean-textarea" placeholder="描述要生成的 3D 物品或纹理用途（例如：当代中式石狮子、黑金边几、水波纹贴图...）" style="width:100%;height:58px;resize:none;"></textarea>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;">
-        <div><span style="font-size:10px;color:#94a3b8;">宽 W (mm)</span><input id="asset-w" type="number" value="600" min="50" max="6000" style="width:100%;padding:4px 6px;border-radius:6px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:11px;" /></div>
-        <div><span style="font-size:10px;color:#94a3b8;">深 D (mm)</span><input id="asset-d" type="number" value="500" min="50" max="6000" style="width:100%;padding:4px 6px;border-radius:6px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:11px;" /></div>
-        <div><span style="font-size:10px;color:#94a3b8;">高 H (mm)</span><input id="asset-h" type="number" value="800" min="50" max="4000" style="width:100%;padding:4px 6px;border-radius:6px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:11px;" /></div>
+        <div><span style="font-size:10px;color:var(--text-secondary);">宽 W (mm)</span><input id="asset-w" class="clean-input" type="number" value="600" min="50" max="6000" style="width:100%;" /></div>
+        <div><span style="font-size:10px;color:var(--text-secondary);">深 D (mm)</span><input id="asset-d" class="clean-input" type="number" value="500" min="50" max="6000" style="width:100%;" /></div>
+        <div><span style="font-size:10px;color:var(--text-secondary);">高 H (mm)</span><input id="asset-h" class="clean-input" type="number" value="800" min="50" max="4000" style="width:100%;" /></div>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
-        <button type="button" class="send-btn" id="gen-3d-btn" style="flex:1;padding:7px 8px;font-size:11px;">生成 3D 物件放入空间</button>
-        <button type="button" class="mini-btn" id="apply-tex-btn" style="padding:7px 8px;">原样平铺到选中面</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button type="button" class="send-btn" id="gen-3d-btn" style="flex:1;">生成 3D 放入空间</button>
+        <button type="button" class="mini-btn" id="apply-tex-btn">原样平铺到选中面</button>
       </div>
-      <div id="draft-asset-box" style="display:none;background:rgba(30,41,59,0.9);border:1px solid rgba(56,189,248,0.4);border-radius:8px;padding:8px;margin-top:6px;">
-        <div style="font-size:11px;font-weight:700;color:#38bdf8;margin-bottom:4px;">当前预览草稿（未同步基础版）</div>
-        <div id="draft-asset-info" style="font-size:11px;color:#e2e8f0;margin-bottom:6px;"></div>
+      <div id="draft-asset-box" style="display:none;background:rgba(255,255,255,0.04);border:1px solid var(--border-gold);border-radius:10px;padding:9px;">
+        <div style="font-size:11px;font-weight:700;color:var(--accent-gold-hover);margin-bottom:4px;">当前预览草稿（未同步基础版）</div>
+        <div id="draft-asset-info" style="font-size:11px;color:var(--text-primary);margin-bottom:6px;"></div>
         <div style="display:flex;gap:5px;margin-bottom:6px;">
           <button type="button" class="mini-btn" id="draft-resize-btn">更新尺寸</button>
           <button type="button" class="mini-btn" id="draft-rot-btn">旋转45°</button>
           <button type="button" class="mini-btn danger" id="draft-cancel-btn">一键取消</button>
         </div>
-        <input type="text" id="draft-reason-input" placeholder="必填：请填写修改/放置原因..." style="width:100%;padding:5px 8px;border-radius:6px;border:1px solid rgba(148,163,184,0.3);background:rgba(15,23,42,0.9);color:#f1f5f9;font-size:11px;margin-bottom:6px;" />
-        <button type="button" class="send-btn" id="draft-submit-btn" style="width:100%;padding:6px 10px;font-size:11px;">保存个人版本并提交项目总监审批</button>
+        <input type="text" id="draft-reason-input" class="clean-input" placeholder="必填：请填写修改/放置原因..." style="width:100%;margin-bottom:6px;" />
+        <button type="button" class="send-btn" id="draft-submit-btn" style="width:100%;">保存个人版本并提交总监审批</button>
       </div>
     </div>
 
-    <!-- Versions Tab: Non-Destructive History & Director Approval -->
     <div class="tab-body" id="tab-versions">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:8px;">
-        <span style="font-size:11px;color:#6ee7b7;font-weight:600;">当前已同步基础版本：<strong id="base-ver-badge">Base v1</strong></span>
-        <span style="font-size:10px;color:#94a3b8;">所有历史版本永久保留</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 9px;background:rgba(52,211,153,0.10);border:1px solid rgba(52,211,153,0.28);border-radius:8px;">
+        <span style="font-size:11px;color:#6EE7B7;font-weight:600;">当前基础版本：<strong id="base-ver-badge">Base v1</strong></span>
+        <span style="font-size:10px;color:var(--text-secondary);">历史版本永久保留</span>
       </div>
       <div id="versions-list" style="display:flex;flex-direction:column;gap:7px;"></div>
     </div>
 
-    <!-- BOM & Cost Tab: Client/Director-Only Price Visibility -->
     <div class="tab-body" id="tab-bom">
-      <div id="bom-privacy-banner" style="font-size:11px;padding:6px 8px;border-radius:8px;background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.28);color:#bae6fd;"></div>
+      <div id="bom-privacy-banner" style="font-size:11px;padding:7px 9px;border-radius:8px;background:rgba(201,162,75,0.12);border:1px solid var(--border-gold);color:var(--text-primary);"></div>
       <div id="bom-list" style="display:flex;flex-direction:column;gap:8px;"></div>
     </div>
 
     <div class="tab-body" id="tab-pins">
-      <div class="empty-hint" id="pins-empty">暂无修改标注。切换到顶部“标注”，在模型任意部位单击即可标记修改意见。</div>
+      <div class="empty-hint" id="pins-empty">暂无修改标注。点击模型任意位置选择「标注修改」或切换顶部「标注」即可记录。</div>
     </div>
 
     <div class="tab-body" id="tab-measures">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <span style="font-size:11px;color:#94a3b8;">按住 Shift 可锁定水平/垂直轴</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:11px;color:var(--text-secondary);">按住 Shift 可锁定水平/垂直轴</span>
         <button type="button" class="mini-btn danger" id="clear-measures-btn">清空全部</button>
       </div>
       <div id="measures-list" style="display:flex;flex-direction:column;gap:7px;"></div>
-      <div class="empty-hint" id="measures-empty">暂无量尺记录。切换到顶部“量尺”，依次点击起点与终点即可精确测量净距（mm）。</div>
+      <div class="empty-hint" id="measures-empty">暂无量尺记录。切换到「量尺」依次点击两点即可精确测量（mm）。</div>
     </div>
 
     <div style="position:relative;">
-      <div id="mention-popup" style="display:none;position:absolute;bottom:48px;left:10px;right:10px;background:rgba(15,23,42,0.96);border:1px solid rgba(56,189,248,0.4);border-radius:8px;padding:4px;z-index:20;max-height:130px;overflow-y:auto;"></div>
+      <div id="mention-popup" style="display:none;position:absolute;bottom:52px;left:12px;right:12px;background:var(--surface-elevated);border:1px solid var(--border-gold);border-radius:8px;padding:4px;z-index:20;max-height:130px;overflow-y:auto;"></div>
       <form class="chat-input-bar" id="chat-form">
-        <input type="text" id="chat-input" placeholder="输入群聊消息，输入 @ 可提醒小伙伴..." autocomplete="off" maxlength="500" />
+        <input type="text" id="chat-input" placeholder="输入群聊消息，@ 可提醒小伙伴..." autocomplete="off" maxlength="500" />
         <button type="submit" class="send-btn">发送</button>
       </form>
     </div>
   </aside>
 
-  <div id="inspect-hud">
-    <div class="label" id="inspect-mode-label">点击任意构件查看名称与尺寸</div>
-    <div class="val" id="inspect-info">未选中构件</div>
-  </div>
+  <!-- Unified Bottom Dock: Contextual Object Bar + Smart House Q&A -->
+  <div id="bottom-dock">
+    <!-- Contextual Object Action Bar (Hidden until user clicks a 3D mesh) -->
+    <div id="object-context-bar" role="region" aria-label="构件操作栏">
+      <div class="ctx-top">
+        <div class="ctx-meta">
+          <span class="ctx-floor" id="ctx-obj-floor">1F</span>
+          <span class="ctx-name" id="ctx-obj-name">构件</span>
+          <span class="ctx-dims" id="ctx-obj-dims">0 × 0 × 0 mm</span>
+        </div>
+        <button type="button" class="ctx-close" id="ctx-btn-close" aria-label="取消选中构件">×</button>
+      </div>
+      <div class="ctx-actions">
+        <button type="button" class="ctx-btn" id="ctx-btn-peek" aria-pressed="false">
+          <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+          <span>拖动透视</span>
+        </button>
+        <button type="button" class="ctx-btn" id="ctx-btn-interact" aria-pressed="false">
+          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/><path d="M9 12h.01"/></svg>
+          <span id="ctx-btn-interact-txt">开关柜门</span>
+        </button>
+        <button type="button" class="ctx-btn" id="ctx-btn-pin">
+          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>标注修改</span>
+        </button>
+        <button type="button" class="ctx-btn" id="ctx-btn-tex">
+          <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 3-6 6"/><path d="m14 3-11 11"/></svg>
+          <span>换平铺贴图</span>
+        </button>
+        <button type="button" class="ctx-btn" id="ctx-btn-ask">
+          <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>问AI此构件</span>
+        </button>
+      </div>
+    </div>
 
-  <div id="help-hud">
-    左键旋转 · 右键平移 · 滚轮缩放 · W/A/S/D/Q/E 漫游 · 1漫游/2标注/3量尺
+    <!-- Smart House Q&A Answer Popover (Appears smoothly only after asking) -->
+    <div id="house-qa-answer" role="region" aria-label="房屋智能解答">
+      <div class="qa-head">
+        <span id="qa-question-echo">房屋智能解答</span>
+        <button type="button" class="ctx-close" id="qa-close-btn" aria-label="关闭解答">×</button>
+      </div>
+      <div class="qa-body" id="qa-answer-text"></div>
+      <div class="qa-chips" id="qa-highlights"></div>
+      <div class="qa-footer">
+        <span style="font-size:11px;color:var(--text-secondary);" id="qa-privacy-note"></span>
+        <button type="button" class="qa-jump-btn" id="qa-jump-btn" style="display:none;">
+          <span id="qa-jump-txt">定位到该空间</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- On-Focus Quick Prompt Suggestions -->
+    <div id="house-qa-suggestions" aria-label="快捷提问">
+      <button type="button" class="qa-sugg-btn" data-q="B1夹层多高、板厚多少？北墙书柜多大尺寸？">B1夹层净高与板厚</button>
+      <button type="button" class="qa-sugg-btn" data-q="1F到B1、B1到B2双楼梯如何衔接？扶手什么材质？">双楼梯衔接与扶手</button>
+      <button type="button" class="qa-sugg-btn" data-q="全屋预估总造价、各空间材料五金分别是什么？">全屋造价与材料五金</button>
+      <button type="button" class="qa-sugg-btn" data-q="当前顾客需求和供应商待确认事项进度如何？">需求与当前进度</button>
+    </div>
+
+    <!-- Always-Ready Bottom Smart House Q&A Bar -->
+    <form id="house-qa-form" role="search" aria-label="房屋智能问答">
+      <svg class="svg-icon" style="color:var(--accent-gold);" viewBox="0 0 24 24"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3z"/><path d="M5 18l.9 2.1L8 21l-2.1.9L5 24l-.9-2.1L2 21l2.1-.9L5 18z"/></svg>
+      <input type="text" id="house-qa-input" placeholder="询问这栋房子的尺寸、层高、楼梯、材质、进度或造价…" autocomplete="off" maxlength="300" />
+      <button type="submit" id="house-qa-submit">询问</button>
+    </form>
   </div>
 
   <!-- Pin Input Popover -->
-  <div id="pin-popover">
+  <div id="pin-popover" role="dialog" aria-label="添加三维修改标注">
     <div class="pop-head">添加三维修改标注</div>
     <div class="pop-loc" id="pin-pop-loc">构件信息</div>
     <textarea id="pin-comment-input" placeholder="描述你想修改的内容（如：此处扶手换高度、柜门分缝调整...）"></textarea>
     <div class="pop-btns">
       <button type="button" class="mini-btn" id="pin-cancel-btn">取消</button>
-      <button type="button" class="send-btn" style="padding:5px 12px;" id="pin-submit-btn">发布标注</button>
+      <button type="button" class="send-btn" id="pin-submit-btn">发布标注</button>
     </div>
   </div>
 
   <!-- Multi-User Login Modal -->
-  <div id="login-modal">
+  <div id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-title">
     <div class="login-card">
-      <h2>4层家装 3D 实时协作室</h2>
-      <p>登录后大家可实时看到彼此的 3D 鼠标指针、在群聊中讨论、点击任意位置标注修改点，或使用 3D 量尺直接测量施工尺寸。</p>
+      <h2 id="login-title">4层家装 3D 实时协作空间</h2>
+      <p>进入后保持极简全景视角；随时可在下方询问全屋尺寸与造价，或点击「开始协作」开启多人实时指针、批注与量尺。</p>
       <label class="field-lbl" for="login-name">你的称呼</label>
       <input id="login-name" class="login-input" type="text" placeholder="例如：业主 / 设计师小李 / 施工张工" maxlength="24" />
-      <label class="field-lbl">选择身份</label>
+      <span class="field-lbl">选择身份（造价权限按身份自动隔离）</span>
       <div class="role-pills" id="role-pills">
-        <span class="role-pill active" data-role="客户/业主">客户/业主</span>
-        <span class="role-pill" data-role="项目总监">项目总监</span>
-        <span class="role-pill" data-role="设计师">设计师</span>
-        <span class="role-pill" data-role="施工方">施工方</span>
-        <span class="role-pill" data-role="全屋定制供应商">全屋定制供应商</span>
-        <span class="role-pill" data-role="灯光/软装供应商">灯光/软装供应商</span>
+        <button type="button" class="role-pill active" data-role="客户/业主" aria-pressed="true">客户/业主</button>
+        <button type="button" class="role-pill" data-role="项目总监" aria-pressed="false">项目总监</button>
+        <button type="button" class="role-pill" data-role="设计师" aria-pressed="false">设计师</button>
+        <button type="button" class="role-pill" data-role="施工方" aria-pressed="false">施工方</button>
+        <button type="button" class="role-pill" data-role="全屋定制供应商" aria-pressed="false">全屋定制供应商</button>
+        <button type="button" class="role-pill" data-role="灯光/软装供应商" aria-pressed="false">灯光/软装供应商</button>
       </div>
-      <label class="field-lbl">你的指针颜色</label>
+      <span class="field-lbl">你的 3D 指针颜色</span>
       <div class="color-row" id="color-row"></div>
-      <button type="button" class="login-submit" id="login-submit-btn">进入 3D 协作房间</button>
+      <button type="button" class="login-submit" id="login-submit-btn">进入 3D 空间</button>
     </div>
   </div>
 
@@ -513,6 +955,15 @@
       return names.some((n) => n.includes('_Walls_Manifold') || WALL_PREFIXES.some((pfx) => n.startsWith(pfx)));
     }
 
+    function isStructuralMesh(mesh) {
+      if (!mesh) return true;
+      const n = (mesh.name || '').toLowerCase();
+      if (/(door|leaf|slant|drw|drawer|cab|shelf|chair|sofa|table|lion|wine|lamp|bed|mirror|tv|bench|desk|vanity|fitness|mahjong)/.test(n)) {
+        return false;
+      }
+      return /(wall|slab|floor|ceiling|stair|riser|tread|skylight|manifold|ground|balustrade|glass|spine|cleat|fascia|anchor)/.test(n);
+    }
+
     const PRESETS = [
       { id: 'overview', name: '全屋鸟瞰', cam: [-11.5, 16.5, 17.5], target: [0.0, 1.0, 1.8], floors: ['2F', '1F', 'B1', 'B2'], hideCeilings: true },
       { id: 'b1_stairs_junction', name: 'B1↔1F & B1↔B2 双楼梯衔接', cam: [0.25, -1.20, 3.85], target: [1.45, -2.35, 0.25], floors: ['B1', 'B2'], hideCeilings: true },
@@ -539,7 +990,8 @@
       { id: '1f_dining_caisson', name: '1F 餐厅过道 (立体盘凤藻井)', cam: [-2.25, 1.35, 3.55], target: [-3.35, 2.82, 2.28], floors: ['1F'], hideCeilings: false },
     ];
 
-    const USER_COLORS = ['#38bdf8', '#f59e0b', '#34d399', '#f472b6', '#a78bfa', '#fb7185', '#22d3ee', '#facc15'];
+    const USER_COLORS = ['#C9A24B', '#38BDF8', '#34D399', '#F472B6', '#A78BFA', '#FB7185', '#2DD4BF', '#FACC15'];
+    const PRICE_VISIBLE_ROLES = new Set(['客户/业主', '项目总监', '业主', '客户', 'director', 'client']);
 
     // Three.js Scene Setup
     const container = document.getElementById('canvas-container');
@@ -548,13 +1000,13 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 1.06;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1e26);
+    scene.background = new THREE.Color(0x16171a);
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -609,6 +1061,7 @@
     const previewGroup = new THREE.Group();
     const customAssetsGroup = new THREE.Group();
     scene.add(remoteCursorGroup, pinsGroup, measuresGroup, previewGroup, customAssetsGroup);
+
     let requirementsList = [];
     let supplierTasksList = [];
     let bomItemsList = [];
@@ -616,7 +1069,10 @@
     let baseVersion = 1;
     let basePatches = [];
     let priceVisible = false;
+    let modelsLoaded = false;
+    let modelsLoadFailed = false;
     let selectedMesh = null;
+    let lastClickedHit = null;
     let draftAsset = null;
     const springAnimations = [];
     const doorAnimations = [];
@@ -625,6 +1081,20 @@
     let hideCeilings = true;
     const wallNodes = [];
     let hideWalls = false;
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const el = document.getElementById('toast-banner');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    function canUserSeePrice() {
+      return !!(priceVisible || (currentUser && PRICE_VISIBLE_ROLES.has(currentUser.role)));
+    }
 
     function applyCeilingVisibility() { for (const o of ceilingNodes) o.visible = !hideCeilings; }
     function applyWallVisibility() { for (const o of wallNodes) o.visible = !hideWalls; }
@@ -661,6 +1131,7 @@
     }
 
     function animateToPreset(preset) {
+      if (!preset) return;
       setFloors(preset.floors);
       hideCeilings = preset.hideCeilings;
       document.getElementById('hide-ceilings').checked = hideCeilings;
@@ -671,6 +1142,11 @@
       flyCamera(preset.cam, preset.target);
     }
 
+    function jumpToPresetById(presetId) {
+      const p = PRESETS.find((item) => item.id === presetId) || PRESETS[0];
+      animateToPreset(p);
+    }
+
     const presetList = document.getElementById('preset-list');
     PRESETS.forEach((p, idx) => {
       const btn = document.createElement('button');
@@ -678,22 +1154,67 @@
       btn.className = 'preset-btn' + (idx === 0 ? ' active' : '');
       btn.dataset.presetId = p.id;
       btn.textContent = p.name;
-      btn.addEventListener('click', () => animateToPreset(p));
+      btn.addEventListener('click', () => {
+        animateToPreset(p);
+        closeViewPopover();
+      });
       presetList.appendChild(btn);
     });
 
     document.querySelectorAll('input[data-floor]').forEach((cb) => cb.addEventListener('change', applyFloorCheckboxes));
     document.getElementById('hide-ceilings').addEventListener('change', (e) => { hideCeilings = e.target.checked; applyCeilingVisibility(); });
     document.getElementById('hide-walls').addEventListener('change', (e) => { hideWalls = e.target.checked; applyWallVisibility(); });
-    document.getElementById('toggle-btn').addEventListener('click', () => {
-      const sb = document.getElementById('sidebar');
-      const collapsed = sb.classList.toggle('collapsed');
-      document.getElementById('toggle-btn').textContent = collapsed ? '展开' : '收起';
+
+    // Minimal Popover & Collaboration Disclosure Controls
+    const viewPopEl = document.getElementById('view-popover');
+    const viewBtnEl = document.getElementById('btn-view-popover');
+    const goalPopEl = document.getElementById('goal-popover');
+    const goalExpandBtn = document.getElementById('brief-goal-expand-btn');
+
+    function closeViewPopover() {
+      viewPopEl.classList.remove('open');
+      viewBtnEl.setAttribute('aria-expanded', 'false');
+    }
+    function closeGoalPopover() {
+      goalPopEl.classList.remove('open');
+      goalExpandBtn.setAttribute('aria-expanded', 'false');
+    }
+    viewBtnEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = !viewPopEl.classList.contains('open');
+      closeGoalPopover();
+      viewPopEl.classList.toggle('open', willOpen);
+      viewBtnEl.setAttribute('aria-expanded', String(willOpen));
     });
-    document.getElementById('toggle-collab-btn').addEventListener('click', () => {
-      const cp = document.getElementById('collab-panel');
-      const collapsed = cp.classList.toggle('collapsed');
-      document.getElementById('toggle-collab-btn').textContent = collapsed ? '显示群聊' : '隐藏群聊';
+    goalExpandBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = !goalPopEl.classList.contains('open');
+      closeViewPopover();
+      renderGoalPopover();
+      goalPopEl.classList.toggle('open', willOpen);
+      goalExpandBtn.setAttribute('aria-expanded', String(willOpen));
+    });
+    document.getElementById('goal-pop-close').addEventListener('click', closeGoalPopover);
+
+    function setCollabOpen(open) {
+      document.body.classList.toggle('collab-open', open);
+      const btn = document.getElementById('btn-enter-collab');
+      const txt = document.getElementById('btn-enter-collab-txt');
+      btn.setAttribute('aria-pressed', String(open));
+      txt.textContent = open ? '收起协作' : '开始协作';
+      if (open) closeGoalPopover();
+    }
+    document.getElementById('btn-enter-collab').addEventListener('click', () => {
+      setCollabOpen(!document.body.classList.contains('collab-open'));
+    });
+
+    document.addEventListener('pointerdown', (e) => {
+      if (viewPopEl.classList.contains('open') && !viewPopEl.contains(e.target) && !viewBtnEl.contains(e.target)) {
+        closeViewPopover();
+      }
+      if (goalPopEl.classList.contains('open') && !goalPopEl.contains(e.target) && !goalExpandBtn.contains(e.target)) {
+        closeGoalPopover();
+      }
     });
 
     // Load 4 GLB Floor Models
@@ -706,8 +1227,64 @@
     const loader = new GLTFLoader();
     const versionTag = Date.now();
     let loadedCount = 0;
-    const statusDot = document.getElementById('status-dot');
-    const statusText = document.getElementById('status-text');
+
+    function updateBriefSummary() {
+      const nameEl = document.getElementById('brief-user-name');
+      const roleEl = document.getElementById('brief-user-role');
+      const dotEl = document.getElementById('brief-user-dot');
+      const onlineEl = document.getElementById('brief-online-count');
+      const goalEl = document.getElementById('brief-goal-text');
+      const stDot = document.getElementById('brief-status-dot');
+      const stTxt = document.getElementById('brief-house-status');
+
+      if (currentUser) {
+        nameEl.textContent = currentUser.name;
+        roleEl.textContent = currentUser.role;
+        dotEl.style.background = currentUser.color || '#C9A24B';
+      }
+      onlineEl.textContent = `${Math.max(onlineUsers.length, currentUser ? 1 : 0)} 人在线`;
+
+      if (requirementsList.length > 0) {
+        const doneCnt = requirementsList.filter((r) => r.status === '已完成' || r.status === '已对齐').length;
+        goalEl.textContent = `顾客 ${requirementsList.length} 项核心目标（已对齐 ${doneCnt} 项）· ${requirementsList[0].title}`;
+      }
+
+      const pendingVer = versionHistoryList.filter((v) => v.status === '待总监审批').length;
+      const openPins = pinsList.filter((p) => p.status !== 'resolved').length;
+      if (modelsLoadFailed) {
+        stDot.className = 'dot error';
+        stTxt.textContent = '3D 模型加载失败（请检查网络）';
+      } else if (!modelsLoaded) {
+        stDot.className = 'dot';
+        stTxt.textContent = `加载中 (${loadedCount}/4) · Base v${baseVersion}`;
+      } else {
+        stDot.className = 'dot ready';
+        stTxt.textContent = `4层已就绪 · Base v${baseVersion} · 待审 ${pendingVer} · 标注 ${openPins}`;
+      }
+    }
+
+    function renderGoalPopover() {
+      const list = document.getElementById('goal-pop-list');
+      if (!list) return;
+      list.innerHTML = '';
+      const items = requirementsList.length ? requirementsList : [
+        { title: '1F 玄关帕斯卡造型改纯白 + 隐藏卫生间门', status: '已完成', owner: '全屋定制' },
+        { title: 'B1 夹层净高 1.9m、板厚 15cm；双楼梯稳固衔接', status: '已对齐', owner: '施工方' },
+        { title: 'B2 15cm 空心水波纹电视墙 + 十字鞋柜 + 鱼肚白地面', status: '待确认', owner: '灯光/软装' },
+      ];
+      for (const r of items) {
+        const row = document.createElement('div');
+        row.className = 'list-card';
+        const resolved = r.status === '已完成' || r.status === '已对齐';
+        row.innerHTML = `
+          <div class="list-card-top">
+            <span style="font-size:11px;color:var(--text-secondary);">${escapeHtml(r.owner || '团队')}</span>
+            <span class="status-pill ${resolved ? 'resolved' : ''}">${escapeHtml(r.status)}</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-primary);">${escapeHtml(r.title)}</div>`;
+        list.appendChild(row);
+      }
+    }
 
     Promise.all(
       floorFiles.map(([floorKey, url]) =>
@@ -734,7 +1311,7 @@
               });
               floorGroups[floorKey].add(root);
               loadedCount += 1;
-              statusText.textContent = `加载中 (${loadedCount}/4)...`;
+              updateBriefSummary();
               resolve();
             },
             undefined,
@@ -744,19 +1321,18 @@
       )
     )
       .then(() => {
+        modelsLoaded = true;
         applyCeilingVisibility();
         applyWallVisibility();
         applyFloorCheckboxes();
-        statusDot.classList.add('ready');
-        statusText.textContent = '已加载 4 层模型';
+        updateBriefSummary();
       })
       .catch((err) => {
         console.error('GLB load failed:', err);
-        statusDot.classList.add('error');
-        statusText.textContent = '模型加载失败';
+        modelsLoadFailed = true;
+        updateBriefSummary();
       });
 
-    // Helper: detect floor of intersected mesh
     function detectFloor(obj) {
       let cur = obj;
       while (cur) {
@@ -767,7 +1343,7 @@
     }
 
     // -----------------------------------------------------------------------
-    // Collaboration State & 3D Helpers (Cursors, Chat, Pins, Tape Measure)
+    // Collaboration State & 3D Helpers
     // -----------------------------------------------------------------------
     let currentUser = null;
     let selfId = null;
@@ -776,19 +1352,17 @@
     let pinsList = [];
     let measuresList = [];
     let followingUserId = null;
-    let toolMode = 'orbit'; // 'orbit' | 'pin' | 'measure'
+    let toolMode = 'orbit'; // 'orbit' | 'peek' | 'interact' | 'pin' | 'measure'
     let ws = null;
     let wsConnected = false;
     let httpPollTimer = null;
     let lastSeq = 0;
 
-    // 3D dynamic visualization maps
-    const remoteCursorMeshes = new Map(); // userId -> { group, targetPos, data, el }
-    const pinMeshes = new Map();          // pinId -> { group, el, pin }
-    const measureMeshes = new Map();      // measureId -> { group, el, mid, measure }
+    const remoteCursorMeshes = new Map();
+    const pinMeshes = new Map();
+    const measureMeshes = new Map();
     const overlayLayer = document.getElementById('overlay-layer');
 
-    // Tape measure draft state + hover snapping
     const hoverDot = new THREE.Mesh(
       new THREE.SphereGeometry(0.032, 14, 14),
       new THREE.MeshBasicMaterial({ color: 0x2dd4bf, depthTest: false })
@@ -810,13 +1384,12 @@
     draftLabelEl.style.pointerEvents = 'none';
     overlayLayer.appendChild(draftLabelEl);
 
-    let measureStart = null; // THREE.Vector3
-    let measureEndPreview = null; // THREE.Vector3
+    let measureStart = null;
+    let measureEndPreview = null;
 
-    // Pending Pin Draft Marker
     const draftPinBeacon = new THREE.Mesh(
       new THREE.SphereGeometry(0.055, 16, 16),
-      new THREE.MeshBasicMaterial({ color: 0xf59e0b, depthTest: false })
+      new THREE.MeshBasicMaterial({ color: 0xeab308, depthTest: false })
     );
     draftPinBeacon.visible = false;
     previewGroup.add(draftPinBeacon);
@@ -834,9 +1407,7 @@
       return out;
     }
 
-    function fmtMm(mm) {
-      return `${mm} mm (${(mm / 1000).toFixed(2)} m)`;
-    }
+    function fmtMm(mm) { return `${mm} mm (${(mm / 1000).toFixed(2)} m)`; }
 
     function escapeHtml(str) {
       return String(str || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -847,8 +1418,36 @@
       return d.toTimeString().slice(0, 5);
     }
 
+    function updateObjectContextBarUI() {
+      const bar = document.getElementById('object-context-bar');
+      const texTarget = document.getElementById('apply-tex-target');
+      if (!selectedMesh) {
+        bar.classList.remove('open');
+        if (texTarget) texTarget.textContent = '未选中构件（点击模型任意处即可选定贴图表面）';
+        return;
+      }
+      const fk = detectFloor(selectedMesh) || '建筑';
+      const box = new THREE.Box3().setFromObject(selectedMesh);
+      const sz = new THREE.Vector3();
+      box.getSize(sz);
+      const name = selectedMesh.name || '(未命名构件)';
+      const dims = `${Math.round(sz.x * 1000)} × ${Math.round(sz.z * 1000)} × ${Math.round(sz.y * 1000)} mm`;
+      document.getElementById('ctx-obj-floor').textContent = fk;
+      document.getElementById('ctx-obj-name').textContent = name;
+      document.getElementById('ctx-obj-dims').textContent = dims;
+      if (texTarget) texTarget.textContent = `已选定贴图目标：${fk} · ${name}`;
+
+      const opened = !!selectedMesh.userData._opened;
+      const interactBtn = document.getElementById('ctx-btn-interact');
+      interactBtn.setAttribute('aria-pressed', String(opened));
+      document.getElementById('ctx-btn-interact-txt').textContent = opened ? '闭合复位' : '开关柜门';
+      document.getElementById('ctx-btn-peek').setAttribute('aria-pressed', String(toolMode === 'peek'));
+      bar.classList.add('open');
+    }
+
     // Mode Switching
     function setToolMode(m) {
+      if (toolMode === 'peek' && m !== 'peek') finishPeekDrag();
       toolMode = m;
       document.querySelectorAll('.mode-btn').forEach((b) => {
         const bm = b.dataset.mode;
@@ -862,23 +1461,20 @@
       if (m !== 'measure') cancelMeasureDraft();
       if (m !== 'pin') closePinPopover();
       hoverDot.visible = false;
-      const lbl = document.getElementById('inspect-mode-label');
-      if (m === 'peek') lbl.textContent = '拖动透视：按住任意家具/物件拖开查看内部，松手自动弹回原位';
-      else if (m === 'interact') lbl.textContent = '开关柜门：点击任意柜门、抽屉或家具触发开合动画';
-      else if (m === 'pin') lbl.textContent = '标注模式：单击模型任意位置添加修改点 (按1返回漫游)';
-      else if (m === 'measure') lbl.textContent = '量尺模式：点击起点→终点测净距 · 按住Shift锁定正交轴 · Esc重选';
-      else lbl.textContent = '点击任意构件查看名称与尺寸';
+      updateObjectContextBarUI();
+      if (m === 'peek') showToast('拖动透视已开启：按住任意构件拖开查看，松手自动回原位');
+      else if (m === 'interact') showToast('开关柜门模式：单击柜门、抽屉或家具原地开合');
+      else if (m === 'pin') showToast('标注模式：单击模型任意位置添加修改点');
+      else if (m === 'measure') showToast('量尺模式：单击起点与终点测距（按 Shift 锁定正交）');
     }
     document.querySelectorAll('.mode-btn').forEach((b) => b.addEventListener('click', () => setToolMode(b.dataset.mode)));
 
-    // Sidebar Tabs
     function activateTab(tabName) {
       document.querySelectorAll('.tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.tab === tabName));
       document.querySelectorAll('.tab-body').forEach((b) => b.classList.toggle('active', b.id === `tab-${tabName}`));
     }
     document.querySelectorAll('.tab-btn').forEach((b) => b.addEventListener('click', () => activateTab(b.dataset.tab)));
 
-    // Render UI lists
     function renderRoster() {
       const el = document.getElementById('user-roster');
       el.innerHTML = '';
@@ -887,7 +1483,7 @@
         const chip = document.createElement('button');
         chip.type = 'button';
         chip.className = 'user-chip' + (followingUserId === u.id ? ' following' : '');
-        chip.title = isSelf ? '你自己' : (followingUserId === u.id ? '点击取消跟随TA视角' : '点击跟随TA的3D视角');
+        chip.title = isSelf ? '你自己' : (followingUserId === u.id ? '点击取消跟随视角' : '点击跟随TA的3D视角');
         chip.innerHTML = `<span class="swatch" style="background:${escapeHtml(u.color)}"></span><span>${escapeHtml(u.name)}${isSelf ? '(我)' : ''}</span>`;
         if (!isSelf) {
           chip.addEventListener('click', () => {
@@ -901,11 +1497,12 @@
       const dot = document.getElementById('ws-dot');
       if (wsConnected) {
         dot.className = 'dot ws-ok';
-        st.textContent = `实时同步 · ${onlineUsers.length}人在线`;
+        st.textContent = `实时同步 · ${onlineUsers.length}人`;
       } else if (currentUser) {
         dot.className = 'dot ready';
-        st.textContent = `HTTP同步 · ${onlineUsers.length}人在线`;
+        st.textContent = `HTTP同步 · ${onlineUsers.length}人`;
       }
+      updateBriefSummary();
     }
 
     function focusPin(pin) {
@@ -937,7 +1534,7 @@
             <span>${fmtTime(m.ts)}</span>
           </div>
           <div class="chat-text">${escapeHtml(m.text)}</div>
-          ${m.pinId ? `<div class="pin-jump-hint"><span>${escapeHtml(m.floor || '')} ${escapeHtml(m.meshName || '')}</span><span>点击定位视角 →</span></div>` : ''}
+          ${m.pinId ? `<div class="pin-jump-hint"><span>${escapeHtml(m.floor || '')} ${escapeHtml(m.meshName || '')}</span><span>点击定位 →</span></div>` : ''}
         `;
         if (m.pinId) {
           div.addEventListener('click', () => {
@@ -961,7 +1558,7 @@
       }
       for (const p of pinsList) {
         let entry = pinMeshes.get(p.id);
-        const colHex = p.status === 'resolved' ? '#10b981' : (p.authorColor || '#f59e0b');
+        const colHex = p.status === 'resolved' ? '#10b981' : (p.authorColor || '#C9A24B');
         if (!entry) {
           const g = new THREE.Group();
           const sphere = new THREE.Mesh(
@@ -977,7 +1574,8 @@
           g.position.set(p.x, p.y, p.z);
           pinsGroup.add(g);
 
-          const el = document.createElement('div');
+          const el = document.createElement('button');
+          el.type = 'button';
           el.className = 'pin-3d-tag';
           el.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -991,7 +1589,7 @@
         entry.sphere.material.color.set(colHex);
         entry.ring.material.color.set(colHex);
         entry.el.style.background = colHex;
-        entry.el.textContent = p.status === 'resolved' ? `✓ #${p.num}` : `#${p.num} ${p.comment.slice(0, 12)}${p.comment.length > 12 ? '…' : ''}`;
+        entry.el.textContent = p.status === 'resolved' ? `已改 #${p.num}` : `#${p.num} ${p.comment.slice(0, 12)}${p.comment.length > 12 ? '…' : ''}`;
       }
     }
 
@@ -1009,21 +1607,21 @@
         card.innerHTML = `
           <div class="list-card-top">
             <strong style="color:${escapeHtml(p.authorColor)}">#${p.num} ${escapeHtml(p.authorName)}</strong>
-            <span class="badge-status ${resolved ? 'badge-resolved' : 'badge-open'}">${resolved ? '已解决' : '待修改'}</span>
+            <span class="badge-status ${resolved ? 'badge-resolved' : ''}">${resolved ? '已解决' : '待修改'}</span>
           </div>
-          <div style="color:#94a3b8;font-size:11px;">${escapeHtml(p.floor)} · ${escapeHtml(p.meshName)}</div>
-          <div style="color:#f1f5f9;">${escapeHtml(p.comment)}</div>
+          <div style="color:var(--text-secondary);font-size:11px;">${escapeHtml(p.floor)} · ${escapeHtml(p.meshName)}</div>
+          <div style="color:var(--text-primary);">${escapeHtml(p.comment)}</div>
           <div class="card-actions">
             <button type="button" class="mini-btn" data-act="jump">定位查看</button>
             <button type="button" class="mini-btn" data-act="toggle">${resolved ? '重新打开' : '标为已改'}</button>
             <button type="button" class="mini-btn danger" data-act="del">删除</button>
-          </div>
-        `;
+          </div>`;
         card.querySelector('[data-act="jump"]').addEventListener('click', () => focusPin(p));
         card.querySelector('[data-act="toggle"]').addEventListener('click', () => sendCollabEvent({ type: 'pin_toggle', pinId: p.id }));
         card.querySelector('[data-act="del"]').addEventListener('click', () => sendCollabEvent({ type: 'pin_delete', pinId: p.id }));
         box.appendChild(card);
       }
+      updateBriefSummary();
     }
 
     function syncMeasure3DObjects() {
@@ -1042,12 +1640,11 @@
         const mid = va.clone().add(vb).multiplyScalar(0.5);
 
         const g = new THREE.Group();
-        const col = m.authorColor || '#2dd4bf';
+        const col = m.authorColor || '#2DD4BF';
         const mat = new THREE.MeshBasicMaterial({ color: col, depthTest: false });
         const sA = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 12), mat);
         const sB = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 12), mat);
-        sA.position.copy(va);
-        sB.position.copy(vb);
+        sA.position.copy(va); sB.position.copy(vb);
 
         const dist = Math.max(0.001, va.distanceTo(vb));
         const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, dist, 10), mat);
@@ -1060,7 +1657,7 @@
         const el = document.createElement('div');
         el.className = 'measure-3d-tag';
         el.style.borderColor = col;
-        el.innerHTML = `<strong>${m.distMm} mm</strong> (${(m.distMm / 1000).toFixed(2)}m)<span class="measure-3d-del" title="删除此量尺">×</span><span class="sub">东西${m.dxMm} · 南北${m.dyMm} · 高${m.dzMm}</span>`;
+        el.innerHTML = `<strong>${m.distMm} mm</strong> (${(m.distMm / 1000).toFixed(2)}m)<button type="button" class="measure-3d-del" aria-label="删除量尺">×</button><span class="sub">东西${m.dxMm} · 南北${m.dyMm} · 高${m.dzMm}</span>`;
         el.querySelector('.measure-3d-del').addEventListener('click', (e) => {
           e.stopPropagation();
           sendCollabEvent({ type: 'measure_delete', measureId: m.id });
@@ -1082,15 +1679,14 @@
         card.className = 'list-card';
         card.innerHTML = `
           <div class="list-card-top">
-            <strong style="color:#2dd4bf;font-size:13px;">${fmtMm(m.distMm)}</strong>
-            <span style="font-size:11px;color:#94a3b8;">${escapeHtml(m.authorName)}</span>
+            <strong style="color:var(--accent-teal);font-size:13px;">${fmtMm(m.distMm)}</strong>
+            <span style="font-size:11px;color:var(--text-secondary);">${escapeHtml(m.authorName)}</span>
           </div>
-          <div style="color:#cbd5e1;font-family:ui-monospace,monospace;font-size:11px;">东西 ΔX: ${m.dxMm}mm · 南北 ΔY: ${m.dyMm}mm · 高差 ΔZ: ${m.dzMm}mm</div>
+          <div style="color:var(--text-primary);font-family:var(--font-mono);font-size:11px;">东西 ΔX: ${m.dxMm}mm · 南北 ΔY: ${m.dyMm}mm · 高差 ΔZ: ${m.dzMm}mm</div>
           <div class="card-actions">
             <button type="button" class="mini-btn" data-act="focus">查看位置</button>
             <button type="button" class="mini-btn danger" data-act="del">删除</button>
-          </div>
-        `;
+          </div>`;
         card.querySelector('[data-act="focus"]').addEventListener('click', () => {
           if (m.camPos && m.camTarget) flyCamera(m.camPos, m.camTarget);
           else {
@@ -1112,7 +1708,7 @@
       let entry = remoteCursorMeshes.get(cur.userId);
       if (!entry) {
         const g = new THREE.Group();
-        const col = cur.color || '#38bdf8';
+        const col = cur.color || '#C9A24B';
         const sph = new THREE.Mesh(
           new THREE.SphereGeometry(0.042, 16, 16),
           new THREE.MeshBasicMaterial({ color: col })
@@ -1167,6 +1763,7 @@
         if (pkt.cursors) Object.values(pkt.cursors).forEach(updateRemoteCursor);
         renderRoster(); renderHomeTab(); renderChat(); renderVersionsTab(); renderBomTab(); renderPinsTab(); renderMeasuresTab();
         syncBasePatchesToScene();
+        updateBriefSummary();
       } else if (pkt.type === 'users') {
         onlineUsers = pkt.users || [];
         const activeIds = new Set(onlineUsers.map((u) => u.id));
@@ -1177,6 +1774,7 @@
       } else if (pkt.type === 'requirements') {
         requirementsList = pkt.requirements || [];
         renderHomeTab();
+        updateBriefSummary();
       } else if (pkt.type === 'supplier_tasks') {
         supplierTasksList = pkt.supplierTasks || [];
         renderHomeTab();
@@ -1184,12 +1782,14 @@
         if (!versionHistoryList.some((v) => v.id === pkt.version.id)) {
           versionHistoryList.push(pkt.version);
           renderVersionsTab();
+          updateBriefSummary();
         }
       } else if (pkt.type === 'version_updated' && pkt.version) {
         const idx = versionHistoryList.findIndex((v) => v.id === pkt.version.id);
         if (idx >= 0) versionHistoryList[idx] = pkt.version;
         else versionHistoryList.push(pkt.version);
         renderVersionsTab();
+        updateBriefSummary();
       } else if (pkt.type === 'base_sync') {
         baseVersion = pkt.baseVersion || baseVersion + 1;
         if (pkt.patch && !basePatches.some((p) => p.id === pkt.patch.id)) basePatches.push(pkt.patch);
@@ -1200,6 +1800,8 @@
         }
         renderVersionsTab();
         syncBasePatchesToScene();
+        updateBriefSummary();
+        showToast(`项目总监已批准，基础版本同步至 Base v${baseVersion}`);
       } else if (pkt.type === 'cursor') {
         updateRemoteCursor(pkt.cursor);
       } else if (pkt.type === 'cursor_hide') {
@@ -1291,6 +1893,11 @@
                 else if (ev.type === 'measure_add') handleIncomingPacket({ type: 'measure_add', measure: ev.data, seq: ev.seq });
                 else if (ev.type === 'measure_delete') handleIncomingPacket({ type: 'measure_delete', ...ev.data, seq: ev.seq });
                 else if (ev.type === 'measure_clear') handleIncomingPacket({ type: 'measure_clear', seq: ev.seq });
+                else if (ev.type === 'requirements') handleIncomingPacket({ type: 'requirements', requirements: ev.data, seq: ev.seq });
+                else if (ev.type === 'supplier_tasks') handleIncomingPacket({ type: 'supplier_tasks', supplierTasks: ev.data, seq: ev.seq });
+                else if (ev.type === 'version_added') handleIncomingPacket({ type: 'version_added', version: ev.data, seq: ev.seq });
+                else if (ev.type === 'version_updated') handleIncomingPacket({ type: 'version_updated', version: ev.data, seq: ev.seq });
+                else if (ev.type === 'base_sync') handleIncomingPacket({ type: 'base_sync', ...ev.data, seq: ev.seq });
               }
             }
           }
@@ -1350,8 +1957,8 @@
       draftPinBeacon.visible = true;
       const pop = document.getElementById('pin-popover');
       document.getElementById('pin-pop-loc').textContent = `${floor || '建筑'} · ${meshName} (${hit.point.x.toFixed(2)}, ${hit.point.y.toFixed(2)}, ${(-hit.point.z).toFixed(2)})`;
-      pop.style.left = `${Math.min(window.innerWidth - 306, Math.max(12, screenX + 12))}px`;
-      pop.style.top = `${Math.min(window.innerHeight - 190, Math.max(66, screenY - 24))}px`;
+      pop.style.left = `${Math.min(window.innerWidth - 310, Math.max(12, screenX + 12))}px`;
+      pop.style.top = `${Math.min(window.innerHeight - 195, Math.max(66, screenY - 24))}px`;
       pop.style.display = 'block';
       const ta = document.getElementById('pin-comment-input');
       ta.value = '';
@@ -1371,7 +1978,9 @@
       const payload = { type: 'pin_add', ...pendingPinData, comment: txt, authorName: currentUser?.name, authorRole: currentUser?.role, authorColor: currentUser?.color };
       closePinPopover();
       sendCollabEvent(payload);
+      setCollabOpen(true);
       activateTab('pins');
+      showToast('已发布修改标注');
     });
 
     function cancelMeasureDraft() {
@@ -1382,7 +1991,7 @@
       draftLabelEl.style.display = 'none';
     }
 
-    // Home Tab (Requirements + Supplier Tasks), Versions Tab, BOM Tab (Client-Only Prices), @Mentions & AI 3D Asset Builder
+    // Home Tab, Versions Tab, BOM Tab
     function renderHomeTab() {
       const reqBox = document.getElementById('req-list');
       const supBox = document.getElementById('sup-list');
@@ -1391,17 +2000,18 @@
       for (const r of requirementsList) {
         const div = document.createElement('div');
         div.className = 'list-card';
+        const done = r.status === '已完成' || r.status === '已对齐';
         div.innerHTML = `
           <div class="list-card-top">
-            <strong style="color:#e2e8f0;">${escapeHtml(r.owner || '团队')}</strong>
-            <span class="status-pill ${r.status === '已完成' ? 'resolved' : ''}">${escapeHtml(r.status)}</span>
+            <strong style="color:var(--text-primary);">${escapeHtml(r.owner || '团队')}</strong>
+            <span class="status-pill ${done ? 'resolved' : ''}">${escapeHtml(r.status)}</span>
           </div>
-          <div style="font-size:11px;color:#cbd5e1;line-height:1.45;">${escapeHtml(r.title)}</div>
+          <div style="font-size:11.5px;color:var(--text-secondary);line-height:1.45;">${escapeHtml(r.title)}</div>
           <div class="card-actions">
-            <button type="button" class="mini-btn" data-act="toggle">${r.status === '已完成' ? '标为待确认' : '标为已完成'}</button>
+            <button type="button" class="mini-btn" data-act="toggle">${done ? '标为待确认' : '标为已完成'}</button>
           </div>`;
         div.querySelector('[data-act="toggle"]').addEventListener('click', () => {
-          sendCollabEvent({ type: 'update_requirement', id: r.id, status: r.status === '已完成' ? '待确认' : '已完成' });
+          sendCollabEvent({ type: 'update_requirement', id: r.id, status: done ? '待确认' : '已完成' });
         });
         reqBox.appendChild(div);
       }
@@ -1409,18 +2019,19 @@
       for (const t of supplierTasksList) {
         const div = document.createElement('div');
         div.className = 'list-card';
+        const confirmed = t.status === '已确认';
         div.innerHTML = `
           <div class="list-card-top">
-            <strong style="color:#fcd34d;">${escapeHtml(t.supplier)}</strong>
-            <span class="status-pill ${t.status === '已确认' ? 'resolved' : ''}">${escapeHtml(t.status)}</span>
+            <strong style="color:#FDE047;">${escapeHtml(t.supplier)}</strong>
+            <span class="status-pill ${confirmed ? 'resolved' : ''}">${escapeHtml(t.status)}</span>
           </div>
-          <div style="font-size:11px;color:#f1f5f9;font-weight:600;">${escapeHtml(t.title)}</div>
-          <div style="font-size:11px;color:#94a3b8;line-height:1.4;">${escapeHtml(t.detail)}</div>
+          <div style="font-size:11.5px;color:var(--text-primary);font-weight:600;">${escapeHtml(t.title)}</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.4;">${escapeHtml(t.detail)}</div>
           <div class="card-actions">
-            <button type="button" class="mini-btn" data-act="confirm">${t.status === '已确认' ? '重开确认' : '确认细节'}</button>
+            <button type="button" class="mini-btn" data-act="confirm">${confirmed ? '重开确认' : '确认细节'}</button>
           </div>`;
         div.querySelector('[data-act="confirm"]').addEventListener('click', () => {
-          sendCollabEvent({ type: 'update_supplier_task', id: t.id, status: t.status === '已确认' ? '待确认' : '已确认' });
+          sendCollabEvent({ type: 'update_supplier_task', id: t.id, status: confirmed ? '待确认' : '已确认' });
         });
         supBox.appendChild(div);
       }
@@ -1457,14 +2068,14 @@
         const isApproved = v.status === '已认可并同步';
         card.innerHTML = `
           <div class="list-card-top">
-            <span class="chat-author"><span class="swatch" style="width:7px;height:7px;border-radius:50%;background:${escapeHtml(v.color || '#38bdf8')};display:inline-block;"></span>v${v.revNum} · ${escapeHtml(v.author)} (${escapeHtml(v.role)})</span>
+            <span class="chat-author"><span class="swatch" style="width:7px;height:7px;border-radius:50%;background:${escapeHtml(v.color || '#C9A24B')};display:inline-block;"></span>v${v.revNum} · ${escapeHtml(v.author)} (${escapeHtml(v.role)})</span>
             <span class="status-pill ${isApproved ? 'resolved' : ''}">${escapeHtml(v.status)}</span>
           </div>
-          <div style="font-size:11px;color:#cbd5e1;">修改原因：${escapeHtml(v.reason)}</div>
-          <div style="font-size:10px;color:#94a3b8;">基于 Base v${v.baseVersionRef || 1} · ${fmtTime(v.ts)}</div>
+          <div style="font-size:11.5px;color:var(--text-primary);">修改原因：${escapeHtml(v.reason)}</div>
+          <div style="font-size:10.5px;color:var(--text-secondary);">基于 Base v${v.baseVersionRef || 1} · ${fmtTime(v.ts)}</div>
           ${isDirector && v.status === '待总监审批' ? `
             <div class="card-actions">
-              <button type="button" class="mini-btn" style="background:rgba(16,185,129,0.2);border-color:#10b981;color:#6ee7b7;" data-act="approve">认可并同步基础版</button>
+              <button type="button" class="mini-btn" style="background:rgba(52,211,153,0.18);border-color:var(--accent-emerald);color:#6EE7B7;" data-act="approve">认可并同步基础版</button>
               <button type="button" class="mini-btn danger" data-act="reject">驳回</button>
             </div>` : ''}`;
         if (isDirector && v.status === '待总监审批') {
@@ -1483,8 +2094,8 @@
       const banner = document.getElementById('bom-privacy-banner');
       const box = document.getElementById('bom-list');
       if (!banner || !box) return;
-      const canSeePrice = priceVisible || (currentUser && (currentUser.role === '客户/业主' || currentUser.role === '项目总监'));
-      banner.textContent = canSeePrice
+      const showPrice = canUserSeePrice();
+      banner.textContent = showPrice
         ? '当前身份为客户/项目总监：已解锁全屋造价、材料单价、人工费与电商直达链接。'
         : '权限保护提示：当前为供应商身份，造价与人工费仅对客户及项目总监开放，已自动隐藏价格列。';
       box.innerHTML = '';
@@ -1494,27 +2105,27 @@
         const links = item.ecommerceLinks || {};
         card.innerHTML = `
           <div class="list-card-top">
-            <strong style="color:#f8fafc;">[${escapeHtml(item.floor)}] ${escapeHtml(item.name)}</strong>
+            <strong style="color:var(--text-primary);">[${escapeHtml(item.floor)}] ${escapeHtml(item.name)}</strong>
           </div>
-          <div style="font-size:11px;color:#94a3b8;">规格：${escapeHtml(item.spec)}</div>
-          <div style="font-size:11px;color:#cbd5e1;">材料：${escapeHtml(item.material)}</div>
-          <div style="font-size:11px;color:#cbd5e1;">五金：${escapeHtml(item.hardware)}</div>
-          <div style="font-size:11px;color:#cbd5e1;">工艺：${escapeHtml(item.craft)}</div>
-          ${canSeePrice && item.totalPrice != null ? `
-            <div style="font-size:11px;color:#6ee7b7;font-weight:600;margin-top:2px;">
-              材料单价 ¥${item.unitPrice} · 人工费 ¥${item.laborFee} · 预估总价 ¥${item.totalPrice}
+          <div style="font-size:11px;color:var(--text-secondary);">规格：${escapeHtml(item.spec)}</div>
+          <div style="font-size:11px;color:var(--text-primary);">材料：${escapeHtml(item.material)}</div>
+          <div style="font-size:11px;color:var(--text-primary);">五金：${escapeHtml(item.hardware)}</div>
+          <div style="font-size:11px;color:var(--text-primary);">工艺：${escapeHtml(item.craft)}</div>
+          ${showPrice && item.totalPrice != null ? `
+            <div style="font-size:11.5px;color:#6EE7B7;font-weight:600;font-family:var(--font-mono);margin-top:2px;">
+              单价 ¥${item.unitPrice} · 人工 ¥${item.laborFee} · 预估总价 ¥${item.totalPrice}
             </div>` : `
-            <div style="font-size:10px;color:#f59e0b;margin-top:2px;">价格已加密隐藏（仅客户可见）</div>`}
+            <div style="font-size:10.5px;color:#FDE047;margin-top:2px;">价格已加密隐藏（仅客户及总监可见）</div>`}
           <div class="card-actions">
-            ${links.taobao ? `<a href="${escapeHtml(links.taobao)}" target="_blank" rel="noopener" class="mini-btn" style="text-decoration:none;">淘宝搜同款</a>` : ''}
-            ${links.jd ? `<a href="${escapeHtml(links.jd)}" target="_blank" rel="noopener" class="mini-btn" style="text-decoration:none;">京东搜同款</a>` : ''}
-            ${links['1688'] ? `<a href="${escapeHtml(links['1688'])}" target="_blank" rel="noopener" class="mini-btn" style="text-decoration:none;">1688找工厂</a>` : ''}
+            ${links.taobao ? `<a href="${escapeHtml(links.taobao)}" target="_blank" rel="noopener" class="mini-btn">淘宝搜同款</a>` : ''}
+            ${links.jd ? `<a href="${escapeHtml(links.jd)}" target="_blank" rel="noopener" class="mini-btn">京东搜同款</a>` : ''}
+            ${links['1688'] ? `<a href="${escapeHtml(links['1688'])}" target="_blank" rel="noopener" class="mini-btn">1688找工厂</a>` : ''}
           </div>`;
         box.appendChild(card);
       }
     }
 
-    // @Mention Autocomplete on Chat Input
+    // @Mention Autocomplete
     const chatInputEl = document.getElementById('chat-input');
     const mentionPopup = document.getElementById('mention-popup');
     chatInputEl?.addEventListener('input', () => {
@@ -1545,12 +2156,12 @@
       mentionPopup.style.display = 'block';
     });
 
-    // Parametric 3D Asset Builder + Tiled Texture Support + Base Sync
+    // Parametric 3D Asset Builder + Tiled Texture Support
     function buildAssetGroupFromSpec(spec, pos, rotY = 0) {
       const g = new THREE.Group();
-      const w = (spec.widthMm || 600) * 0.001;
-      const d = (spec.depthMm || 500) * 0.001;
-      const h = (spec.heightMm || 800) * 0.001;
+      const w = (spec.widthMm || 600) / 1000.0;
+      const d = (spec.depthMm || 500) / 1000.0;
+      const h = (spec.heightMm || 800) / 1000.0;
       const mat = new THREE.MeshStandardMaterial({ color: spec.color || '#d8c8a8', roughness: 0.42, metalness: 0.12 });
       const addPart = (pw, ph, pd, px, py, pz, m = mat) => {
         const mesh = new THREE.Mesh(new THREE.BoxGeometry(pw, ph, pd), m);
@@ -1609,8 +2220,9 @@
         tex.wrapT = THREE.RepeatWrapping;
         const box = new THREE.Box3().setFromObject(mesh);
         const sz = new THREE.Vector3(); box.getSize(sz);
-        const rep = Math.max(1, Math.round(Math.max(sz.x, sz.z) * 1.2));
-        tex.repeat.set(rep, rep);
+        const repX = Math.max(1, Math.round(Math.max(sz.x, sz.z)));
+        const repY = Math.max(1, Math.round(Math.max(sz.y, sz.z)));
+        tex.repeat.set(repX, repY);
         mesh.material = mesh.material ? mesh.material.clone() : new THREE.MeshStandardMaterial();
         mesh.material.map = tex;
         mesh.material.needsUpdate = true;
@@ -1674,9 +2286,9 @@
     });
 
     document.getElementById('apply-tex-btn')?.addEventListener('click', async () => {
-      if (!selectedMesh) { alert('请先在 3D 画面中点击选中一个构件表面'); return; }
+      if (!selectedMesh) { showToast('请先在 3D 画面中点击选中一个构件表面'); return; }
       const imgDataUrl = await readSelectedImageDataUrl();
-      if (!imgDataUrl) { alert('请先选择要贴图的图片'); return; }
+      if (!imgDataUrl) { showToast('请先在上方选择要原样平铺的图片'); return; }
       const res = await fetch(`${API_BASE}/api/generate_asset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1715,7 +2327,7 @@
     document.getElementById('draft-submit-btn')?.addEventListener('click', () => {
       if (!draftAsset) return;
       const reason = document.getElementById('draft-reason-input').value.trim();
-      if (!reason) { alert('提交给项目总监前，请填写修改/放置原因'); return; }
+      if (!reason) { showToast('提交给项目总监前，请填写修改/放置原因'); return; }
       const payload = draftAsset.action === 'add_3d_asset'
         ? { spec: draftAsset.spec, pos: draftAsset.pos, rotY: draftAsset.rotY }
         : { meshName: draftAsset.meshName, imageUrl: draftAsset.imageUrl };
@@ -1725,11 +2337,119 @@
       draftAsset = null;
       showDraftBox();
       activateTab('versions');
+      showToast('已保存个人版本并提交总监审批');
     });
 
-    // Raycasting: Live 3D Cursor Sync + Peek-Drag Spring-Back + Cabinet Door Toggle + Tape Measure + Click Actions
+    // =======================================================================
+    // FIXED PHYSICS: IN-PLACE DOOR HINGE/DRAWER + GUARANTEED PEEK SPRING-BACK
+    // =======================================================================
+    function removeMeshFromAnims(list, mesh) {
+      for (let i = list.length - 1; i >= 0; i--) {
+        if (list[i].mesh === mesh) list.splice(i, 1);
+      }
+    }
+
+    function toggleMeshInteract(mesh) {
+      if (!mesh) return;
+      if (isStructuralMesh(mesh)) {
+        showToast('建筑墙体/楼板无需开合，请使用「拖动透视」临时移开查看内部');
+        return;
+      }
+      mesh.updateMatrixWorld(true);
+      const n = (mesh.name || '').toLowerCase();
+      const isDrawer = n.includes('drw') || n.includes('drawer');
+      const isDoor = n.includes('door') || n.includes('leaf') || n.includes('slant');
+
+      // Ensure immutable true closed rest transform
+      if (!mesh.userData._interactBasePos) {
+        mesh.userData._interactBasePos = (mesh.userData._peekOrigin || mesh.position).clone();
+        mesh.userData._interactBaseQuat = mesh.quaternion.clone();
+        mesh.userData._curDoorDelta = 0;
+        mesh.userData._curSlide = 0;
+      }
+
+      // If currently spring-animating from peek-drag, cancel cleanly and reset to pre-peek pose before hinging
+      removeMeshFromAnims(springAnimations, mesh);
+      removeMeshFromAnims(doorAnimations, mesh);
+      if ((mesh.userData._curDoorDelta || 0) === 0 && (mesh.userData._curSlide || 0) === 0) {
+        mesh.position.copy(mesh.userData._interactBasePos);
+        mesh.quaternion.copy(mesh.userData._interactBaseQuat);
+        mesh.updateMatrixWorld(true);
+      }
+
+      const opened = !mesh.userData._opened;
+      mesh.userData._opened = opened;
+
+      const parent = mesh.parent;
+      if (parent) parent.updateMatrixWorld(true);
+
+      // Compute world bounding box at rest or current orientation
+      const wbox = new THREE.Box3().setFromObject(mesh);
+      const wsz = new THREE.Vector3();
+      const wctr = new THREE.Vector3();
+      wbox.getSize(wsz);
+      wbox.getCenter(wctr);
+
+      if (isDrawer) {
+        const slideWorld = wsz.x < wsz.z ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1);
+        const toCam = camera.position.clone().sub(wctr);
+        toCam.y = 0;
+        if (toCam.lengthSq() > 1e-6 && slideWorld.dot(toCam) < 0) slideWorld.negate();
+        slideWorld.multiplyScalar(0.26);
+
+        let slideParent = slideWorld.clone();
+        if (parent) {
+          const pA = parent.worldToLocal(wctr.clone());
+          const pB = parent.worldToLocal(wctr.clone().add(slideWorld));
+          slideParent = pB.sub(pA);
+        }
+        doorAnimations.push({
+          mesh,
+          kind: 'drawer',
+          basePos: mesh.userData._interactBasePos.clone(),
+          baseQuat: mesh.userData._interactBaseQuat.clone(),
+          slideParent,
+          startSlide: mesh.userData._curSlide || 0,
+          endSlide: opened ? 1 : 0,
+          t: 0,
+          duration: 0.34,
+        });
+      } else {
+        if (!mesh.userData._hingePivotParent || !mesh.userData._hingeAxisParent) {
+          // Determine hinge edge strictly in world space around the mesh's own edge, then convert to parent space
+          const hingeWorld = wsz.x >= wsz.z
+            ? new THREE.Vector3(wbox.min.x, wctr.y, wctr.z)
+            : new THREE.Vector3(wctr.x, wctr.y, wbox.min.z);
+          const pivotParent = parent ? parent.worldToLocal(hingeWorld.clone()) : hingeWorld.clone();
+          let axisParent = new THREE.Vector3(0, 1, 0);
+          if (parent) {
+            const p0 = parent.worldToLocal(wctr.clone());
+            const p1 = parent.worldToLocal(wctr.clone().add(new THREE.Vector3(0, 1, 0)));
+            axisParent = p1.sub(p0).normalize();
+          }
+          mesh.userData._hingePivotParent = pivotParent;
+          mesh.userData._hingeAxisParent = axisParent;
+        }
+        const targetAngle = opened ? (isDoor ? Math.PI * 0.42 : Math.PI * 0.25) : 0;
+        doorAnimations.push({
+          mesh,
+          kind: 'hinge',
+          basePos: mesh.userData._interactBasePos.clone(),
+          baseQuat: mesh.userData._interactBaseQuat.clone(),
+          pivotParent: mesh.userData._hingePivotParent.clone(),
+          axisParent: mesh.userData._hingeAxisParent.clone(),
+          startDelta: mesh.userData._curDoorDelta || 0,
+          endDelta: targetAngle,
+          t: 0,
+          duration: 0.38,
+        });
+      }
+      updateObjectContextBarUI();
+    }
+
+    // Raycasting & Pointer Handlers
     const raycaster = new THREE.Raycaster();
-    const pointerDown = { x: 0, y: 0 };
+    const pointerDown = { x: 0, y: 0, time: 0 };
     let lastCursorSent = 0;
     let peekDrag = null;
     const _dragPlane = new THREE.Plane();
@@ -1742,15 +2462,49 @@
       return raycaster.intersectObjects(targets, true).filter((h) => h.object.visible);
     }
 
-    renderer.domElement.addEventListener('pointermove', (e) => {
-      if (peekDrag && toolMode === 'peek') {
+    function finishPeekDrag() {
+      if (!peekDrag) return;
+      const m = peekDrag.mesh;
+      const target = (m.userData._peekOrigin || peekDrag.dragStartLocalPos).clone();
+      try { renderer.domElement.releasePointerCapture(peekDrag.pointerId); } catch (_) {}
+      removeMeshFromAnims(springAnimations, m);
+      springAnimations.push({
+        mesh: m,
+        startPos: m.position.clone(),
+        targetPos: target,
+        t: 0,
+        duration: 0.35,
+      });
+      peekDrag = null;
+      controls.enabled = true;
+      renderer.domElement.style.cursor = toolMode === 'peek' ? 'grab' : '';
+    }
+
+    window.addEventListener('pointermove', (e) => {
+      if (peekDrag) {
+        if ((e.buttons & 1) === 0 && e.pointerType === 'mouse') {
+          finishPeekDrag();
+          return;
+        }
         const ndc = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
         raycaster.setFromCamera(ndc, camera);
         if (raycaster.ray.intersectPlane(_dragPlane, _dragHit)) {
-          peekDrag.mesh.position.copy(peekDrag.origPos).add(_dragHit).sub(peekDrag.startHit);
+          const worldDelta = _dragHit.clone().sub(peekDrag.startHit);
+          if (worldDelta.length() > 2.2) worldDelta.setLength(2.2);
+          const parent = peekDrag.mesh.parent;
+          if (parent) {
+            parent.updateMatrixWorld(true);
+            const localStart = parent.worldToLocal(peekDrag.startHit.clone());
+            const localEnd = parent.worldToLocal(peekDrag.startHit.clone().add(worldDelta));
+            peekDrag.mesh.position.copy(peekDrag.dragStartLocalPos).add(localEnd).sub(localStart);
+          } else {
+            peekDrag.mesh.position.copy(peekDrag.dragStartLocalPos).add(worldDelta);
+          }
         }
         return;
       }
+
+      if (e.target !== renderer.domElement) return;
       const hits = raycastModel(e.clientX, e.clientY);
       const now = performance.now();
 
@@ -1793,69 +2547,63 @@
     renderer.domElement.addEventListener('pointerdown', (e) => {
       pointerDown.x = e.clientX;
       pointerDown.y = e.clientY;
+      pointerDown.time = performance.now();
       if (followingUserId) { followingUserId = null; renderRoster(); }
       if (toolMode === 'peek' && e.button === 0) {
         const hits = raycastModel(e.clientX, e.clientY);
         if (hits.length > 0) {
           const hit = hits[0];
+          const mesh = hit.object;
+          removeMeshFromAnims(springAnimations, mesh);
+          if (!mesh.userData._peekOrigin) {
+            mesh.userData._peekOrigin = mesh.position.clone();
+          }
           const camDir = new THREE.Vector3();
           camera.getWorldDirection(camDir);
           _dragPlane.setFromNormalAndCoplanarPoint(camDir, hit.point);
           controls.enabled = false;
           peekDrag = {
-            mesh: hit.object,
-            origPos: hit.object.userData._origPos ? hit.object.userData._origPos.clone() : hit.object.position.clone(),
+            mesh,
+            dragStartLocalPos: mesh.position.clone(),
             startHit: hit.point.clone(),
+            pointerId: e.pointerId,
           };
-          if (!hit.object.userData._origPos) hit.object.userData._origPos = hit.object.position.clone();
+          selectedMesh = mesh;
+          lastClickedHit = hit;
+          updateObjectContextBarUI();
+          try { renderer.domElement.setPointerCapture(e.pointerId); } catch (_) {}
           renderer.domElement.style.cursor = 'grabbing';
         }
       }
     });
 
-    renderer.domElement.addEventListener('pointerup', (e) => {
+    window.addEventListener('pointerup', (e) => {
       if (peekDrag) {
-        springAnimations.push({ mesh: peekDrag.mesh, targetPos: peekDrag.origPos.clone(), t: 0 });
-        peekDrag = null;
-        controls.enabled = true;
-        renderer.domElement.style.cursor = toolMode === 'peek' ? 'grab' : '';
+        finishPeekDrag();
         return;
       }
+      if (e.target !== renderer.domElement) return;
       if (e.button === 2 && toolMode === 'measure' && measureStart) { cancelMeasureDraft(); return; }
       const dist = Math.hypot(e.clientX - pointerDown.x, e.clientY - pointerDown.y);
-      if (dist > 5) return;
+      if (dist > 6) return;
 
       const hits = raycastModel(e.clientX, e.clientY);
-      const hud = document.getElementById('inspect-info');
       if (hits.length === 0) {
-        if (toolMode === 'orbit') hud.textContent = '未选中构件';
+        if (toolMode === 'orbit') {
+          selectedMesh = null;
+          lastClickedHit = null;
+          updateObjectContextBarUI();
+        }
         return;
       }
 
       const hit = hits[0];
-      const mesh = hit.object;
-      selectedMesh = mesh;
-      const box = new THREE.Box3().setFromObject(mesh);
-      const sz = new THREE.Vector3();
-      box.getSize(sz);
-      hud.textContent = `${mesh.name || '(未命名)'} · ${Math.round(sz.x * 1000)} × ${Math.round(sz.z * 1000)} × ${Math.round(sz.y * 1000)} mm`;
+      selectedMesh = hit.object;
+      lastClickedHit = hit;
+      updateObjectContextBarUI();
 
       if (toolMode === 'interact') {
-        const n = (mesh.name || '').toLowerCase();
-        const isDrawer = n.includes('drw') || n.includes('drawer');
-        const isDoor = n.includes('door') || n.includes('leaf') || n.includes('slant');
-        if (!mesh.userData._basePos) mesh.userData._basePos = mesh.position.clone();
-        if (!mesh.userData._baseRotY) mesh.userData._baseRotY = mesh.rotation.y;
-        const opened = !mesh.userData._opened;
-        mesh.userData._opened = opened;
-        if (isDrawer) {
-          const targetPos = mesh.userData._basePos.clone().add(new THREE.Vector3(0, 0, opened ? 0.28 : 0));
-          doorAnimations.push({ mesh, targetPos, targetRotY: mesh.userData._baseRotY, t: 0 });
-        } else {
-          const angle = opened ? (isDoor ? Math.PI * 0.42 : Math.PI * 0.22) : 0;
-          doorAnimations.push({ mesh, targetPos: mesh.userData._basePos.clone(), targetRotY: mesh.userData._baseRotY + angle, t: 0 });
-        }
-        hud.textContent += opened ? ' [已开启]' : ' [已闭合]';
+        toggleMeshInteract(hit.object);
       } else if (toolMode === 'pin') {
         openPinPopover(e.clientX, e.clientY, hit);
       } else if (toolMode === 'measure') {
@@ -1866,7 +2614,7 @@
           draftPointA.visible = true;
           draftLineGeo.setFromPoints([measureStart, measureStart]);
           draftLine.visible = true;
-          hud.textContent = `已设起点 (${measureStart.x.toFixed(2)}, ${(-measureStart.z).toFixed(2)}, ${measureStart.y.toFixed(2)})，请点击终点`;
+          showToast('已设量尺起点，请点击终点位置');
         } else {
           const endPt = applyOrthoShift(measureStart, hit.point, e.shiftKey);
           const payload = {
@@ -1880,9 +2628,177 @@
           };
           cancelMeasureDraft();
           sendCollabEvent(payload);
+          setCollabOpen(true);
           activateTab('measures');
         }
       }
+    });
+
+    window.addEventListener('pointercancel', finishPeekDrag);
+    window.addEventListener('blur', finishPeekDrag);
+
+    // Contextual Object Action Bar Event Wiring
+    document.getElementById('ctx-btn-close').addEventListener('click', () => {
+      selectedMesh = null;
+      lastClickedHit = null;
+      if (toolMode === 'peek') setToolMode('orbit');
+      updateObjectContextBarUI();
+    });
+    document.getElementById('ctx-btn-peek').addEventListener('click', () => {
+      setToolMode(toolMode === 'peek' ? 'orbit' : 'peek');
+    });
+    document.getElementById('ctx-btn-interact').addEventListener('click', () => {
+      if (selectedMesh) toggleMeshInteract(selectedMesh);
+    });
+    document.getElementById('ctx-btn-pin').addEventListener('click', () => {
+      if (!selectedMesh || !lastClickedHit) return;
+      openPinPopover(window.innerWidth * 0.5 - 140, window.innerHeight - 310, lastClickedHit);
+    });
+    document.getElementById('ctx-btn-tex').addEventListener('click', () => {
+      setCollabOpen(true);
+      activateTab('create');
+      showToast('请在右侧上传图片后点击「原样平铺到选中面」');
+    });
+    document.getElementById('ctx-btn-ask').addEventListener('click', () => {
+      if (!selectedMesh) return;
+      const fk = detectFloor(selectedMesh);
+      const q = `请介绍 ${fk ? fk + ' ' : ''}${selectedMesh.name || '此构件'} 的尺寸、材料工艺及注意事项`;
+      document.getElementById('house-qa-input').value = q;
+      submitHouseQuestion(q, selectedMesh.name || '', fk);
+    });
+
+    // =======================================================================
+    // BOTTOM SMART HOUSE Q&A BAR (Backend /api/ask + Offline Fallback)
+    // =======================================================================
+    let currentQaPresetId = null;
+    const qaInput = document.getElementById('house-qa-input');
+    const qaSugg = document.getElementById('house-qa-suggestions');
+    const qaAnswerBox = document.getElementById('house-qa-answer');
+
+    qaInput.addEventListener('focus', () => {
+      if (!qaInput.value.trim()) qaSugg.classList.add('open');
+    });
+    qaInput.addEventListener('input', () => {
+      qaSugg.classList.toggle('open', !qaInput.value.trim() && document.activeElement === qaInput);
+    });
+    qaInput.addEventListener('blur', () => {
+      setTimeout(() => qaSugg.classList.remove('open'), 160);
+    });
+    document.querySelectorAll('.qa-sugg-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const q = btn.dataset.q || btn.textContent;
+        qaInput.value = q;
+        qaSugg.classList.remove('open');
+        submitHouseQuestion(q);
+      });
+    });
+    document.getElementById('qa-close-btn').addEventListener('click', () => {
+      qaAnswerBox.classList.remove('open');
+    });
+    document.getElementById('qa-jump-btn').addEventListener('click', () => {
+      if (currentQaPresetId) jumpToPresetById(currentQaPresetId);
+    });
+
+    function localHouseAnswer(q, selName = '', fk = '') {
+      const ql = `${q} ${fk} ${selName}`.toLowerCase();
+      const showPrice = canUserSeePrice();
+      let presetId = 'overview';
+      let presetName = '全屋鸟瞰';
+      const blocks = [];
+      const hl = [];
+
+      if (/(b1|夹层|负一|净高|板厚|15cm|1\.9|书柜|鱼池)/.test(ql)) {
+        presetId = 'b1_site_room'; presetName = 'B1 负一楼实景书柜(图3)';
+        blocks.push('【B1 夹层与柜体】B1 夹层净高 1.90 m，楼板厚 15 cm（150 mm），清玻护栏无金边；北墙闭门白柜 5110×320×1880 mm（含 6 处斜板灯带），鱼池下黑金矮柜 2440×300×870 mm。');
+        hl.push({ label: 'B1 净高/板厚', value: '1.90 m / 15 cm' });
+      }
+      if (/(楼梯|旋转|踏步|镂空|扶手|悬空)/.test(ql)) {
+        presetId = 'b1_stairs_junction'; presetName = 'B1↔1F & B1↔B2 双楼梯衔接';
+        blocks.push('【双楼梯结构】1F→B1 旋转楼梯贴西墙与北墙稳固锚固，踏步宽 930 mm 平行 TV 墙起步、落于 B1 西北沿；B1→B2 悬空弧梯从 B1 夹层锚入，踏步下全镂空，右侧香槟金钢板 / 左侧无边清玻。');
+        hl.push({ label: '双梯工艺', value: '左清玻右金板·下全镂空' });
+      }
+      if (/(b2|负二|地下室|电视|水波纹|瓷砖|鱼肚白|鞋柜|狮子|酒架|麻将|健身)/.test(ql)) {
+        presetId = 'b2_b1_lounge'; presetName = 'B2+B1 挑空地下室';
+        blocks.push('【B2 地下室】灰白鱼肚白 800×800 瓷砖；电视墙突出 15 cm 且底部弧弯空心、上方水光灯照射；十字鞋柜离地减半至 175 mm 配石狮子；铝管搭建红酒架；茶座区改放麻将桌、原区放健身器材。');
+        hl.push({ label: 'TV 墙/鞋柜', value: '突出15cm / 离地175mm' });
+      }
+      if (/(1f|一层|一楼|餐边柜|门檐|1\.2|藻井|客卫|隐形门)/.test(ql)) {
+        presetId = '1f_dining'; presetName = '1F 餐厅餐边柜 & 夹丝玻璃';
+        blocks.push('【1F 一层】飞檐斗拱餐边柜门檐下净宽 1.20 m，两侧玻璃门到倒数第二格底板（1.50 m），配宋氏桌椅与立体盘凤藻井；已去掉多余横梁并改纯白帕斯卡隐形门。');
+        hl.push({ label: '门檐净宽', value: '1.20 m' });
+      }
+      if (/(2f|二层|二楼|主卧|次卧|床尾柜|45cm|60cm|格栅|10cm)/.test(ql)) {
+        presetId = '2f_mbr_wardrobe'; presetName = '2F 主卧床尾柜 (白影木)';
+        blocks.push('【2F 卧室】主卧床尾柜左深 45 cm、右深 60 cm（北墙右内陷）；次卧柜深 30 cm，波浪格栅厚 10 cm。');
+        hl.push({ label: '主卧/次卧深', value: '45/60 cm · 次卧30/10 cm' });
+      }
+      if (/(造价|价格|报价|预算|多少钱|费用|人工|材料|五金|bom)/.test(ql)) {
+        if (showPrice) {
+          const sum = bomItemsList.reduce((acc, it) => acc + (Number(it.totalPrice) || 0), 0) || 197050;
+          blocks.push(`【全屋造价参考】当前已录入 8 大核心定制及结构项预估合计 ¥${sum.toLocaleString()}（含材料、五金与人工费，可在「开始协作 → 造价」按项比价）。`);
+          hl.push({ label: '全屋预估总价', value: `¥${sum.toLocaleString()}` });
+        } else {
+          blocks.push('【权限提示】当前身份为供应商，全屋造价与人工费仅对「客户/业主」与「项目总监」开放，已隐藏价格列；支持查阅材料、五金与施工工艺标准。');
+        }
+      }
+      if (blocks.length === 0) {
+        blocks.push(`这是 4 层当代中式精装宅邸（Base v${baseVersion}），包含 B2/B1/1F/2F 精确家具与结构模型。支持询问夹层净高（1.9m/15cm）、双楼梯结构、餐边柜与卧室尺寸、材料工艺或全屋造价。`);
+      }
+      return { ok: true, answer: blocks.join('\n\n'), highlights: hl, presetId, presetName, priceHidden: !showPrice };
+    }
+
+    function renderQaResult(question, data) {
+      document.getElementById('qa-question-echo').textContent = question.length > 36 ? question.slice(0, 36) + '…' : question;
+      document.getElementById('qa-answer-text').textContent = data.answer || '';
+      const chipsEl = document.getElementById('qa-highlights');
+      chipsEl.innerHTML = '';
+      for (const h of (data.highlights || [])) {
+        const span = document.createElement('span');
+        span.className = 'qa-chip';
+        span.innerHTML = `${escapeHtml(h.label)}<strong>${escapeHtml(h.value)}</strong>`;
+        chipsEl.appendChild(span);
+      }
+      const privEl = document.getElementById('qa-privacy-note');
+      privEl.textContent = data.priceHidden ? '价格已按当前角色隐私保护' : `当前视角：${currentUser?.role || '客户/业主'}`;
+
+      const jumpBtn = document.getElementById('qa-jump-btn');
+      if (data.presetId && data.presetId !== 'overview') {
+        currentQaPresetId = data.presetId;
+        document.getElementById('qa-jump-txt').textContent = `定位到 ${data.presetName || '该空间'}`;
+        jumpBtn.style.display = 'inline-flex';
+      } else {
+        currentQaPresetId = null;
+        jumpBtn.style.display = 'none';
+      }
+      qaAnswerBox.classList.add('open');
+    }
+
+    async function submitHouseQuestion(rawText, meshOverride = '', floorOverride = '') {
+      const q = (rawText || '').trim();
+      if (!q) return;
+      qaSugg.classList.remove('open');
+      const role = currentUser?.role || '客户/业主';
+      const selName = meshOverride || selectedMesh?.name || '';
+      const fk = floorOverride || (selectedMesh ? detectFloor(selectedMesh) : '');
+      try {
+        const res = await fetch(`${API_BASE}/api/ask`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: q, role, selectedMesh: selName, floor: fk }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        renderQaResult(q, data);
+      } catch (_) {
+        renderQaResult(q, localHouseAnswer(q, selName, fk));
+      }
+    }
+
+    document.getElementById('house-qa-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const q = qaInput.value.trim();
+      if (!q) return;
+      submitHouseQuestion(q);
     });
 
     // Camera Broadcast for Follow Mode
@@ -1902,30 +2818,58 @@
     }
 
     // Login Modal Initialization
-    let selectedRole = '业主';
+    let selectedRole = '客户/业主';
     let selectedColor = USER_COLORS[0];
+    let lastModalOpener = null;
     const colorRow = document.getElementById('color-row');
     USER_COLORS.forEach((hex, idx) => {
-      const dot = document.createElement('span');
+      const dot = document.createElement('button');
+      dot.type = 'button';
       dot.className = 'color-dot' + (idx === 0 ? ' active' : '');
       dot.style.background = hex;
+      dot.setAttribute('aria-label', `选择指针颜色 ${hex}`);
+      dot.setAttribute('aria-pressed', String(idx === 0));
       dot.addEventListener('click', () => {
         selectedColor = hex;
-        colorRow.querySelectorAll('.color-dot').forEach((d) => d.classList.toggle('active', d === dot));
+        colorRow.querySelectorAll('.color-dot').forEach((d) => {
+          const act = d === dot;
+          d.classList.toggle('active', act);
+          d.setAttribute('aria-pressed', String(act));
+        });
       });
       colorRow.appendChild(dot);
     });
     document.querySelectorAll('#role-pills .role-pill').forEach((pill) => {
       pill.addEventListener('click', () => {
         selectedRole = pill.dataset.role;
-        document.querySelectorAll('#role-pills .role-pill').forEach((p) => p.classList.toggle('active', p === pill));
+        document.querySelectorAll('#role-pills .role-pill').forEach((p) => {
+          const act = p === pill;
+          p.classList.toggle('active', act);
+          p.setAttribute('aria-pressed', String(act));
+        });
       });
     });
 
-    function finishLogin(name, role, color) {
-      currentUser = { name: name || '协作者', role: role || '业主', color: color || USER_COLORS[0] };
-      localStorage.setItem('house3d_profile', JSON.stringify(currentUser));
+    function openLoginModal(openerEl = null) {
+      lastModalOpener = openerEl;
+      document.getElementById('login-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('login-name').focus(), 30);
+    }
+    function closeLoginModal() {
       document.getElementById('login-modal').classList.add('hidden');
+      if (lastModalOpener && typeof lastModalOpener.focus === 'function') {
+        lastModalOpener.focus();
+      }
+      lastModalOpener = null;
+    }
+
+    function finishLogin(name, role, color) {
+      currentUser = { name: name || '协作者', role: role || '客户/业主', color: color || USER_COLORS[0] };
+      localStorage.setItem('house3d_profile', JSON.stringify(currentUser));
+      closeLoginModal();
+      updateBriefSummary();
+      renderBomTab();
+      renderVersionsTab();
       connectCollab();
     }
 
@@ -1935,12 +2879,20 @@
         document.getElementById('login-name').value = saved.name;
         if (saved.role) {
           selectedRole = saved.role;
-          document.querySelectorAll('#role-pills .role-pill').forEach((p) => p.classList.toggle('active', p.dataset.role === selectedRole));
+          document.querySelectorAll('#role-pills .role-pill').forEach((p) => {
+            const act = p.dataset.role === selectedRole;
+            p.classList.toggle('active', act);
+            p.setAttribute('aria-pressed', String(act));
+          });
         }
         if (saved.color) {
           selectedColor = saved.color;
           const idx = USER_COLORS.indexOf(selectedColor);
-          if (idx >= 0) colorRow.querySelectorAll('.color-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+          if (idx >= 0) colorRow.querySelectorAll('.color-dot').forEach((d, i) => {
+            const act = i === idx;
+            d.classList.toggle('active', act);
+            d.setAttribute('aria-pressed', String(act));
+          });
         }
       }
     } catch (_) {}
@@ -1952,17 +2904,17 @@
     document.getElementById('login-name').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') document.getElementById('login-submit-btn').click();
     });
-    document.getElementById('switch-user-btn').addEventListener('click', () => {
-      document.getElementById('login-modal').classList.remove('hidden');
-      setTimeout(() => document.getElementById('login-name').focus(), 30);
-    });
+    document.getElementById('switch-user-btn').addEventListener('click', (e) => openLoginModal(e.currentTarget));
+    document.getElementById('brief-switch-btn').addEventListener('click', (e) => openLoginModal(e.currentTarget));
 
     const urlName = URL_PARAMS.get('name');
     if (urlName) {
-      finishLogin(urlName.trim(), URL_PARAMS.get('role') || '业主', URL_PARAMS.get('color') || USER_COLORS[1]);
+      finishLogin(urlName.trim(), URL_PARAMS.get('role') || '客户/业主', URL_PARAMS.get('color') || USER_COLORS[0]);
+    } else {
+      updateBriefSummary();
     }
 
-    // Keyboard WASD/QE walk controls + mode hotkeys (guarded when typing!)
+    // Keyboard WASD/QE Navigation + Escape + Hotkeys
     const keys = new Set();
     function isTyping() {
       const el = document.activeElement;
@@ -1970,7 +2922,17 @@
       return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
     }
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { closePinPopover(); cancelMeasureDraft(); return; }
+      if (e.key === 'Escape') {
+        finishPeekDrag();
+        closePinPopover();
+        cancelMeasureDraft();
+        closeViewPopover();
+        closeGoalPopover();
+        if (!document.getElementById('login-modal').classList.contains('hidden') && currentUser) {
+          closeLoginModal();
+        }
+        return;
+      }
       if (isTyping()) return;
       if (e.key === '1') { setToolMode('orbit'); return; }
       if (e.key === '2') { setToolMode('peek'); return; }
@@ -1987,7 +2949,6 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Project 3D world point to viewport pixel (returns null if behind camera)
     const _proj = new THREE.Vector3();
     function toScreen(vec3) {
       _proj.copy(vec3).project(camera);
@@ -2037,6 +2998,62 @@
       }
     }
 
+    // Read-only diagnostic hook for interactive regression verification
+    window.__house3dDebug = {
+      state: () => ({
+        modelsLoaded,
+        baseVersion,
+        collabOpen: document.body.classList.contains('collab-open'),
+        toolMode,
+        selectedMeshName: selectedMesh?.name || null,
+        selectedOpened: !!selectedMesh?.userData?._opened,
+        peekActive: !!peekDrag,
+        springCount: springAnimations.length,
+        doorAnimCount: doorAnimations.length,
+        cameraPos: camera.position.toArray(),
+        controlsTarget: controls.target.toArray(),
+      }),
+      findInteractableScreenPoint: (pattern = 'door|slant|leaf|cab') => {
+        const re = new RegExp(pattern, 'i');
+        let best = null;
+        for (const [fk, grp] of Object.entries(floorGroups)) {
+          if (!grp.visible) continue;
+          grp.traverse((m) => {
+            if (!m.isMesh || !m.visible || isStructuralMesh(m) || !re.test(m.name || '')) return;
+            const b = new THREE.Box3().setFromObject(m);
+            const c = new THREE.Vector3();
+            b.getCenter(c);
+            const sc = toScreen(c);
+            if (!sc || sc.x < 40 || sc.x > window.innerWidth - 40 || sc.y < 80 || sc.y > window.innerHeight - 130) return;
+            const dist = c.distanceTo(camera.position);
+            if (!best || dist < best.dist) {
+              best = { floor: fk, name: m.name, dist, screen: sc, pos: m.position.toArray(), boxMin: b.min.toArray(), boxMax: b.max.toArray() };
+            }
+          });
+        }
+        return best;
+      },
+      getMeshMetrics: (name) => {
+        let out = null;
+        scene.traverse((m) => {
+          if (m.isMesh && m.name === name) {
+            const b = new THREE.Box3().setFromObject(m);
+            out = {
+              name: m.name,
+              pos: m.position.toArray(),
+              quat: m.quaternion.toArray(),
+              opened: !!m.userData._opened,
+              peekOrigin: m.userData._peekOrigin ? m.userData._peekOrigin.toArray() : null,
+              interactBasePos: m.userData._interactBasePos ? m.userData._interactBasePos.toArray() : null,
+              boxMin: b.min.toArray(),
+              boxMax: b.max.toArray(),
+            };
+          }
+        });
+        return out;
+      },
+    };
+
     const clock = new THREE.Clock();
     const forward = new THREE.Vector3();
     const right = new THREE.Vector3();
@@ -2074,23 +3091,38 @@
         }
       }
 
+      // Guaranteed Peek Spring-Back (easeOutCubic)
       for (let i = springAnimations.length - 1; i >= 0; i--) {
         const a = springAnimations[i];
-        a.t = Math.min(1, a.t + dt * 6.5);
-        a.mesh.position.lerp(a.targetPos, 0.32);
-        if (a.mesh.position.distanceTo(a.targetPos) < 0.002 || a.t >= 1) {
+        a.t = Math.min(1, a.t + dt / (a.duration || 0.35));
+        const ease = 1 - Math.pow(1 - a.t, 3);
+        a.mesh.position.lerpVectors(a.startPos, a.targetPos, ease);
+        if (a.t >= 1 || a.mesh.position.distanceTo(a.targetPos) < 0.001) {
           a.mesh.position.copy(a.targetPos);
           springAnimations.splice(i, 1);
         }
       }
+
+      // Exact In-Place Door Hinge / Drawer Slide Animation
       for (let i = doorAnimations.length - 1; i >= 0; i--) {
         const d = doorAnimations[i];
-        d.t = Math.min(1, d.t + dt * 4.5);
-        d.mesh.position.lerp(d.targetPos, 0.25);
-        d.mesh.rotation.y += (d.targetRotY - d.mesh.rotation.y) * 0.25;
+        d.t = Math.min(1, d.t + dt / (d.duration || 0.36));
+        const ease = 1 - Math.pow(1 - d.t, 3);
+        if (d.kind === 'drawer') {
+          const curSlide = THREE.MathUtils.lerp(d.startSlide, d.endSlide, ease);
+          d.mesh.position.copy(d.basePos).addScaledVector(d.slideParent, curSlide);
+          d.mesh.quaternion.copy(d.baseQuat);
+          d.mesh.userData._curSlide = curSlide;
+        } else {
+          const curDelta = THREE.MathUtils.lerp(d.startDelta, d.endDelta, ease);
+          const qRot = new THREE.Quaternion().setFromAxisAngle(d.axisParent, curDelta);
+          d.mesh.quaternion.copy(qRot).multiply(d.baseQuat);
+          const off = d.basePos.clone().sub(d.pivotParent).applyQuaternion(qRot);
+          d.mesh.position.copy(d.pivotParent).add(off);
+          d.mesh.userData._curDoorDelta = curDelta;
+        }
         if (d.t >= 1) {
-          d.mesh.position.copy(d.targetPos);
-          d.mesh.rotation.y = d.targetRotY;
+          d.mesh.userData._peekOrigin = d.mesh.position.clone();
           doorAnimations.splice(i, 1);
         }
       }
