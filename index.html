@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>4层家装 3D 实时协作设计与量尺平台</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three/build/three.module.js",
+      "three/addons/": "./vendor/three/examples/jsm/"
+    }
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #14171c; color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    }
+    #canvas-container { position: fixed; inset: 0; width: 100%; height: 100%; }
+    canvas { display: block; width: 100%; height: 100%; outline: none; }
+    canvas.tool-crosshair { cursor: crosshair; }
+
+    /* Top Collaboration Bar */
+    #collab-topbar {
+      position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+      max-width: calc(100vw - 24px);
+      background: rgba(15, 20, 28, 0.88);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px; padding: 7px 12px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+      z-index: 30; font-size: 12px;
+    }
+    .conn-pill { display: flex; align-items: center; gap: 6px; padding-right: 8px; border-right: 1px solid rgba(255,255,255,0.12); white-space: nowrap; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; }
+    .dot.ready { background: #10b981; }
+    .dot.error { background: #ef4444; }
+    .dot.ws-ok { background: #22d3ee; box-shadow: 0 0 8px #22d3ee; }
+
+    .mode-group { display: flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.06); padding: 3px; border-radius: 8px; }
+    .mode-btn {
+      border: none; background: transparent; color: #cbd5e1;
+      padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 500;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .mode-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .mode-btn.active { background: #0284c7; color: #fff; box-shadow: 0 2px 8px rgba(2,132,199,0.45); }
+    .mode-btn.pin-active { background: #d97706; color: #fff; box-shadow: 0 2px 8px rgba(217,119,6,0.45); }
+    .mode-btn.measure-active { background: #0d9488; color: #fff; box-shadow: 0 2px 8px rgba(13,148,136,0.45); }
+
+    .roster-row { display: flex; align-items: center; gap: 6px; max-width: 340px; overflow-x: auto; padding: 1px 0; }
+    .user-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 8px; border-radius: 999px; font-size: 11.5px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      cursor: pointer; white-space: nowrap; transition: all 0.15s; color: #e2e8f0;
+    }
+    .user-chip:hover { background: rgba(255,255,255,0.16); }
+    .user-chip.following { border-color: #38bdf8; background: rgba(56,189,248,0.22); color: #fff; }
+    .user-chip .swatch { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .top-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      color: #e2e8f0; padding: 4px 9px; border-radius: 7px; font-size: 11.5px; cursor: pointer; white-space: nowrap;
+    }
+    .top-btn:hover { background: rgba(255,255,255,0.16); }
+
+    /* Left Model Control Sidebar */
+    #sidebar {
+      position: fixed; top: 64px; left: 14px; width: 264px;
+      max-height: calc(100vh - 134px); overflow-y: auto;
+      background: rgba(18, 22, 29, 0.84);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      z-index: 20; transition: transform 0.22s ease;
+    }
+    #sidebar.collapsed { transform: translateX(calc(-100% + 42px)); }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .panel-title { font-size: 13.5px; font-weight: 600; }
+    .panel-toggle-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      color: #e2e8f0; border-radius: 6px; padding: 3px 8px; font-size: 11.5px; cursor: pointer;
+    }
+    .panel-toggle-btn:hover { background: rgba(255,255,255,0.16); }
+
+    .section { padding: 11px 13px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .section:last-child { border-bottom: none; }
+    .section-title { font-size: 11px; letter-spacing: 0.6px; color: #94a3b8; margin-bottom: 7px; font-weight: 600; }
+    .status-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1; }
+    .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+    .check-item { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; user-select: none; color: #e2e8f0; }
+    .check-item input { accent-color: #38bdf8; width: 14px; height: 14px; cursor: pointer; }
+    .check-full { grid-column: 1 / -1; margin-top: 3px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.1); }
+    .preset-list { display: flex; flex-direction: column; gap: 5px; }
+    .preset-btn {
+      width: 100%; text-align: left; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0;
+      padding: 6px 9px; border-radius: 7px; font-size: 12px; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    }
+    .preset-btn:hover { background: rgba(56,189,248,0.16); border-color: rgba(56,189,248,0.45); }
+    .preset-btn.active { background: rgba(56,189,248,0.24); border-color: #38bdf8; color: #fff; font-weight: 500; }
+
+    /* Right Collaborative Panel (Chat + Modification Pins + Measurements) */
+    #collab-panel {
+      position: fixed; top: 64px; right: 14px; width: 320px; height: calc(100vh - 116px);
+      display: flex; flex-direction: column;
+      background: rgba(18, 22, 29, 0.88);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.14); border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+      z-index: 22; transition: transform 0.22s ease; overflow: hidden;
+    }
+    #collab-panel.collapsed { transform: translateX(calc(100% + 20px)); }
+    .tab-bar { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); }
+    .tab-btn {
+      flex: 1; background: transparent; border: none; color: #94a3b8;
+      padding: 10px 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all 0.15s;
+    }
+    .tab-btn.active { color: #f8fafc; border-bottom-color: #38bdf8; background: rgba(56,189,248,0.08); }
+    .tab-body { flex: 1; overflow-y: auto; padding: 10px 12px; display: none; flex-direction: column; gap: 8px; }
+    .tab-body.active { display: flex; }
+
+    .chat-msg {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 9px; padding: 8px 10px; font-size: 12.5px; line-height: 1.45;
+    }
+    .chat-msg.pin-card {
+      border-color: rgba(245, 158, 11, 0.45); background: rgba(245, 158, 11, 0.11); cursor: pointer;
+    }
+    .chat-msg.pin-card:hover { background: rgba(245, 158, 11, 0.2); }
+    .chat-meta { display: flex; align-items: center; justify-content: space-between; font-size: 11px; margin-bottom: 3px; color: #94a3b8; }
+    .chat-author { font-weight: 600; display: flex; align-items: center; gap: 5px; }
+    .chat-text { color: #f1f5f9; word-break: break-word; }
+    .pin-jump-hint { margin-top: 4px; font-size: 11px; color: #fbbf24; display: flex; justify-content: space-between; }
+
+    .chat-input-bar {
+      display: flex; gap: 6px; padding: 9px 10px; border-top: 1px solid rgba(255,255,255,0.1);
+      background: rgba(10, 14, 20, 0.55);
+    }
+    .chat-input-bar input {
+      flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px; padding: 7px 10px; color: #fff; font-size: 12.5px; outline: none;
+    }
+    .chat-input-bar input:focus { border-color: #38bdf8; }
+    .send-btn {
+      background: #0284c7; border: none; color: #fff; border-radius: 8px;
+      padding: 0 12px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    }
+    .send-btn:hover { background: #0369a1; }
+
+    .list-card {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 9px; padding: 9px 10px; font-size: 12px; display: flex; flex-direction: column; gap: 5px;
+    }
+    .list-card-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .badge-status { font-size: 10.5px; padding: 2px 6px; border-radius: 999px; font-weight: 600; }
+    .badge-open { background: rgba(245,158,11,0.22); color: #fbbf24; }
+    .badge-resolved { background: rgba(16,185,129,0.22); color: #34d399; }
+    .card-actions { display: flex; gap: 6px; margin-top: 2px; }
+    .mini-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      color: #cbd5e1; border-radius: 5px; padding: 3px 7px; font-size: 11px; cursor: pointer;
+    }
+    .mini-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+    .mini-btn.danger:hover { background: rgba(239,68,68,0.28); border-color: #ef4444; }
+    .empty-hint { color: #64748b; font-size: 12px; text-align: center; padding: 24px 10px; line-height: 1.6; }
+
+    /* Bottom HUDs */
+    #inspect-hud {
+      position: fixed; bottom: 12px; left: 14px;
+      background: rgba(18, 22, 29, 0.84); backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
+      padding: 8px 12px; font-size: 12px; line-height: 1.45; color: #cbd5e1;
+      z-index: 15; max-width: 480px; pointer-events: none;
+    }
+    #inspect-hud .label { color: #94a3b8; font-size: 11px; }
+    #inspect-hud .val { color: #f8fafc; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    #help-hud {
+      position: fixed; bottom: 12px; right: 14px;
+      background: rgba(18, 22, 29, 0.78); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+      padding: 7px 11px; font-size: 11.5px; color: #94a3b8; z-index: 15; pointer-events: none;
+    }
+
+    /* Projected 3D Overlays (Remote Cursors, Pin Badges, Tape Measure Labels) */
+    #overlay-layer { position: fixed; inset: 0; pointer-events: none; z-index: 18; overflow: hidden; }
+    .remote-cursor-tag {
+      position: absolute; transform: translate(10px, -110%);
+      padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      color: #0f172a; white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,0.45);
+      border: 1.5px solid #fff; pointer-events: none;
+    }
+    .pin-3d-tag {
+      position: absolute; transform: translate(-50%, -125%);
+      padding: 3px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700;
+      color: #fff; white-space: nowrap; cursor: pointer; pointer-events: auto;
+      border: 1.5px solid rgba(255,255,255,0.9); box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transition: transform 0.12s;
+    }
+    .pin-3d-tag:hover { transform: translate(-50%, -135%) scale(1.08); }
+    .measure-3d-tag {
+      position: absolute; transform: translate(-50%, -50%);
+      background: rgba(10, 15, 24, 0.9); border: 1.5px solid #2dd4bf; color: #f8fafc;
+      padding: 4px 8px; border-radius: 7px; font-size: 11.5px; line-height: 1.3;
+      white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.55); pointer-events: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .measure-3d-tag .sub { font-size: 10px; color: #94a3b8; display: block; }
+    .measure-3d-del { margin-left: 6px; color: #fca5a5; cursor: pointer; font-weight: 700; }
+
+    /* Pin Comment Input Popover */
+    #pin-popover {
+      position: fixed; z-index: 40; width: 290px; display: none;
+      background: rgba(15, 20, 28, 0.96); backdrop-filter: blur(14px);
+      border: 1px solid #f59e0b; border-radius: 12px; padding: 12px;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.6);
+    }
+    #pin-popover .pop-head { font-size: 12px; font-weight: 600; color: #fbbf24; margin-bottom: 4px; }
+    #pin-popover .pop-loc { font-size: 11px; color: #94a3b8; margin-bottom: 8px; word-break: break-all; }
+    #pin-popover textarea {
+      width: 100%; height: 68px; resize: none; border-radius: 8px; padding: 8px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16);
+      color: #fff; font-size: 12.5px; outline: none; margin-bottom: 8px;
+    }
+    #pin-popover textarea:focus { border-color: #fbbf24; }
+    #pin-popover .pop-btns { display: flex; justify-content: flex-end; gap: 6px; }
+
+    /* Login Modal */
+    #login-modal {
+      position: fixed; inset: 0; z-index: 60;
+      background: rgba(8, 11, 16, 0.78); backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    #login-modal.hidden { display: none; }
+    .login-card {
+      width: 100%; max-width: 390px;
+      background: #141922; border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;
+      padding: 22px; box-shadow: 0 20px 50px rgba(0,0,0,0.65);
+    }
+    .login-card h2 { font-size: 17px; margin-bottom: 6px; }
+    .login-card p { font-size: 12.5px; color: #94a3b8; margin-bottom: 16px; line-height: 1.5; }
+    .field-lbl { font-size: 11.5px; color: #cbd5e1; margin-bottom: 6px; display: block; font-weight: 600; }
+    .login-input {
+      width: 100%; padding: 9px 12px; border-radius: 9px; margin-bottom: 14px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16);
+      color: #fff; font-size: 14px; outline: none;
+    }
+    .login-input:focus { border-color: #38bdf8; }
+    .role-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .role-pill {
+      padding: 5px 11px; border-radius: 999px; font-size: 12px; cursor: pointer;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: #cbd5e1;
+    }
+    .role-pill.active { background: rgba(56,189,248,0.22); border-color: #38bdf8; color: #fff; font-weight: 600; }
+    .color-row { display: flex; gap: 8px; margin-bottom: 18px; }
+    .color-dot {
+      width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: transform 0.12s;
+    }
+    .color-dot.active { border-color: #fff; transform: scale(1.16); box-shadow: 0 0 0 2px #0284c7; }
+    .login-submit {
+      width: 100%; padding: 10px; border-radius: 10px; border: none;
+      background: #0284c7; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .login-submit:hover { background: #0369a1; }
+
+    @media (max-width: 900px) {
+      #sidebar { width: 220px; }
+      #collab-panel { width: 275px; }
+      .roster-row { max-width: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div id="overlay-layer"></div>
+
+  <!-- Top Collaborative Bar -->
+  <header id="collab-topbar">
+    <div class="conn-pill">
+      <span id="ws-dot" class="dot"></span>
+      <span id="ws-status">未登录协作</span>
+    </div>
+    <div class="mode-group">
+      <button type="button" class="mode-btn active" data-mode="orbit" title="漫游/旋转查看 (快捷键 1)">漫游</button>
+      <button type="button" class="mode-btn" data-mode="peek" title="拖动任意物件移开查看内部，松手自动回原位 (快捷键 2)">拖动透视</button>
+      <button type="button" class="mode-btn" data-mode="interact" title="点击家具打开柜门或触发组件动作 (快捷键 3)">开关柜门</button>
+      <button type="button" class="mode-btn" data-mode="pin" title="点击模型任意处添加修改标注 (快捷键 4)">标注</button>
+      <button type="button" class="mode-btn" data-mode="measure" title="点击两点实时量尺寸 (快捷键 5)">量尺</button>
+    </div>
+    <div class="roster-row" id="user-roster"></div>
+    <button type="button" class="top-btn" id="switch-user-btn">切换身份</button>
+    <button type="button" class="top-btn" id="toggle-collab-btn">隐藏群聊</button>
+  </header>
+
+  <!-- Left Controls Sidebar -->
+  <aside id="sidebar">
+    <div class="panel-header">
+      <div class="panel-title">4层家装 3D 交互模型</div>
+      <button id="toggle-btn" class="panel-toggle-btn" type="button" title="收起/展开面板">收起</button>
+    </div>
+
+    <div class="section">
+      <div class="status-row">
+        <span id="status-dot" class="dot"></span>
+        <span id="status-text">加载中...</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">楼层显示 / 层级控制</div>
+      <div class="check-grid">
+        <label class="check-item"><input type="checkbox" data-floor="2F" checked /> 2F 二层</label>
+        <label class="check-item"><input type="checkbox" data-floor="1F" checked /> 1F 一层</label>
+        <label class="check-item"><input type="checkbox" data-floor="B1" checked /> B1 夹层</label>
+        <label class="check-item"><input type="checkbox" data-floor="B2" checked /> B2 地下室</label>
+        <label class="check-item check-full"><input type="checkbox" id="hide-ceilings" checked /> 隐藏吊顶 (Hide Ceilings)</label>
+        <label class="check-item check-full" style="border-top:none;margin-top:0;padding-top:2px;"><input type="checkbox" id="hide-walls" /> 隐藏四周墙壁 (Hide Walls)</label>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">房间视角预设</div>
+      <div class="preset-list" id="preset-list"></div>
+    </div>
+  </aside>
+
+  <!-- Right Collaborative Sidebar -->
+  <aside id="collab-panel" style="width:360px;">
+    <div class="tab-bar" style="overflow-x:auto;flex-wrap:nowrap;">
+      <button type="button" class="tab-btn active" data-tab="home" style="white-space:nowrap;padding:8px 8px;">主页</button>
+      <button type="button" class="tab-btn" data-tab="chat" style="white-space:nowrap;padding:8px 8px;">群聊(<span id="cnt-chat">0</span>)</button>
+      <button type="button" class="tab-btn" data-tab="create" style="white-space:nowrap;padding:8px 8px;">造物</button>
+      <button type="button" class="tab-btn" data-tab="versions" style="white-space:nowrap;padding:8px 8px;">版本(<span id="cnt-ver">0</span>)</button>
+      <button type="button" class="tab-btn" data-tab="bom" style="white-space:nowrap;padding:8px 8px;">造价</button>
+      <button type="button" class="tab-btn" data-tab="pins" style="white-space:nowrap;padding:8px 8px;">标注(<span id="cnt-pins">0</span>)</button>
+      <button type="button" class="tab-btn" data-tab="measures" style="white-space:nowrap;padding:8px 8px;">量尺(<span id="cnt-measures">0</span>)</button>
+    </div>
+
+    <!-- Home Tab: Customer Requirements & Supplier Confirmation Tasks -->
+    <div class="tab-body active" id="tab-home">
+      <div style="font-size:11px;font-weight:700;color:#7dd3fc;margin-bottom:4px;">客户最新需求清单</div>
+      <div id="req-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      <div style="display:flex;gap:5px;margin-top:6px;">
+        <input type="text" id="new-req-input" placeholder="新增客户需求..." style="flex:1;padding:5px 8px;border-radius:6px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:11px;" />
+        <button type="button" class="mini-btn" id="add-req-btn">添加</button>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#fcd34d;margin:12px 0 4px;">供应商细节待办与确认事项</div>
+      <div id="sup-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      <div style="display:flex;gap:5px;margin-top:6px;">
+        <input type="text" id="new-sup-input" placeholder="供应商提交待确认细节..." style="flex:1;padding:5px 8px;border-radius:6px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:11px;" />
+        <button type="button" class="mini-btn" id="add-sup-btn">提交</button>
+      </div>
+    </div>
+
+    <div class="tab-body" id="tab-chat">
+      <div class="empty-hint" id="chat-empty">登录后可发送群聊消息（支持 @小伙伴），点击“标注”也会自动生成带定位的讨论卡片。</div>
+    </div>
+
+    <!-- Create Tab: Image + Description -> 3D Model or Tiled Texture -->
+    <div class="tab-body" id="tab-create">
+      <div style="font-size:11px;font-weight:700;color:#7dd3fc;">图生 3D 物件 / 纹理原样平铺</div>
+      <label style="font-size:11px;color:#cbd5e1;">上传参考图片或材质纹理：</label>
+      <input type="file" id="asset-img-input" accept="image/*" style="font-size:11px;color:#cbd5e1;" />
+      <textarea id="asset-desc-input" placeholder="描述要生成的3D物品或纹理用途（例如：当代中式石狮子、黑金边几、水波纹贴图...）" style="width:100%;height:56px;padding:6px 8px;border-radius:8px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:12px;resize:none;"></textarea>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;">
+        <div><span style="font-size:10px;color:#94a3b8;">宽 W (mm)</span><input id="asset-w" type="number" value="600" min="50" max="6000" style="width:100%;padding:4px 6px;border-radius:6px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:11px;" /></div>
+        <div><span style="font-size:10px;color:#94a3b8;">深 D (mm)</span><input id="asset-d" type="number" value="500" min="50" max="6000" style="width:100%;padding:4px 6px;border-radius:6px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:11px;" /></div>
+        <div><span style="font-size:10px;color:#94a3b8;">高 H (mm)</span><input id="asset-h" type="number" value="800" min="50" max="4000" style="width:100%;padding:4px 6px;border-radius:6px;border:1px solid rgba(148,163,184,0.28);background:rgba(15,23,42,0.85);color:#f1f5f9;font-size:11px;" /></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+        <button type="button" class="send-btn" id="gen-3d-btn" style="flex:1;padding:7px 8px;font-size:11px;">生成 3D 物件放入空间</button>
+        <button type="button" class="mini-btn" id="apply-tex-btn" style="padding:7px 8px;">原样平铺到选中面</button>
+      </div>
+      <div id="draft-asset-box" style="display:none;background:rgba(30,41,59,0.9);border:1px solid rgba(56,189,248,0.4);border-radius:8px;padding:8px;margin-top:6px;">
+        <div style="font-size:11px;font-weight:700;color:#38bdf8;margin-bottom:4px;">当前预览草稿（未同步基础版）</div>
+        <div id="draft-asset-info" style="font-size:11px;color:#e2e8f0;margin-bottom:6px;"></div>
+        <div style="display:flex;gap:5px;margin-bottom:6px;">
+          <button type="button" class="mini-btn" id="draft-resize-btn">更新尺寸</button>
+          <button type="button" class="mini-btn" id="draft-rot-btn">旋转45°</button>
+          <button type="button" class="mini-btn danger" id="draft-cancel-btn">一键取消</button>
+        </div>
+        <input type="text" id="draft-reason-input" placeholder="必填：请填写修改/放置原因..." style="width:100%;padding:5px 8px;border-radius:6px;border:1px solid rgba(148,163,184,0.3);background:rgba(15,23,42,0.9);color:#f1f5f9;font-size:11px;margin-bottom:6px;" />
+        <button type="button" class="send-btn" id="draft-submit-btn" style="width:100%;padding:6px 10px;font-size:11px;">保存个人版本并提交项目总监审批</button>
+      </div>
+    </div>
+
+    <!-- Versions Tab: Non-Destructive History & Director Approval -->
+    <div class="tab-body" id="tab-versions">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:8px;">
+        <span style="font-size:11px;color:#6ee7b7;font-weight:600;">当前已同步基础版本：<strong id="base-ver-badge">Base v1</strong></span>
+        <span style="font-size:10px;color:#94a3b8;">所有历史版本永久保留</span>
+      </div>
+      <div id="versions-list" style="display:flex;flex-direction:column;gap:7px;"></div>
+    </div>
+
+    <!-- BOM & Cost Tab: Client/Director-Only Price Visibility -->
+    <div class="tab-body" id="tab-bom">
+      <div id="bom-privacy-banner" style="font-size:11px;padding:6px 8px;border-radius:8px;background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.28);color:#bae6fd;"></div>
+      <div id="bom-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <div class="tab-body" id="tab-pins">
+      <div class="empty-hint" id="pins-empty">暂无修改标注。切换到顶部“标注”，在模型任意部位单击即可标记修改意见。</div>
+    </div>
+
+    <div class="tab-body" id="tab-measures">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:11px;color:#94a3b8;">按住 Shift 可锁定水平/垂直轴</span>
+        <button type="button" class="mini-btn danger" id="clear-measures-btn">清空全部</button>
+      </div>
+      <div id="measures-list" style="display:flex;flex-direction:column;gap:7px;"></div>
+      <div class="empty-hint" id="measures-empty">暂无量尺记录。切换到顶部“量尺”，依次点击起点与终点即可精确测量净距（mm）。</div>
+    </div>
+
+    <div style="position:relative;">
+      <div id="mention-popup" style="display:none;position:absolute;bottom:48px;left:10px;right:10px;background:rgba(15,23,42,0.96);border:1px solid rgba(56,189,248,0.4);border-radius:8px;padding:4px;z-index:20;max-height:130px;overflow-y:auto;"></div>
+      <form class="chat-input-bar" id="chat-form">
+        <input type="text" id="chat-input" placeholder="输入群聊消息，输入 @ 可提醒小伙伴..." autocomplete="off" maxlength="500" />
+        <button type="submit" class="send-btn">发送</button>
+      </form>
+    </div>
+  </aside>
+
+  <div id="inspect-hud">
+    <div class="label" id="inspect-mode-label">点击任意构件查看名称与尺寸</div>
+    <div class="val" id="inspect-info">未选中构件</div>
+  </div>
+
+  <div id="help-hud">
+    左键旋转 · 右键平移 · 滚轮缩放 · W/A/S/D/Q/E 漫游 · 1漫游/2标注/3量尺
+  </div>
+
+  <!-- Pin Input Popover -->
+  <div id="pin-popover">
+    <div class="pop-head">添加三维修改标注</div>
+    <div class="pop-loc" id="pin-pop-loc">构件信息</div>
+    <textarea id="pin-comment-input" placeholder="描述你想修改的内容（如：此处扶手换高度、柜门分缝调整...）"></textarea>
+    <div class="pop-btns">
+      <button type="button" class="mini-btn" id="pin-cancel-btn">取消</button>
+      <button type="button" class="send-btn" style="padding:5px 12px;" id="pin-submit-btn">发布标注</button>
+    </div>
+  </div>
+
+  <!-- Multi-User Login Modal -->
+  <div id="login-modal">
+    <div class="login-card">
+      <h2>4层家装 3D 实时协作室</h2>
+      <p>登录后大家可实时看到彼此的 3D 鼠标指针、在群聊中讨论、点击任意位置标注修改点，或使用 3D 量尺直接测量施工尺寸。</p>
+      <label class="field-lbl" for="login-name">你的称呼</label>
+      <input id="login-name" class="login-input" type="text" placeholder="例如：业主 / 设计师小李 / 施工张工" maxlength="24" />
+      <label class="field-lbl">选择身份</label>
+      <div class="role-pills" id="role-pills">
+        <span class="role-pill active" data-role="客户/业主">客户/业主</span>
+        <span class="role-pill" data-role="项目总监">项目总监</span>
+        <span class="role-pill" data-role="设计师">设计师</span>
+        <span class="role-pill" data-role="施工方">施工方</span>
+        <span class="role-pill" data-role="全屋定制供应商">全屋定制供应商</span>
+        <span class="role-pill" data-role="灯光/软装供应商">灯光/软装供应商</span>
+      </div>
+      <label class="field-lbl">你的指针颜色</label>
+      <div class="color-row" id="color-row"></div>
+      <button type="button" class="login-submit" id="login-submit-btn">进入 3D 协作房间</button>
+    </div>
+  </div>
+
+  <script>
+    window.COLLAB_API_BASE = "https://house3d-348255-13-1396089953.sh.run.tcloudbase.com";
+    window.MODELS_BASE = "https://house3d-348255-13-1396089953.sh.run.tcloudbase.com/models";
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+    const URL_PARAMS = new URLSearchParams(window.location.search);
+    const API_BASE = (URL_PARAMS.get('apiBase') || window.COLLAB_API_BASE || window.location.origin).replace(/\/$/, '');
+    const MODELS_BASE = (URL_PARAMS.get('modelsBase') || window.MODELS_BASE || './models').replace(/\/$/, '');
+
+    const CEILING_PREFIXES = [
+      '1F_Living_Ceiling_',
+      '1F_Kaspar_Ceiling_',
+      'B1_Ceiling_',
+      '2F_NorthBed_HeadCove_',
+      '2F_NorthBed_OppCab_CeilingCove',
+      '2F_NorthBed_OppCab_CeilingLED',
+    ];
+
+    const WALL_PREFIXES = [
+      'B2_Wall_West_Full',
+      'B2_Wall_North_Full',
+      'B2_Wall_South_Full',
+      'B2_Wall_East_',
+      'B1_East_Win_',
+      'B2_East_Win_',
+      'B1_East_Skylight_',
+      'B2_East_Skylight_',
+      '1F_Living_CurvedWall',
+      '1F_Dining_WestReturn_BackWall',
+      '1F_Dining_EastReturn_HallWall',
+      '2F_CurvedWall_Parent',
+    ];
+
+    function isPerimeterWall(obj) {
+      const names = [obj.name || '', obj.parent?.name || ''];
+      return names.some((n) => n.includes('_Walls_Manifold') || WALL_PREFIXES.some((pfx) => n.startsWith(pfx)));
+    }
+
+    const PRESETS = [
+      { id: 'overview', name: '全屋鸟瞰', cam: [-11.5, 16.5, 17.5], target: [0.0, 1.0, 1.8], floors: ['2F', '1F', 'B1', 'B2'], hideCeilings: true },
+      { id: 'b1_stairs_junction', name: 'B1↔1F & B1↔B2 双楼梯衔接', cam: [0.25, -1.20, 3.85], target: [1.45, -2.35, 0.25], floors: ['B1', 'B2'], hideCeilings: true },
+      { id: 'b2_b1_lounge', name: 'B2+B1 挑空地下室', cam: [2.15, -3.00, 5.32], target: [2.15, -2.60, -0.20], floors: ['B1', 'B2'], hideCeilings: false },
+      { id: 'b1_site_room', name: 'B1 负一楼实景书柜(图3)', cam: [2.35, -1.05, 1.35], target: [4.25, -1.35, -0.80], floors: ['B1', 'B2'], hideCeilings: false },
+      { id: 'b1_to_b2_stair', name: 'B1 夹层下B2旋转楼梯', cam: [0.65, -0.90, 0.45], target: [2.00, -3.20, 1.40], floors: ['B1', 'B2'], hideCeilings: false },
+      { id: 'b2_wine_tall', name: 'B2 酒柜/铝管酒架/镜柜/高柜', cam: [2.40, -3.15, 3.30], target: [5.10, -3.20, 0.05], floors: ['B1', 'B2'], hideCeilings: false },
+      { id: '2f_bird', name: '2F 俯瞰', cam: [-1.0, 18.5, 10.8], target: [-1.0, 4.0, 1.9], floors: ['2F'], hideCeilings: true },
+      { id: '2f_north_grille', name: '2F 次卧床头 (圆弧格栅)', cam: [5.05, 4.45, 1.32], target: [5.05, 4.45, -1.35], floors: ['2F'], hideCeilings: false },
+      { id: '2f_mbr_vanity', name: '2F 主卧梳妆台 (光学木影)', cam: [5.90, 4.42, 2.60], target: [5.96, 4.42, 5.05], floors: ['2F'], hideCeilings: false },
+      { id: '2f_mbr_wardrobe', name: '2F 主卧床尾柜 (白影木)', cam: [4.805, 4.48, 4.65], target: [4.805, 4.48, 2.35], floors: ['2F'], hideCeilings: false },
+      { id: '2f_wic_mirror', name: '2F 主卧衣帽间 (三门镜面南柜)', cam: [1.65, 4.48, 3.58], target: [0.36, 4.42, 4.68], floors: ['2F'], hideCeilings: false },
+      { id: '2f_wic_north', name: '2F 主卧衣帽间 (四门光学木影北柜)', cam: [1.70, 4.55, 4.18], target: [0.15, 4.55, 3.35], floors: ['2F'], hideCeilings: false },
+      { id: '2f_wic_bath_door', name: '2F 衣帽间通往主卫 (对开移门)', cam: [1.35, 4.48, 4.02], target: [-0.55, 4.46, 4.02], floors: ['2F'], hideCeilings: false },
+      { id: '2f_north_bath_door', name: '2F 次卫磨砂玻璃门', cam: [3.45, 4.42, 1.24], target: [2.05, 4.42, 0.42], floors: ['2F'], hideCeilings: false },
+      { id: '2f_north_cab', name: '2F 次卧床对面柜', cam: [4.22, 4.48, -0.90], target: [4.22, 4.46, 1.55], floors: ['2F'], hideCeilings: false },
+      { id: '2f_north_wardrobe', name: '2F 次卧撞色镜脚衣柜(图2)', cam: [4.95, 4.45, -0.35], target: [3.58, 4.45, -0.55], floors: ['2F'], hideCeilings: false },
+      { id: '1f_toilet_door', name: '1F 客卫隐形门', cam: [-0.30, 1.30, 2.02], target: [-0.30, 1.24, 4.28], floors: ['1F'], hideCeilings: false },
+      { id: '1f_living_fireplace', name: '1F 客厅雕塑壁炉背景墙', cam: [2.7235, 1.34, 0.15], target: [2.7235, 1.32, 5.51], floors: ['1F'], hideCeilings: false },
+      { id: '1f_living_wave', name: '1F 客厅波浪天花', cam: [3.65, 1.32, 2.75], target: [3.65, 1.32, -1.13], floors: ['1F'], hideCeilings: false },
+      { id: '1f_dining', name: '1F 餐厅餐边柜 & 夹丝玻璃', cam: [-2.62, 1.24, 3.12], target: [-3.78, 1.22, 0.15], floors: ['1F'], hideCeilings: false },
+      { id: '1f_dining_song', name: '1F 餐厅宋氏木桌椅 & 45cm卡座', cam: [-2.10, 1.38, 3.05], target: [-3.40, 0.90, 0.85], floors: ['1F'], hideCeilings: false },
+      { id: '1f_living_rug', name: '1F 客厅放射状黑白地毯', cam: [2.72, 2.55, 5.20], target: [2.72, 0.25, 2.75], floors: ['1F'], hideCeilings: false },
+      { id: '1f_dining_caisson', name: '1F 餐厅过道 (立体盘凤藻井)', cam: [-2.25, 1.35, 3.55], target: [-3.35, 2.82, 2.28], floors: ['1F'], hideCeilings: false },
+    ];
+
+    const USER_COLORS = ['#38bdf8', '#f59e0b', '#34d399', '#f472b6', '#a78bfa', '#fb7185', '#22d3ee', '#facc15'];
+
+    // Three.js Scene Setup
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1e26);
+
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environmentIntensity = 0.65;
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.08, 250);
+    camera.position.set(...PRESETS[0].cam);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(...PRESETS[0].target);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.maxDistance = 80;
+    controls.minDistance = 0.25;
+    controls.update();
+
+    const hemiLight = new THREE.HemisphereLight(0xf6f8ff, 0x3b362f, 0.95);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff4e0, 1.85);
+    sunLight.position.set(12, 22, 14);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(2048, 2048);
+    sunLight.shadow.camera.near = 1;
+    sunLight.shadow.camera.far = 65;
+    sunLight.shadow.camera.left = -18;
+    sunLight.shadow.camera.right = 18;
+    sunLight.shadow.camera.top = 18;
+    sunLight.shadow.camera.bottom = -18;
+    sunLight.shadow.bias = -0.0005;
+    scene.add(sunLight);
+
+    const fillLight = new THREE.DirectionalLight(0xdbeafe, 0.65);
+    fillLight.position.set(-14, 12, -10);
+    scene.add(fillLight);
+
+    const floorGroups = {
+      '2F': new THREE.Group(),
+      '1F': new THREE.Group(),
+      'B1': new THREE.Group(),
+      'B2': new THREE.Group(),
+    };
+    Object.entries(floorGroups).forEach(([k, g]) => {
+      g.name = `Floor_${k}`;
+      g.userData.floorKey = k;
+      scene.add(g);
+    });
+
+    const remoteCursorGroup = new THREE.Group();
+    const pinsGroup = new THREE.Group();
+    const measuresGroup = new THREE.Group();
+    const previewGroup = new THREE.Group();
+    const customAssetsGroup = new THREE.Group();
+    scene.add(remoteCursorGroup, pinsGroup, measuresGroup, previewGroup, customAssetsGroup);
+    let requirementsList = [];
+    let supplierTasksList = [];
+    let bomItemsList = [];
+    let versionHistoryList = [];
+    let baseVersion = 1;
+    let basePatches = [];
+    let priceVisible = false;
+    let selectedMesh = null;
+    let draftAsset = null;
+    const springAnimations = [];
+    const doorAnimations = [];
+
+    const ceilingNodes = [];
+    let hideCeilings = true;
+    const wallNodes = [];
+    let hideWalls = false;
+
+    function applyCeilingVisibility() { for (const o of ceilingNodes) o.visible = !hideCeilings; }
+    function applyWallVisibility() { for (const o of wallNodes) o.visible = !hideWalls; }
+    function applyFloorCheckboxes() {
+      document.querySelectorAll('input[data-floor]').forEach((cb) => {
+        const key = cb.getAttribute('data-floor');
+        if (floorGroups[key]) floorGroups[key].visible = cb.checked;
+      });
+    }
+    function setFloors(activeFloors) {
+      document.querySelectorAll('input[data-floor]').forEach((cb) => {
+        cb.checked = activeFloors.includes(cb.getAttribute('data-floor'));
+      });
+      applyFloorCheckboxes();
+    }
+    function ensureFloorVisible(fk) {
+      if (!fk || !floorGroups[fk]) return;
+      const cb = document.querySelector(`input[data-floor="${fk}"]`);
+      if (cb && !cb.checked) { cb.checked = true; applyFloorCheckboxes(); }
+    }
+
+    let camAnim = null;
+    function flyCamera(posArr, targetArr, floorKey = '') {
+      if (floorKey) ensureFloorVisible(floorKey);
+      followingUserId = null;
+      renderRoster();
+      camAnim = {
+        startPos: camera.position.clone(),
+        endPos: new THREE.Vector3(...posArr),
+        startTarget: controls.target.clone(),
+        endTarget: new THREE.Vector3(...targetArr),
+        t: 0,
+      };
+    }
+
+    function animateToPreset(preset) {
+      setFloors(preset.floors);
+      hideCeilings = preset.hideCeilings;
+      document.getElementById('hide-ceilings').checked = hideCeilings;
+      applyCeilingVisibility();
+      document.querySelectorAll('.preset-btn').forEach((b) => {
+        b.classList.toggle('active', b.dataset.presetId === preset.id);
+      });
+      flyCamera(preset.cam, preset.target);
+    }
+
+    const presetList = document.getElementById('preset-list');
+    PRESETS.forEach((p, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'preset-btn' + (idx === 0 ? ' active' : '');
+      btn.dataset.presetId = p.id;
+      btn.textContent = p.name;
+      btn.addEventListener('click', () => animateToPreset(p));
+      presetList.appendChild(btn);
+    });
+
+    document.querySelectorAll('input[data-floor]').forEach((cb) => cb.addEventListener('change', applyFloorCheckboxes));
+    document.getElementById('hide-ceilings').addEventListener('change', (e) => { hideCeilings = e.target.checked; applyCeilingVisibility(); });
+    document.getElementById('hide-walls').addEventListener('change', (e) => { hideWalls = e.target.checked; applyWallVisibility(); });
+    document.getElementById('toggle-btn').addEventListener('click', () => {
+      const sb = document.getElementById('sidebar');
+      const collapsed = sb.classList.toggle('collapsed');
+      document.getElementById('toggle-btn').textContent = collapsed ? '展开' : '收起';
+    });
+    document.getElementById('toggle-collab-btn').addEventListener('click', () => {
+      const cp = document.getElementById('collab-panel');
+      const collapsed = cp.classList.toggle('collapsed');
+      document.getElementById('toggle-collab-btn').textContent = collapsed ? '显示群聊' : '隐藏群聊';
+    });
+
+    // Load 4 GLB Floor Models
+    const floorFiles = [
+      ['B2', `${MODELS_BASE}/B2.glb`],
+      ['B1', `${MODELS_BASE}/B1.glb`],
+      ['1F', `${MODELS_BASE}/1F.glb`],
+      ['2F', `${MODELS_BASE}/2F.glb`],
+    ];
+    const loader = new GLTFLoader();
+    const versionTag = Date.now();
+    let loadedCount = 0;
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+
+    Promise.all(
+      floorFiles.map(([floorKey, url]) =>
+        new Promise((resolve, reject) => {
+          loader.load(
+            `${url}?v=${versionTag}`,
+            (gltf) => {
+              const root = gltf.scene;
+              root.traverse((child) => {
+                if (child.isMesh) {
+                  child.userData.floorKey = floorKey;
+                  child.castShadow = true;
+                  child.receiveShadow = true;
+                  if (child.material && child.material.transparent) child.castShadow = false;
+                  if (child.name === '1F_Living_Fireplace_MoonGateWall') {
+                    child.castShadow = false;
+                    child.receiveShadow = false;
+                  } else if (child.name === '1F_Living_Fireplace_LingnanWallpaper') {
+                    child.receiveShadow = false;
+                  }
+                  if (CEILING_PREFIXES.some((pfx) => child.name.startsWith(pfx))) ceilingNodes.push(child);
+                  if (isPerimeterWall(child)) wallNodes.push(child);
+                }
+              });
+              floorGroups[floorKey].add(root);
+              loadedCount += 1;
+              statusText.textContent = `加载中 (${loadedCount}/4)...`;
+              resolve();
+            },
+            undefined,
+            (err) => reject(err)
+          );
+        })
+      )
+    )
+      .then(() => {
+        applyCeilingVisibility();
+        applyWallVisibility();
+        applyFloorCheckboxes();
+        statusDot.classList.add('ready');
+        statusText.textContent = '已加载 4 层模型';
+      })
+      .catch((err) => {
+        console.error('GLB load failed:', err);
+        statusDot.classList.add('error');
+        statusText.textContent = '模型加载失败';
+      });
+
+    // Helper: detect floor of intersected mesh
+    function detectFloor(obj) {
+      let cur = obj;
+      while (cur) {
+        if (cur.userData && cur.userData.floorKey) return cur.userData.floorKey;
+        cur = cur.parent;
+      }
+      return '';
+    }
+
+    // -----------------------------------------------------------------------
+    // Collaboration State & 3D Helpers (Cursors, Chat, Pins, Tape Measure)
+    // -----------------------------------------------------------------------
+    let currentUser = null;
+    let selfId = null;
+    let onlineUsers = [];
+    let messagesList = [];
+    let pinsList = [];
+    let measuresList = [];
+    let followingUserId = null;
+    let toolMode = 'orbit'; // 'orbit' | 'pin' | 'measure'
+    let ws = null;
+    let wsConnected = false;
+    let httpPollTimer = null;
+    let lastSeq = 0;
+
+    // 3D dynamic visualization maps
+    const remoteCursorMeshes = new Map(); // userId -> { group, targetPos, data, el }
+    const pinMeshes = new Map();          // pinId -> { group, el, pin }
+    const measureMeshes = new Map();      // measureId -> { group, el, mid, measure }
+    const overlayLayer = document.getElementById('overlay-layer');
+
+    // Tape measure draft state + hover snapping
+    const hoverDot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.032, 14, 14),
+      new THREE.MeshBasicMaterial({ color: 0x2dd4bf, depthTest: false })
+    );
+    hoverDot.visible = false;
+    const draftPointA = new THREE.Mesh(
+      new THREE.SphereGeometry(0.04, 14, 14),
+      new THREE.MeshBasicMaterial({ color: 0xfacc15, depthTest: false })
+    );
+    draftPointA.visible = false;
+    const draftLineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+    const draftLine = new THREE.Line(draftLineGeo, new THREE.LineBasicMaterial({ color: 0xfacc15, depthTest: false }));
+    draftLine.visible = false;
+    previewGroup.add(hoverDot, draftPointA, draftLine);
+
+    const draftLabelEl = document.createElement('div');
+    draftLabelEl.className = 'measure-3d-tag';
+    draftLabelEl.style.display = 'none';
+    draftLabelEl.style.pointerEvents = 'none';
+    overlayLayer.appendChild(draftLabelEl);
+
+    let measureStart = null; // THREE.Vector3
+    let measureEndPreview = null; // THREE.Vector3
+
+    // Pending Pin Draft Marker
+    const draftPinBeacon = new THREE.Mesh(
+      new THREE.SphereGeometry(0.055, 16, 16),
+      new THREE.MeshBasicMaterial({ color: 0xf59e0b, depthTest: false })
+    );
+    draftPinBeacon.visible = false;
+    previewGroup.add(draftPinBeacon);
+    let pendingPinData = null;
+
+    function applyOrthoShift(a, b, shiftHeld) {
+      if (!shiftHeld) return b.clone();
+      const dx = Math.abs(b.x - a.x);
+      const dy = Math.abs(b.y - a.y);
+      const dz = Math.abs(b.z - a.z);
+      const out = a.clone();
+      if (dx >= dy && dx >= dz) out.x = b.x;
+      else if (dz >= dx && dz >= dy) out.z = b.z;
+      else out.y = b.y;
+      return out;
+    }
+
+    function fmtMm(mm) {
+      return `${mm} mm (${(mm / 1000).toFixed(2)} m)`;
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function fmtTime(ts) {
+      const d = new Date((ts || Date.now() / 1000) * 1000);
+      return d.toTimeString().slice(0, 5);
+    }
+
+    // Mode Switching
+    function setToolMode(m) {
+      toolMode = m;
+      document.querySelectorAll('.mode-btn').forEach((b) => {
+        const bm = b.dataset.mode;
+        b.classList.remove('active', 'pin-active', 'measure-active');
+        if (bm === m) {
+          b.classList.add(m === 'pin' ? 'pin-active' : m === 'measure' ? 'measure-active' : 'active');
+        }
+      });
+      renderer.domElement.classList.toggle('tool-crosshair', m === 'pin' || m === 'measure');
+      renderer.domElement.style.cursor = m === 'peek' ? 'grab' : m === 'interact' ? 'pointer' : '';
+      if (m !== 'measure') cancelMeasureDraft();
+      if (m !== 'pin') closePinPopover();
+      hoverDot.visible = false;
+      const lbl = document.getElementById('inspect-mode-label');
+      if (m === 'peek') lbl.textContent = '拖动透视：按住任意家具/物件拖开查看内部，松手自动弹回原位';
+      else if (m === 'interact') lbl.textContent = '开关柜门：点击任意柜门、抽屉或家具触发开合动画';
+      else if (m === 'pin') lbl.textContent = '标注模式：单击模型任意位置添加修改点 (按1返回漫游)';
+      else if (m === 'measure') lbl.textContent = '量尺模式：点击起点→终点测净距 · 按住Shift锁定正交轴 · Esc重选';
+      else lbl.textContent = '点击任意构件查看名称与尺寸';
+    }
+    document.querySelectorAll('.mode-btn').forEach((b) => b.addEventListener('click', () => setToolMode(b.dataset.mode)));
+
+    // Sidebar Tabs
+    function activateTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.tab === tabName));
+      document.querySelectorAll('.tab-body').forEach((b) => b.classList.toggle('active', b.id === `tab-${tabName}`));
+    }
+    document.querySelectorAll('.tab-btn').forEach((b) => b.addEventListener('click', () => activateTab(b.dataset.tab)));
+
+    // Render UI lists
+    function renderRoster() {
+      const el = document.getElementById('user-roster');
+      el.innerHTML = '';
+      for (const u of onlineUsers) {
+        const isSelf = u.id === selfId;
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'user-chip' + (followingUserId === u.id ? ' following' : '');
+        chip.title = isSelf ? '你自己' : (followingUserId === u.id ? '点击取消跟随TA视角' : '点击跟随TA的3D视角');
+        chip.innerHTML = `<span class="swatch" style="background:${escapeHtml(u.color)}"></span><span>${escapeHtml(u.name)}${isSelf ? '(我)' : ''}</span>`;
+        if (!isSelf) {
+          chip.addEventListener('click', () => {
+            followingUserId = followingUserId === u.id ? null : u.id;
+            renderRoster();
+          });
+        }
+        el.appendChild(chip);
+      }
+      const st = document.getElementById('ws-status');
+      const dot = document.getElementById('ws-dot');
+      if (wsConnected) {
+        dot.className = 'dot ws-ok';
+        st.textContent = `实时同步 · ${onlineUsers.length}人在线`;
+      } else if (currentUser) {
+        dot.className = 'dot ready';
+        st.textContent = `HTTP同步 · ${onlineUsers.length}人在线`;
+      }
+    }
+
+    function focusPin(pin) {
+      if (!pin) return;
+      ensureFloorVisible(pin.floor);
+      if (pin.camPos && pin.camTarget && (pin.camPos[0] || pin.camPos[1] || pin.camPos[2])) {
+        flyCamera(pin.camPos, pin.camTarget, pin.floor);
+      } else {
+        const p = new THREE.Vector3(pin.x, pin.y, pin.z);
+        const dir = camera.position.clone().sub(controls.target).normalize();
+        if (dir.lengthSq() < 0.01) dir.set(0.6, 0.5, 0.8).normalize();
+        const cp = p.clone().addScaledVector(dir, 2.8);
+        flyCamera([cp.x, cp.y, cp.z], [p.x, p.y, p.z], pin.floor);
+      }
+    }
+
+    function renderChat() {
+      const box = document.getElementById('tab-chat');
+      const empty = document.getElementById('chat-empty');
+      box.querySelectorAll('.chat-msg').forEach((n) => n.remove());
+      empty.style.display = messagesList.length ? 'none' : 'block';
+      document.getElementById('cnt-chat').textContent = String(messagesList.length);
+      for (const m of messagesList) {
+        const div = document.createElement('div');
+        div.className = 'chat-msg' + (m.kind === 'pin' ? ' pin-card' : '');
+        div.innerHTML = `
+          <div class="chat-meta">
+            <span class="chat-author"><span class="swatch" style="width:7px;height:7px;border-radius:50%;background:${escapeHtml(m.authorColor)};display:inline-block;"></span>${escapeHtml(m.authorName)} · ${escapeHtml(m.authorRole || '')}</span>
+            <span>${fmtTime(m.ts)}</span>
+          </div>
+          <div class="chat-text">${escapeHtml(m.text)}</div>
+          ${m.pinId ? `<div class="pin-jump-hint"><span>${escapeHtml(m.floor || '')} ${escapeHtml(m.meshName || '')}</span><span>点击定位视角 →</span></div>` : ''}
+        `;
+        if (m.pinId) {
+          div.addEventListener('click', () => {
+            const found = pinsList.find((p) => p.id === m.pinId);
+            if (found) focusPin(found);
+          });
+        }
+        box.appendChild(div);
+      }
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function syncPin3DMarkers() {
+      const keep = new Set(pinsList.map((p) => p.id));
+      for (const [id, entry] of pinMeshes.entries()) {
+        if (!keep.has(id)) {
+          pinsGroup.remove(entry.group);
+          entry.el.remove();
+          pinMeshes.delete(id);
+        }
+      }
+      for (const p of pinsList) {
+        let entry = pinMeshes.get(p.id);
+        const colHex = p.status === 'resolved' ? '#10b981' : (p.authorColor || '#f59e0b');
+        if (!entry) {
+          const g = new THREE.Group();
+          const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(0.055, 16, 16),
+            new THREE.MeshBasicMaterial({ color: colHex })
+          );
+          const ring = new THREE.Mesh(
+            new THREE.RingGeometry(0.07, 0.095, 24),
+            new THREE.MeshBasicMaterial({ color: colHex, side: THREE.DoubleSide, transparent: true, opacity: 0.85 })
+          );
+          ring.lookAt(new THREE.Vector3(p.nx || 0, p.ny || 1, p.nz || 0));
+          g.add(sphere, ring);
+          g.position.set(p.x, p.y, p.z);
+          pinsGroup.add(g);
+
+          const el = document.createElement('div');
+          el.className = 'pin-3d-tag';
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            focusPin(p);
+          });
+          overlayLayer.appendChild(el);
+          entry = { group: g, sphere, ring, el, pin: p };
+          pinMeshes.set(p.id, entry);
+        }
+        entry.pin = p;
+        entry.sphere.material.color.set(colHex);
+        entry.ring.material.color.set(colHex);
+        entry.el.style.background = colHex;
+        entry.el.textContent = p.status === 'resolved' ? `✓ #${p.num}` : `#${p.num} ${p.comment.slice(0, 12)}${p.comment.length > 12 ? '…' : ''}`;
+      }
+    }
+
+    function renderPinsTab() {
+      syncPin3DMarkers();
+      const box = document.getElementById('tab-pins');
+      const empty = document.getElementById('pins-empty');
+      box.querySelectorAll('.list-card').forEach((n) => n.remove());
+      empty.style.display = pinsList.length ? 'none' : 'block';
+      document.getElementById('cnt-pins').textContent = String(pinsList.length);
+      for (const p of pinsList) {
+        const card = document.createElement('div');
+        card.className = 'list-card';
+        const resolved = p.status === 'resolved';
+        card.innerHTML = `
+          <div class="list-card-top">
+            <strong style="color:${escapeHtml(p.authorColor)}">#${p.num} ${escapeHtml(p.authorName)}</strong>
+            <span class="badge-status ${resolved ? 'badge-resolved' : 'badge-open'}">${resolved ? '已解决' : '待修改'}</span>
+          </div>
+          <div style="color:#94a3b8;font-size:11px;">${escapeHtml(p.floor)} · ${escapeHtml(p.meshName)}</div>
+          <div style="color:#f1f5f9;">${escapeHtml(p.comment)}</div>
+          <div class="card-actions">
+            <button type="button" class="mini-btn" data-act="jump">定位查看</button>
+            <button type="button" class="mini-btn" data-act="toggle">${resolved ? '重新打开' : '标为已改'}</button>
+            <button type="button" class="mini-btn danger" data-act="del">删除</button>
+          </div>
+        `;
+        card.querySelector('[data-act="jump"]').addEventListener('click', () => focusPin(p));
+        card.querySelector('[data-act="toggle"]').addEventListener('click', () => sendCollabEvent({ type: 'pin_toggle', pinId: p.id }));
+        card.querySelector('[data-act="del"]').addEventListener('click', () => sendCollabEvent({ type: 'pin_delete', pinId: p.id }));
+        box.appendChild(card);
+      }
+    }
+
+    function syncMeasure3DObjects() {
+      const keep = new Set(measuresList.map((m) => m.id));
+      for (const [id, entry] of measureMeshes.entries()) {
+        if (!keep.has(id)) {
+          measuresGroup.remove(entry.group);
+          entry.el.remove();
+          measureMeshes.delete(id);
+        }
+      }
+      for (const m of measuresList) {
+        if (measureMeshes.has(m.id)) continue;
+        const va = new THREE.Vector3(...m.a);
+        const vb = new THREE.Vector3(...m.b);
+        const mid = va.clone().add(vb).multiplyScalar(0.5);
+
+        const g = new THREE.Group();
+        const col = m.authorColor || '#2dd4bf';
+        const mat = new THREE.MeshBasicMaterial({ color: col, depthTest: false });
+        const sA = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 12), mat);
+        const sB = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 12), mat);
+        sA.position.copy(va);
+        sB.position.copy(vb);
+
+        const dist = Math.max(0.001, va.distanceTo(vb));
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, dist, 10), mat);
+        rod.position.copy(mid);
+        rod.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), vb.clone().sub(va).normalize());
+        sA.renderOrder = sB.renderOrder = rod.renderOrder = 999;
+        g.add(sA, sB, rod);
+        measuresGroup.add(g);
+
+        const el = document.createElement('div');
+        el.className = 'measure-3d-tag';
+        el.style.borderColor = col;
+        el.innerHTML = `<strong>${m.distMm} mm</strong> (${(m.distMm / 1000).toFixed(2)}m)<span class="measure-3d-del" title="删除此量尺">×</span><span class="sub">东西${m.dxMm} · 南北${m.dyMm} · 高${m.dzMm}</span>`;
+        el.querySelector('.measure-3d-del').addEventListener('click', (e) => {
+          e.stopPropagation();
+          sendCollabEvent({ type: 'measure_delete', measureId: m.id });
+        });
+        overlayLayer.appendChild(el);
+        measureMeshes.set(m.id, { group: g, el, mid, measure: m });
+      }
+    }
+
+    function renderMeasuresTab() {
+      syncMeasure3DObjects();
+      const list = document.getElementById('measures-list');
+      const empty = document.getElementById('measures-empty');
+      list.innerHTML = '';
+      empty.style.display = measuresList.length ? 'none' : 'block';
+      document.getElementById('cnt-measures').textContent = String(measuresList.length);
+      for (const m of measuresList) {
+        const card = document.createElement('div');
+        card.className = 'list-card';
+        card.innerHTML = `
+          <div class="list-card-top">
+            <strong style="color:#2dd4bf;font-size:13px;">${fmtMm(m.distMm)}</strong>
+            <span style="font-size:11px;color:#94a3b8;">${escapeHtml(m.authorName)}</span>
+          </div>
+          <div style="color:#cbd5e1;font-family:ui-monospace,monospace;font-size:11px;">东西 ΔX: ${m.dxMm}mm · 南北 ΔY: ${m.dyMm}mm · 高差 ΔZ: ${m.dzMm}mm</div>
+          <div class="card-actions">
+            <button type="button" class="mini-btn" data-act="focus">查看位置</button>
+            <button type="button" class="mini-btn danger" data-act="del">删除</button>
+          </div>
+        `;
+        card.querySelector('[data-act="focus"]').addEventListener('click', () => {
+          if (m.camPos && m.camTarget) flyCamera(m.camPos, m.camTarget);
+          else {
+            const mid = new THREE.Vector3(...m.a).add(new THREE.Vector3(...m.b)).multiplyScalar(0.5);
+            flyCamera([mid.x + 1.8, mid.y + 1.6, mid.z + 2.2], [mid.x, mid.y, mid.z]);
+          }
+        });
+        card.querySelector('[data-act="del"]').addEventListener('click', () => sendCollabEvent({ type: 'measure_delete', measureId: m.id }));
+        list.appendChild(card);
+      }
+    }
+
+    document.getElementById('clear-measures-btn').addEventListener('click', () => {
+      sendCollabEvent({ type: 'measure_clear' });
+    });
+
+    function updateRemoteCursor(cur) {
+      if (!cur || !cur.userId || cur.userId === selfId) return;
+      let entry = remoteCursorMeshes.get(cur.userId);
+      if (!entry) {
+        const g = new THREE.Group();
+        const col = cur.color || '#38bdf8';
+        const sph = new THREE.Mesh(
+          new THREE.SphereGeometry(0.042, 16, 16),
+          new THREE.MeshBasicMaterial({ color: col })
+        );
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(0.06, 0.088, 24),
+          new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide, transparent: true, opacity: 0.85 })
+        );
+        g.add(sph, ring);
+        remoteCursorGroup.add(g);
+
+        const el = document.createElement('div');
+        el.className = 'remote-cursor-tag';
+        el.style.background = col;
+        el.textContent = `${cur.name}${cur.role ? ' · ' + cur.role : ''}`;
+        overlayLayer.appendChild(el);
+
+        entry = { group: g, ring, el, targetPos: new THREE.Vector3(cur.x, cur.y, cur.z), visible: true };
+        remoteCursorMeshes.set(cur.userId, entry);
+      }
+      entry.targetPos.set(cur.x, cur.y, cur.z);
+      entry.ring.lookAt(cur.nx || 0, cur.ny || 1, cur.nz || 0);
+      entry.visible = cur.visible !== false;
+      entry.group.visible = entry.visible;
+    }
+
+    function hideRemoteCursor(uid) {
+      const entry = remoteCursorMeshes.get(uid);
+      if (entry) {
+        remoteCursorGroup.remove(entry.group);
+        entry.el.remove();
+        remoteCursorMeshes.delete(uid);
+      }
+    }
+
+    function handleIncomingPacket(pkt) {
+      if (!pkt || !pkt.type) return;
+      if (pkt.type === 'init') {
+        selfId = pkt.selfId || selfId;
+        lastSeq = pkt.seq || 0;
+        onlineUsers = pkt.users || [];
+        messagesList = pkt.messages || [];
+        pinsList = pkt.pins || [];
+        measuresList = pkt.measures || [];
+        requirementsList = pkt.requirements || [];
+        supplierTasksList = pkt.supplierTasks || [];
+        bomItemsList = pkt.bomItems || [];
+        versionHistoryList = pkt.versionHistory || [];
+        baseVersion = pkt.baseVersion || 1;
+        basePatches = pkt.basePatches || [];
+        priceVisible = !!pkt.priceVisible;
+        if (pkt.cursors) Object.values(pkt.cursors).forEach(updateRemoteCursor);
+        renderRoster(); renderHomeTab(); renderChat(); renderVersionsTab(); renderBomTab(); renderPinsTab(); renderMeasuresTab();
+        syncBasePatchesToScene();
+      } else if (pkt.type === 'users') {
+        onlineUsers = pkt.users || [];
+        const activeIds = new Set(onlineUsers.map((u) => u.id));
+        for (const uid of remoteCursorMeshes.keys()) {
+          if (!activeIds.has(uid)) hideRemoteCursor(uid);
+        }
+        renderRoster();
+      } else if (pkt.type === 'requirements') {
+        requirementsList = pkt.requirements || [];
+        renderHomeTab();
+      } else if (pkt.type === 'supplier_tasks') {
+        supplierTasksList = pkt.supplierTasks || [];
+        renderHomeTab();
+      } else if (pkt.type === 'version_added' && pkt.version) {
+        if (!versionHistoryList.some((v) => v.id === pkt.version.id)) {
+          versionHistoryList.push(pkt.version);
+          renderVersionsTab();
+        }
+      } else if (pkt.type === 'version_updated' && pkt.version) {
+        const idx = versionHistoryList.findIndex((v) => v.id === pkt.version.id);
+        if (idx >= 0) versionHistoryList[idx] = pkt.version;
+        else versionHistoryList.push(pkt.version);
+        renderVersionsTab();
+      } else if (pkt.type === 'base_sync') {
+        baseVersion = pkt.baseVersion || baseVersion + 1;
+        if (pkt.patch && !basePatches.some((p) => p.id === pkt.patch.id)) basePatches.push(pkt.patch);
+        if (pkt.version) {
+          const idx = versionHistoryList.findIndex((v) => v.id === pkt.version.id);
+          if (idx >= 0) versionHistoryList[idx] = pkt.version;
+          else versionHistoryList.push(pkt.version);
+        }
+        renderVersionsTab();
+        syncBasePatchesToScene();
+      } else if (pkt.type === 'cursor') {
+        updateRemoteCursor(pkt.cursor);
+      } else if (pkt.type === 'cursor_hide') {
+        hideRemoteCursor(pkt.userId);
+      } else if (pkt.type === 'camera') {
+        const c = pkt.camera;
+        if (c && followingUserId && c.userId === followingUserId) {
+          camera.position.set(...c.pos);
+          controls.target.set(...c.target);
+          camAnim = null;
+        }
+      } else if (pkt.type === 'chat') {
+        if (pkt.message && !messagesList.some((m) => m.id === pkt.message.id)) {
+          messagesList.push(pkt.message);
+          renderChat();
+        }
+      } else if (pkt.type === 'pin_add') {
+        if (pkt.pin && !pinsList.some((p) => p.id === pkt.pin.id)) {
+          pinsList.push(pkt.pin);
+          renderPinsTab();
+        }
+      } else if (pkt.type === 'pin_update') {
+        if (pkt.pin) {
+          const idx = pinsList.findIndex((p) => p.id === pkt.pin.id);
+          if (idx >= 0) pinsList[idx] = pkt.pin;
+          else pinsList.push(pkt.pin);
+          renderPinsTab();
+        }
+      } else if (pkt.type === 'pin_delete') {
+        pinsList = pinsList.filter((p) => p.id !== pkt.pinId);
+        renderPinsTab();
+      } else if (pkt.type === 'measure_add') {
+        if (pkt.measure && !measuresList.some((m) => m.id === pkt.measure.id)) {
+          measuresList.push(pkt.measure);
+          renderMeasuresTab();
+        }
+      } else if (pkt.type === 'measure_delete') {
+        measuresList = measuresList.filter((m) => m.id !== pkt.measureId);
+        renderMeasuresTab();
+      } else if (pkt.type === 'measure_clear') {
+        measuresList = [];
+        renderMeasuresTab();
+      }
+      if (pkt.seq) lastSeq = Math.max(lastSeq, pkt.seq);
+    }
+
+    async function sendCollabEvent(payload) {
+      if (!currentUser) return;
+      if (ws && wsConnected && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(payload));
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/event`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, clientId: selfId }),
+        });
+        const data = await res.json();
+        if (data.clientId && !selfId) selfId = data.clientId;
+        if (Array.isArray(data.emitted)) data.emitted.forEach(handleIncomingPacket);
+      } catch (e) {
+        console.warn('HTTP fallback send failed:', e);
+      }
+    }
+
+    async function startHttpFallbackPolling() {
+      if (httpPollTimer || !currentUser) return;
+      if (!selfId) selfId = 'u_' + Math.random().toString(36).slice(2, 10);
+      await sendCollabEvent({ type: 'join', ...currentUser });
+      httpPollTimer = setInterval(async () => {
+        if (wsConnected || !currentUser) return;
+        try {
+          const r = await fetch(`${API_BASE}/api/state?since=${lastSeq}&clientId=${encodeURIComponent(selfId)}&role=${encodeURIComponent(currentUser?.role || '')}`);
+          const d = await r.json();
+          if (d.full) {
+            handleIncomingPacket({ type: 'init', ...d });
+          } else {
+            lastSeq = Math.max(lastSeq, d.seq || 0);
+            onlineUsers = d.users || onlineUsers;
+            renderRoster();
+            if (d.cursors) Object.values(d.cursors).forEach(updateRemoteCursor);
+            if (Array.isArray(d.events)) {
+              for (const ev of d.events) {
+                if (ev.type === 'chat') handleIncomingPacket({ type: 'chat', message: ev.data, seq: ev.seq });
+                else if (ev.type === 'pin_add') handleIncomingPacket({ type: 'pin_add', pin: ev.data, seq: ev.seq });
+                else if (ev.type === 'pin_update') handleIncomingPacket({ type: 'pin_update', pin: ev.data, seq: ev.seq });
+                else if (ev.type === 'pin_delete') handleIncomingPacket({ type: 'pin_delete', ...ev.data, seq: ev.seq });
+                else if (ev.type === 'measure_add') handleIncomingPacket({ type: 'measure_add', measure: ev.data, seq: ev.seq });
+                else if (ev.type === 'measure_delete') handleIncomingPacket({ type: 'measure_delete', ...ev.data, seq: ev.seq });
+                else if (ev.type === 'measure_clear') handleIncomingPacket({ type: 'measure_clear', seq: ev.seq });
+              }
+            }
+          }
+        } catch (_) {}
+      }, 1500);
+    }
+
+    function connectCollab() {
+      if (!currentUser) return;
+      if (ws) { try { ws.close(); } catch (_) {} }
+      const wsBase = API_BASE.replace(/^http/, 'ws');
+      const socket = new WebSocket(`${wsBase}/ws`);
+      ws = socket;
+      socket.addEventListener('open', () => {
+        wsConnected = true;
+        socket.send(JSON.stringify({ type: 'join', ...currentUser }));
+        renderRoster();
+      });
+      socket.addEventListener('message', (ev) => {
+        try { handleIncomingPacket(JSON.parse(ev.data)); } catch (_) {}
+      });
+      socket.addEventListener('close', () => {
+        wsConnected = false;
+        renderRoster();
+        startHttpFallbackPolling();
+        setTimeout(() => { if (currentUser) connectCollab(); }, 3000);
+      });
+      socket.addEventListener('error', () => {
+        wsConnected = false;
+        startHttpFallbackPolling();
+      });
+    }
+
+    // Chat Form
+    document.getElementById('chat-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const inp = document.getElementById('chat-input');
+      const txt = inp.value.trim();
+      if (!txt) return;
+      inp.value = '';
+      sendCollabEvent({ type: 'chat', text: txt, ...currentUser });
+    });
+
+    // Pin Popover
+    function openPinPopover(screenX, screenY, hit) {
+      const floor = detectFloor(hit.object);
+      const meshName = hit.object.name || '(未命名构件)';
+      const n = hit.face ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld) : new THREE.Vector3(0, 1, 0);
+      pendingPinData = {
+        x: hit.point.x, y: hit.point.y, z: hit.point.z,
+        nx: n.x, ny: n.y, nz: n.z,
+        floor, meshName,
+        camPos: [camera.position.x, camera.position.y, camera.position.z],
+        camTarget: [controls.target.x, controls.target.y, controls.target.z],
+      };
+      draftPinBeacon.position.copy(hit.point);
+      draftPinBeacon.visible = true;
+      const pop = document.getElementById('pin-popover');
+      document.getElementById('pin-pop-loc').textContent = `${floor || '建筑'} · ${meshName} (${hit.point.x.toFixed(2)}, ${hit.point.y.toFixed(2)}, ${(-hit.point.z).toFixed(2)})`;
+      pop.style.left = `${Math.min(window.innerWidth - 306, Math.max(12, screenX + 12))}px`;
+      pop.style.top = `${Math.min(window.innerHeight - 190, Math.max(66, screenY - 24))}px`;
+      pop.style.display = 'block';
+      const ta = document.getElementById('pin-comment-input');
+      ta.value = '';
+      setTimeout(() => ta.focus(), 20);
+    }
+
+    function closePinPopover() {
+      pendingPinData = null;
+      draftPinBeacon.visible = false;
+      document.getElementById('pin-popover').style.display = 'none';
+    }
+
+    document.getElementById('pin-cancel-btn').addEventListener('click', closePinPopover);
+    document.getElementById('pin-submit-btn').addEventListener('click', () => {
+      const txt = document.getElementById('pin-comment-input').value.trim();
+      if (!txt || !pendingPinData) return;
+      const payload = { type: 'pin_add', ...pendingPinData, comment: txt, authorName: currentUser?.name, authorRole: currentUser?.role, authorColor: currentUser?.color };
+      closePinPopover();
+      sendCollabEvent(payload);
+      activateTab('pins');
+    });
+
+    function cancelMeasureDraft() {
+      measureStart = null;
+      measureEndPreview = null;
+      draftPointA.visible = false;
+      draftLine.visible = false;
+      draftLabelEl.style.display = 'none';
+    }
+
+    // Home Tab (Requirements + Supplier Tasks), Versions Tab, BOM Tab (Client-Only Prices), @Mentions & AI 3D Asset Builder
+    function renderHomeTab() {
+      const reqBox = document.getElementById('req-list');
+      const supBox = document.getElementById('sup-list');
+      if (!reqBox || !supBox) return;
+      reqBox.innerHTML = '';
+      for (const r of requirementsList) {
+        const div = document.createElement('div');
+        div.className = 'list-card';
+        div.innerHTML = `
+          <div class="list-card-top">
+            <strong style="color:#e2e8f0;">${escapeHtml(r.owner || '团队')}</strong>
+            <span class="status-pill ${r.status === '已完成' ? 'resolved' : ''}">${escapeHtml(r.status)}</span>
+          </div>
+          <div style="font-size:11px;color:#cbd5e1;line-height:1.45;">${escapeHtml(r.title)}</div>
+          <div class="card-actions">
+            <button type="button" class="mini-btn" data-act="toggle">${r.status === '已完成' ? '标为待确认' : '标为已完成'}</button>
+          </div>`;
+        div.querySelector('[data-act="toggle"]').addEventListener('click', () => {
+          sendCollabEvent({ type: 'update_requirement', id: r.id, status: r.status === '已完成' ? '待确认' : '已完成' });
+        });
+        reqBox.appendChild(div);
+      }
+      supBox.innerHTML = '';
+      for (const t of supplierTasksList) {
+        const div = document.createElement('div');
+        div.className = 'list-card';
+        div.innerHTML = `
+          <div class="list-card-top">
+            <strong style="color:#fcd34d;">${escapeHtml(t.supplier)}</strong>
+            <span class="status-pill ${t.status === '已确认' ? 'resolved' : ''}">${escapeHtml(t.status)}</span>
+          </div>
+          <div style="font-size:11px;color:#f1f5f9;font-weight:600;">${escapeHtml(t.title)}</div>
+          <div style="font-size:11px;color:#94a3b8;line-height:1.4;">${escapeHtml(t.detail)}</div>
+          <div class="card-actions">
+            <button type="button" class="mini-btn" data-act="confirm">${t.status === '已确认' ? '重开确认' : '确认细节'}</button>
+          </div>`;
+        div.querySelector('[data-act="confirm"]').addEventListener('click', () => {
+          sendCollabEvent({ type: 'update_supplier_task', id: t.id, status: t.status === '已确认' ? '待确认' : '已确认' });
+        });
+        supBox.appendChild(div);
+      }
+    }
+
+    document.getElementById('add-req-btn')?.addEventListener('click', () => {
+      const inp = document.getElementById('new-req-input');
+      const txt = inp.value.trim();
+      if (!txt) return;
+      inp.value = '';
+      sendCollabEvent({ type: 'update_requirement', title: txt, owner: currentUser?.role || '客户/业主', status: '待确认' });
+    });
+
+    document.getElementById('add-sup-btn')?.addEventListener('click', () => {
+      const inp = document.getElementById('new-sup-input');
+      const txt = inp.value.trim();
+      if (!txt) return;
+      inp.value = '';
+      sendCollabEvent({ type: 'update_supplier_task', title: txt, detail: '供应商提交现场/深化待确认事项', supplier: currentUser?.role || '供应商', status: '待总监确认' });
+    });
+
+    function renderVersionsTab() {
+      const badge = document.getElementById('base-ver-badge');
+      const cnt = document.getElementById('cnt-ver');
+      const box = document.getElementById('versions-list');
+      if (badge) badge.textContent = `Base v${baseVersion}`;
+      if (cnt) cnt.textContent = String(versionHistoryList.length);
+      if (!box) return;
+      box.innerHTML = '';
+      const isDirector = currentUser && currentUser.role === '项目总监';
+      for (const v of [...versionHistoryList].reverse()) {
+        const card = document.createElement('div');
+        card.className = 'list-card';
+        const isApproved = v.status === '已认可并同步';
+        card.innerHTML = `
+          <div class="list-card-top">
+            <span class="chat-author"><span class="swatch" style="width:7px;height:7px;border-radius:50%;background:${escapeHtml(v.color || '#38bdf8')};display:inline-block;"></span>v${v.revNum} · ${escapeHtml(v.author)} (${escapeHtml(v.role)})</span>
+            <span class="status-pill ${isApproved ? 'resolved' : ''}">${escapeHtml(v.status)}</span>
+          </div>
+          <div style="font-size:11px;color:#cbd5e1;">修改原因：${escapeHtml(v.reason)}</div>
+          <div style="font-size:10px;color:#94a3b8;">基于 Base v${v.baseVersionRef || 1} · ${fmtTime(v.ts)}</div>
+          ${isDirector && v.status === '待总监审批' ? `
+            <div class="card-actions">
+              <button type="button" class="mini-btn" style="background:rgba(16,185,129,0.2);border-color:#10b981;color:#6ee7b7;" data-act="approve">认可并同步基础版</button>
+              <button type="button" class="mini-btn danger" data-act="reject">驳回</button>
+            </div>` : ''}`;
+        if (isDirector && v.status === '待总监审批') {
+          card.querySelector('[data-act="approve"]').addEventListener('click', () => {
+            sendCollabEvent({ type: 'approve_change', revId: v.id, approve: true, role: currentUser.role, author: currentUser.name });
+          });
+          card.querySelector('[data-act="reject"]').addEventListener('click', () => {
+            sendCollabEvent({ type: 'approve_change', revId: v.id, approve: false, role: currentUser.role, author: currentUser.name });
+          });
+        }
+        box.appendChild(card);
+      }
+    }
+
+    function renderBomTab() {
+      const banner = document.getElementById('bom-privacy-banner');
+      const box = document.getElementById('bom-list');
+      if (!banner || !box) return;
+      const canSeePrice = priceVisible || (currentUser && (currentUser.role === '客户/业主' || currentUser.role === '项目总监'));
+      banner.textContent = canSeePrice
+        ? '当前身份为客户/项目总监：已解锁全屋造价、材料单价、人工费与电商直达链接。'
+        : '权限保护提示：当前为供应商身份，造价与人工费仅对客户及项目总监开放，已自动隐藏价格列。';
+      box.innerHTML = '';
+      for (const item of bomItemsList) {
+        const card = document.createElement('div');
+        card.className = 'list-card';
+        const links = item.ecommerceLinks || {};
+        card.innerHTML = `
+          <div class="list-card-top">
+            <strong style="color:#f8fafc;">[${escapeHtml(item.floor)}] ${escapeHtml(item.name)}</strong>
+          </div>
+          <div style="font-size:11px;color:#94a3b8;">规格：${escapeHtml(item.spec)}</div>
+          <div style="font-size:11px;color:#cbd5e1;">材料：${escapeHtml(item.material)}</div>
+          <div style="font-size:11px;color:#cbd5e1;">五金：${escapeHtml(item.hardware)}</div>
+          <div style="font-size:11px;color:#cbd5e1;">工艺：${escapeHtml(item.craft)}</div>
+          ${canSeePrice && item.totalPrice != null ? `
+            <div style="font-size:11px;color:#6ee7b7;font-weight:600;margin-top:2px;">
+              材料单价 ¥${item.unitPrice} · 人工费 ¥${item.laborFee} · 预估总价 ¥${item.totalPrice}
+            </div>` : `
+            <div style="font-size:10px;color:#f59e0b;margin-top:2px;">价格已加密隐藏（仅客户可见）</div>`}
+          <div class="card-actions">
+            ${links.taobao ? `<a href="${escapeHtml(links.taobao)}" target="_blank" rel="noopener" class="mini-btn" style="text-decoration:none;">淘宝搜同款</a>` : ''}
+            ${links.jd ? `<a href="${escapeHtml(links.jd)}" target="_blank" rel="noopener" class="mini-btn" style="text-decoration:none;">京东搜同款</a>` : ''}
+            ${links['1688'] ? `<a href="${escapeHtml(links['1688'])}" target="_blank" rel="noopener" class="mini-btn" style="text-decoration:none;">1688找工厂</a>` : ''}
+          </div>`;
+        box.appendChild(card);
+      }
+    }
+
+    // @Mention Autocomplete on Chat Input
+    const chatInputEl = document.getElementById('chat-input');
+    const mentionPopup = document.getElementById('mention-popup');
+    chatInputEl?.addEventListener('input', () => {
+      const val = chatInputEl.value;
+      const m = val.match(/@([^\s@]*)$/);
+      if (!m) { mentionPopup.style.display = 'none'; return; }
+      const q = m[1].toLowerCase();
+      const candidates = [
+        { name: '项目总监', role: '审批' },
+        { name: '全员', role: '群组' },
+        ...onlineUsers.map((u) => ({ name: u.name, role: u.role || '' })),
+      ].filter((c) => c.name.toLowerCase().includes(q));
+      if (!candidates.length) { mentionPopup.style.display = 'none'; return; }
+      mentionPopup.innerHTML = '';
+      candidates.slice(0, 6).forEach((c) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mini-btn';
+        btn.style.cssText = 'display:block;width:100%;text-align:left;margin-bottom:3px;';
+        btn.textContent = `@${c.name} ${c.role ? '(' + c.role + ')' : ''}`;
+        btn.addEventListener('click', () => {
+          chatInputEl.value = val.replace(/@([^\s@]*)$/, `@${c.name} `);
+          mentionPopup.style.display = 'none';
+          chatInputEl.focus();
+        });
+        mentionPopup.appendChild(btn);
+      });
+      mentionPopup.style.display = 'block';
+    });
+
+    // Parametric 3D Asset Builder + Tiled Texture Support + Base Sync
+    function buildAssetGroupFromSpec(spec, pos, rotY = 0) {
+      const g = new THREE.Group();
+      const w = (spec.widthMm || 600) * 0.001;
+      const d = (spec.depthMm || 500) * 0.001;
+      const h = (spec.heightMm || 800) * 0.001;
+      const mat = new THREE.MeshStandardMaterial({ color: spec.color || '#d8c8a8', roughness: 0.42, metalness: 0.12 });
+      const addPart = (pw, ph, pd, px, py, pz, m = mat) => {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(pw, ph, pd), m);
+        mesh.position.set(px, py, pz);
+        mesh.castShadow = true; mesh.receiveShadow = true;
+        g.add(mesh);
+      };
+      if (spec.archetype === 'table') {
+        addPart(w, 0.04, d, 0, h - 0.02, 0);
+        addPart(w * 0.35, h - 0.04, d * 0.35, 0, (h - 0.04) * 0.5, 0);
+      } else if (spec.archetype === 'chair') {
+        addPart(w, 0.06, d, 0, h * 0.45, 0);
+        addPart(w, h * 0.52, 0.06, 0, h * 0.72, -d * 0.44);
+        addPart(w * 0.85, h * 0.42, d * 0.85, 0, h * 0.21, 0);
+      } else if (spec.archetype === 'lamp') {
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, h * 0.85, 16), mat);
+        pole.position.y = h * 0.425;
+        const shade = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.35, w * 0.5, h * 0.2, 24), new THREE.MeshStandardMaterial({ color: '#fef3c7', emissive: '#fde68a', emissiveIntensity: 0.7 }));
+        shade.position.y = h * 0.9;
+        g.add(pole, shade);
+      } else if (spec.archetype === 'sculpture') {
+        addPart(w, h * 0.22, d, 0, h * 0.11, 0);
+        addPart(w * 0.68, h * 0.48, d * 0.72, 0, h * 0.46, 0);
+        const head = new THREE.Mesh(new THREE.SphereGeometry(Math.min(w, d) * 0.32, 20, 20), mat);
+        head.position.set(0, h * 0.82, 0);
+        g.add(head);
+      } else {
+        addPart(w, h, d, 0, h * 0.5, 0);
+      }
+      if (spec.imageUrl) {
+        const texLoader = new THREE.TextureLoader();
+        const url = spec.imageUrl.startsWith('/') ? `${API_BASE}${spec.imageUrl}` : spec.imageUrl;
+        texLoader.load(url, (tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+          const imgPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(w * 0.92, h * 0.92),
+            new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
+          );
+          imgPlane.position.set(0, h * 0.52, d * 0.51);
+          g.add(imgPlane);
+        });
+      }
+      g.position.set(...(pos || [controls.target.x, Math.max(-4.55, controls.target.y), controls.target.z]));
+      g.rotation.y = rotY;
+      return g;
+    }
+
+    function applyTiledTextureToMesh(mesh, imageUrl) {
+      if (!mesh || !imageUrl) return;
+      const texLoader = new THREE.TextureLoader();
+      const url = imageUrl.startsWith('/') ? `${API_BASE}${imageUrl}` : imageUrl;
+      texLoader.load(url, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        const box = new THREE.Box3().setFromObject(mesh);
+        const sz = new THREE.Vector3(); box.getSize(sz);
+        const rep = Math.max(1, Math.round(Math.max(sz.x, sz.z) * 1.2));
+        tex.repeat.set(rep, rep);
+        mesh.material = mesh.material ? mesh.material.clone() : new THREE.MeshStandardMaterial();
+        mesh.material.map = tex;
+        mesh.material.needsUpdate = true;
+      });
+    }
+
+    function syncBasePatchesToScene() {
+      customAssetsGroup.clear();
+      for (const p of basePatches) {
+        if (p.action === 'add_3d_asset' && p.payload?.spec) {
+          customAssetsGroup.add(buildAssetGroupFromSpec(p.payload.spec, p.payload.pos, p.payload.rotY || 0));
+        } else if (p.action === 'apply_texture' && p.payload?.meshName && p.payload?.imageUrl) {
+          scene.traverse((obj) => {
+            if (obj.isMesh && obj.name === p.payload.meshName) {
+              applyTiledTextureToMesh(obj, p.payload.imageUrl);
+            }
+          });
+        }
+      }
+      if (draftAsset?.group) customAssetsGroup.add(draftAsset.group);
+    }
+
+    async function readSelectedImageDataUrl() {
+      const file = document.getElementById('asset-img-input')?.files?.[0];
+      if (!file) return null;
+      return await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function showDraftBox() {
+      const box = document.getElementById('draft-asset-box');
+      const info = document.getElementById('draft-asset-info');
+      if (!draftAsset) { box.style.display = 'none'; return; }
+      box.style.display = 'block';
+      const s = draftAsset.spec;
+      info.textContent = `${draftAsset.description} · 尺寸 ${s.widthMm}×${s.depthMm}×${s.heightMm} mm`;
+    }
+
+    document.getElementById('gen-3d-btn')?.addEventListener('click', async () => {
+      const desc = document.getElementById('asset-desc-input').value.trim() || '自定义3D物件';
+      const w = Number(document.getElementById('asset-w').value) || 600;
+      const d = Number(document.getElementById('asset-d').value) || 500;
+      const h = Number(document.getElementById('asset-h').value) || 800;
+      const imgDataUrl = await readSelectedImageDataUrl();
+      const res = await fetch(`${API_BASE}/api/generate_asset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: desc, widthMm: w, depthMm: d, heightMm: h, imageDataUrl: imgDataUrl }),
+      });
+      const data = await res.json();
+      if (draftAsset?.group) customAssetsGroup.remove(draftAsset.group);
+      const pos = [controls.target.x, Math.max(-4.55, controls.target.y), controls.target.z];
+      const group = buildAssetGroupFromSpec(data.spec, pos, 0);
+      customAssetsGroup.add(group);
+      draftAsset = { action: 'add_3d_asset', description: desc, spec: data.spec, pos, rotY: 0, group };
+      showDraftBox();
+    });
+
+    document.getElementById('apply-tex-btn')?.addEventListener('click', async () => {
+      if (!selectedMesh) { alert('请先在 3D 画面中点击选中一个构件表面'); return; }
+      const imgDataUrl = await readSelectedImageDataUrl();
+      if (!imgDataUrl) { alert('请先选择要贴图的图片'); return; }
+      const res = await fetch(`${API_BASE}/api/generate_asset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: '纹理原样平铺', imageDataUrl: imgDataUrl }),
+      });
+      const data = await res.json();
+      const imageUrl = data.spec.imageUrl;
+      applyTiledTextureToMesh(selectedMesh, imageUrl);
+      draftAsset = { action: 'apply_texture', description: `纹理平铺 -> ${selectedMesh.name}`, spec: { widthMm: 0, depthMm: 0, heightMm: 0 }, meshName: selectedMesh.name, imageUrl };
+      showDraftBox();
+    });
+
+    document.getElementById('draft-resize-btn')?.addEventListener('click', () => {
+      if (!draftAsset || draftAsset.action !== 'add_3d_asset') return;
+      draftAsset.spec.widthMm = Number(document.getElementById('asset-w').value) || draftAsset.spec.widthMm;
+      draftAsset.spec.depthMm = Number(document.getElementById('asset-d').value) || draftAsset.spec.depthMm;
+      draftAsset.spec.heightMm = Number(document.getElementById('asset-h').value) || draftAsset.spec.heightMm;
+      if (draftAsset.group) customAssetsGroup.remove(draftAsset.group);
+      draftAsset.group = buildAssetGroupFromSpec(draftAsset.spec, draftAsset.pos, draftAsset.rotY);
+      customAssetsGroup.add(draftAsset.group);
+      showDraftBox();
+    });
+
+    document.getElementById('draft-rot-btn')?.addEventListener('click', () => {
+      if (!draftAsset || !draftAsset.group) return;
+      draftAsset.rotY += Math.PI / 4;
+      draftAsset.group.rotation.y = draftAsset.rotY;
+    });
+
+    document.getElementById('draft-cancel-btn')?.addEventListener('click', () => {
+      if (draftAsset?.group) customAssetsGroup.remove(draftAsset.group);
+      draftAsset = null;
+      showDraftBox();
+    });
+
+    document.getElementById('draft-submit-btn')?.addEventListener('click', () => {
+      if (!draftAsset) return;
+      const reason = document.getElementById('draft-reason-input').value.trim();
+      if (!reason) { alert('提交给项目总监前，请填写修改/放置原因'); return; }
+      const payload = draftAsset.action === 'add_3d_asset'
+        ? { spec: draftAsset.spec, pos: draftAsset.pos, rotY: draftAsset.rotY }
+        : { meshName: draftAsset.meshName, imageUrl: draftAsset.imageUrl };
+      sendCollabEvent({ type: 'submit_change', action: draftAsset.action, reason, payload });
+      document.getElementById('draft-reason-input').value = '';
+      if (draftAsset.group) customAssetsGroup.remove(draftAsset.group);
+      draftAsset = null;
+      showDraftBox();
+      activateTab('versions');
+    });
+
+    // Raycasting: Live 3D Cursor Sync + Peek-Drag Spring-Back + Cabinet Door Toggle + Tape Measure + Click Actions
+    const raycaster = new THREE.Raycaster();
+    const pointerDown = { x: 0, y: 0 };
+    let lastCursorSent = 0;
+    let peekDrag = null;
+    const _dragPlane = new THREE.Plane();
+    const _dragHit = new THREE.Vector3();
+
+    function raycastModel(clientX, clientY) {
+      const ndc = new THREE.Vector2((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
+      raycaster.setFromCamera(ndc, camera);
+      const targets = Object.values(floorGroups).filter((g) => g.visible);
+      return raycaster.intersectObjects(targets, true).filter((h) => h.object.visible);
+    }
+
+    renderer.domElement.addEventListener('pointermove', (e) => {
+      if (peekDrag && toolMode === 'peek') {
+        const ndc = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+        raycaster.setFromCamera(ndc, camera);
+        if (raycaster.ray.intersectPlane(_dragPlane, _dragHit)) {
+          peekDrag.mesh.position.copy(peekDrag.origPos).add(_dragHit).sub(peekDrag.startHit);
+        }
+        return;
+      }
+      const hits = raycastModel(e.clientX, e.clientY);
+      const now = performance.now();
+
+      if (hits.length > 0) {
+        const hit = hits[0];
+        if (toolMode === 'measure' || toolMode === 'pin') {
+          hoverDot.position.copy(hit.point);
+          hoverDot.visible = true;
+        } else {
+          hoverDot.visible = false;
+        }
+        if (toolMode === 'measure' && measureStart) {
+          measureEndPreview = applyOrthoShift(measureStart, hit.point, e.shiftKey);
+          draftLineGeo.setFromPoints([measureStart, measureEndPreview]);
+          draftLine.visible = true;
+          const distMm = Math.round(measureStart.distanceTo(measureEndPreview) * 1000);
+          const dxMm = Math.round(Math.abs(measureEndPreview.x - measureStart.x) * 1000);
+          const dyMm = Math.round(Math.abs(measureEndPreview.z - measureStart.z) * 1000);
+          const dzMm = Math.round(Math.abs(measureEndPreview.y - measureStart.y) * 1000);
+          draftLabelEl.innerHTML = `<strong>${distMm} mm</strong> (${(distMm / 1000).toFixed(2)}m) <span class="sub">东西${dxMm} · 南北${dyMm} · 高${dzMm} · 单击定终点</span>`;
+          draftLabelEl.style.display = 'block';
+        }
+        if (currentUser && now - lastCursorSent >= 50) {
+          lastCursorSent = now;
+          const n = hit.face ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld) : new THREE.Vector3(0, 1, 0);
+          sendCollabEvent({
+            type: 'cursor',
+            x: hit.point.x, y: hit.point.y, z: hit.point.z,
+            nx: n.x, ny: n.y, nz: n.z,
+            floor: detectFloor(hit.object),
+            mesh: hit.object.name || '',
+            visible: true,
+          });
+        }
+      } else {
+        hoverDot.visible = false;
+      }
+    });
+
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      pointerDown.x = e.clientX;
+      pointerDown.y = e.clientY;
+      if (followingUserId) { followingUserId = null; renderRoster(); }
+      if (toolMode === 'peek' && e.button === 0) {
+        const hits = raycastModel(e.clientX, e.clientY);
+        if (hits.length > 0) {
+          const hit = hits[0];
+          const camDir = new THREE.Vector3();
+          camera.getWorldDirection(camDir);
+          _dragPlane.setFromNormalAndCoplanarPoint(camDir, hit.point);
+          controls.enabled = false;
+          peekDrag = {
+            mesh: hit.object,
+            origPos: hit.object.userData._origPos ? hit.object.userData._origPos.clone() : hit.object.position.clone(),
+            startHit: hit.point.clone(),
+          };
+          if (!hit.object.userData._origPos) hit.object.userData._origPos = hit.object.position.clone();
+          renderer.domElement.style.cursor = 'grabbing';
+        }
+      }
+    });
+
+    renderer.domElement.addEventListener('pointerup', (e) => {
+      if (peekDrag) {
+        springAnimations.push({ mesh: peekDrag.mesh, targetPos: peekDrag.origPos.clone(), t: 0 });
+        peekDrag = null;
+        controls.enabled = true;
+        renderer.domElement.style.cursor = toolMode === 'peek' ? 'grab' : '';
+        return;
+      }
+      if (e.button === 2 && toolMode === 'measure' && measureStart) { cancelMeasureDraft(); return; }
+      const dist = Math.hypot(e.clientX - pointerDown.x, e.clientY - pointerDown.y);
+      if (dist > 5) return;
+
+      const hits = raycastModel(e.clientX, e.clientY);
+      const hud = document.getElementById('inspect-info');
+      if (hits.length === 0) {
+        if (toolMode === 'orbit') hud.textContent = '未选中构件';
+        return;
+      }
+
+      const hit = hits[0];
+      const mesh = hit.object;
+      selectedMesh = mesh;
+      const box = new THREE.Box3().setFromObject(mesh);
+      const sz = new THREE.Vector3();
+      box.getSize(sz);
+      hud.textContent = `${mesh.name || '(未命名)'} · ${Math.round(sz.x * 1000)} × ${Math.round(sz.z * 1000)} × ${Math.round(sz.y * 1000)} mm`;
+
+      if (toolMode === 'interact') {
+        const n = (mesh.name || '').toLowerCase();
+        const isDrawer = n.includes('drw') || n.includes('drawer');
+        const isDoor = n.includes('door') || n.includes('leaf') || n.includes('slant');
+        if (!mesh.userData._basePos) mesh.userData._basePos = mesh.position.clone();
+        if (!mesh.userData._baseRotY) mesh.userData._baseRotY = mesh.rotation.y;
+        const opened = !mesh.userData._opened;
+        mesh.userData._opened = opened;
+        if (isDrawer) {
+          const targetPos = mesh.userData._basePos.clone().add(new THREE.Vector3(0, 0, opened ? 0.28 : 0));
+          doorAnimations.push({ mesh, targetPos, targetRotY: mesh.userData._baseRotY, t: 0 });
+        } else {
+          const angle = opened ? (isDoor ? Math.PI * 0.42 : Math.PI * 0.22) : 0;
+          doorAnimations.push({ mesh, targetPos: mesh.userData._basePos.clone(), targetRotY: mesh.userData._baseRotY + angle, t: 0 });
+        }
+        hud.textContent += opened ? ' [已开启]' : ' [已闭合]';
+      } else if (toolMode === 'pin') {
+        openPinPopover(e.clientX, e.clientY, hit);
+      } else if (toolMode === 'measure') {
+        if (!measureStart) {
+          measureStart = hit.point.clone();
+          measureEndPreview = measureStart.clone();
+          draftPointA.position.copy(measureStart);
+          draftPointA.visible = true;
+          draftLineGeo.setFromPoints([measureStart, measureStart]);
+          draftLine.visible = true;
+          hud.textContent = `已设起点 (${measureStart.x.toFixed(2)}, ${(-measureStart.z).toFixed(2)}, ${measureStart.y.toFixed(2)})，请点击终点`;
+        } else {
+          const endPt = applyOrthoShift(measureStart, hit.point, e.shiftKey);
+          const payload = {
+            type: 'measure_add',
+            a: [measureStart.x, measureStart.y, measureStart.z],
+            b: [endPt.x, endPt.y, endPt.z],
+            camPos: [camera.position.x, camera.position.y, camera.position.z],
+            camTarget: [controls.target.x, controls.target.y, controls.target.z],
+            authorName: currentUser?.name,
+            authorColor: currentUser?.color,
+          };
+          cancelMeasureDraft();
+          sendCollabEvent(payload);
+          activateTab('measures');
+        }
+      }
+    });
+
+    // Camera Broadcast for Follow Mode
+    let lastCamSent = 0;
+    let lastCamSig = '';
+    function maybeBroadcastCamera() {
+      if (!currentUser || followingUserId) return;
+      const now = performance.now();
+      if (now - lastCamSent < 120) return;
+      const pos = [camera.position.x, camera.position.y, camera.position.z].map((v) => +v.toFixed(3));
+      const tgt = [controls.target.x, controls.target.y, controls.target.z].map((v) => +v.toFixed(3));
+      const sig = `${pos.join(',')}|${tgt.join(',')}`;
+      if (sig === lastCamSig) return;
+      lastCamSig = sig;
+      lastCamSent = now;
+      sendCollabEvent({ type: 'camera', pos, target: tgt });
+    }
+
+    // Login Modal Initialization
+    let selectedRole = '业主';
+    let selectedColor = USER_COLORS[0];
+    const colorRow = document.getElementById('color-row');
+    USER_COLORS.forEach((hex, idx) => {
+      const dot = document.createElement('span');
+      dot.className = 'color-dot' + (idx === 0 ? ' active' : '');
+      dot.style.background = hex;
+      dot.addEventListener('click', () => {
+        selectedColor = hex;
+        colorRow.querySelectorAll('.color-dot').forEach((d) => d.classList.toggle('active', d === dot));
+      });
+      colorRow.appendChild(dot);
+    });
+    document.querySelectorAll('#role-pills .role-pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        selectedRole = pill.dataset.role;
+        document.querySelectorAll('#role-pills .role-pill').forEach((p) => p.classList.toggle('active', p === pill));
+      });
+    });
+
+    function finishLogin(name, role, color) {
+      currentUser = { name: name || '协作者', role: role || '业主', color: color || USER_COLORS[0] };
+      localStorage.setItem('house3d_profile', JSON.stringify(currentUser));
+      document.getElementById('login-modal').classList.add('hidden');
+      connectCollab();
+    }
+
+    try {
+      const saved = JSON.parse(localStorage.getItem('house3d_profile') || 'null');
+      if (saved && saved.name) {
+        document.getElementById('login-name').value = saved.name;
+        if (saved.role) {
+          selectedRole = saved.role;
+          document.querySelectorAll('#role-pills .role-pill').forEach((p) => p.classList.toggle('active', p.dataset.role === selectedRole));
+        }
+        if (saved.color) {
+          selectedColor = saved.color;
+          const idx = USER_COLORS.indexOf(selectedColor);
+          if (idx >= 0) colorRow.querySelectorAll('.color-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+        }
+      }
+    } catch (_) {}
+
+    document.getElementById('login-submit-btn').addEventListener('click', () => {
+      const name = document.getElementById('login-name').value.trim() || `${selectedRole}${Math.floor(10 + Math.random() * 89)}`;
+      finishLogin(name, selectedRole, selectedColor);
+    });
+    document.getElementById('login-name').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('login-submit-btn').click();
+    });
+    document.getElementById('switch-user-btn').addEventListener('click', () => {
+      document.getElementById('login-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('login-name').focus(), 30);
+    });
+
+    const urlName = URL_PARAMS.get('name');
+    if (urlName) {
+      finishLogin(urlName.trim(), URL_PARAMS.get('role') || '业主', URL_PARAMS.get('color') || USER_COLORS[1]);
+    }
+
+    // Keyboard WASD/QE walk controls + mode hotkeys (guarded when typing!)
+    const keys = new Set();
+    function isTyping() {
+      const el = document.activeElement;
+      if (!document.getElementById('login-modal').classList.contains('hidden')) return true;
+      return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+    }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { closePinPopover(); cancelMeasureDraft(); return; }
+      if (isTyping()) return;
+      if (e.key === '1') { setToolMode('orbit'); return; }
+      if (e.key === '2') { setToolMode('peek'); return; }
+      if (e.key === '3') { setToolMode('interact'); return; }
+      if (e.key === '4') { setToolMode('pin'); return; }
+      if (e.key === '5') { setToolMode('measure'); return; }
+      keys.add(e.code);
+    });
+    window.addEventListener('keyup', (e) => keys.delete(e.code));
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Project 3D world point to viewport pixel (returns null if behind camera)
+    const _proj = new THREE.Vector3();
+    function toScreen(vec3) {
+      _proj.copy(vec3).project(camera);
+      if (_proj.z > 1 || _proj.z < -1) return null;
+      return {
+        x: (_proj.x * 0.5 + 0.5) * window.innerWidth,
+        y: (-_proj.y * 0.5 + 0.5) * window.innerHeight,
+      };
+    }
+
+    function updateOverlays() {
+      for (const entry of remoteCursorMeshes.values()) {
+        entry.group.position.lerp(entry.targetPos, 0.35);
+        if (!entry.visible) { entry.el.style.display = 'none'; continue; }
+        const sc = toScreen(entry.group.position);
+        if (!sc) { entry.el.style.display = 'none'; continue; }
+        entry.el.style.display = 'block';
+        entry.el.style.left = `${sc.x}px`;
+        entry.el.style.top = `${sc.y}px`;
+      }
+      for (const entry of pinMeshes.values()) {
+        const sc = toScreen(entry.group.position);
+        if (!sc || (entry.pin.floor && !floorGroups[entry.pin.floor]?.visible)) {
+          entry.el.style.display = 'none'; continue;
+        }
+        entry.el.style.display = 'block';
+        entry.el.style.left = `${sc.x}px`;
+        entry.el.style.top = `${sc.y}px`;
+      }
+      for (const entry of measureMeshes.values()) {
+        const sc = toScreen(entry.mid);
+        if (!sc) { entry.el.style.display = 'none'; continue; }
+        entry.el.style.display = 'block';
+        entry.el.style.left = `${sc.x}px`;
+        entry.el.style.top = `${sc.y}px`;
+      }
+      if (measureStart && measureEndPreview && draftLine.visible) {
+        const mid = measureStart.clone().add(measureEndPreview).multiplyScalar(0.5);
+        const sc = toScreen(mid);
+        if (sc) {
+          draftLabelEl.style.display = 'block';
+          draftLabelEl.style.left = `${sc.x}px`;
+          draftLabelEl.style.top = `${sc.y}px`;
+        } else {
+          draftLabelEl.style.display = 'none';
+        }
+      }
+    }
+
+    const clock = new THREE.Clock();
+    const forward = new THREE.Vector3();
+    const right = new THREE.Vector3();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.05);
+
+      if (camAnim) {
+        camAnim.t = Math.min(1, camAnim.t + dt * 2.6);
+        const s = camAnim.t * camAnim.t * (3 - 2 * camAnim.t);
+        camera.position.lerpVectors(camAnim.startPos, camAnim.endPos, s);
+        controls.target.lerpVectors(camAnim.startTarget, camAnim.endTarget, s);
+        if (camAnim.t >= 1) camAnim = null;
+      }
+
+      if (keys.size > 0 && !isTyping()) {
+        const speed = (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 6.0 : 2.8) * dt;
+        camera.getWorldDirection(forward);
+        forward.y = 0;
+        if (forward.lengthSq() > 1e-6) forward.normalize();
+        right.crossVectors(forward, camera.up).normalize();
+        const delta = new THREE.Vector3();
+        if (keys.has('KeyW') || keys.has('ArrowUp')) delta.addScaledVector(forward, speed);
+        if (keys.has('KeyS') || keys.has('ArrowDown')) delta.addScaledVector(forward, -speed);
+        if (keys.has('KeyD') || keys.has('ArrowRight')) delta.addScaledVector(right, speed);
+        if (keys.has('KeyA') || keys.has('ArrowLeft')) delta.addScaledVector(right, -speed);
+        if (keys.has('KeyE')) delta.y += speed;
+        if (keys.has('KeyQ')) delta.y -= speed;
+        if (delta.lengthSq() > 0) {
+          camera.position.add(delta);
+          controls.target.add(delta);
+          camAnim = null;
+          followingUserId = null;
+        }
+      }
+
+      for (let i = springAnimations.length - 1; i >= 0; i--) {
+        const a = springAnimations[i];
+        a.t = Math.min(1, a.t + dt * 6.5);
+        a.mesh.position.lerp(a.targetPos, 0.32);
+        if (a.mesh.position.distanceTo(a.targetPos) < 0.002 || a.t >= 1) {
+          a.mesh.position.copy(a.targetPos);
+          springAnimations.splice(i, 1);
+        }
+      }
+      for (let i = doorAnimations.length - 1; i >= 0; i--) {
+        const d = doorAnimations[i];
+        d.t = Math.min(1, d.t + dt * 4.5);
+        d.mesh.position.lerp(d.targetPos, 0.25);
+        d.mesh.rotation.y += (d.targetRotY - d.mesh.rotation.y) * 0.25;
+        if (d.t >= 1) {
+          d.mesh.position.copy(d.targetPos);
+          d.mesh.rotation.y = d.targetRotY;
+          doorAnimations.splice(i, 1);
+        }
+      }
+
+      controls.update();
+      updateOverlays();
+      maybeBroadcastCamera();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
