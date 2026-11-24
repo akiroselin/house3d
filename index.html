@@ -633,8 +633,24 @@
       body.collab-open #left-hud-stack { opacity: 0; pointer-events: none; visibility: hidden; }
       #view-popover { max-height: min(340px, calc(100vh - 270px)); }
       #minimal-actions { top: 12px; right: 12px; }
-      #collab-topbar { top: 56px; left: 12px; right: 12px; max-width: calc(100vw - 24px); border-radius: var(--radius-md); }
-      #collab-panel { top: 112px; right: 12px; left: 12px; width: auto; height: 46vh; bottom: auto; }
+      #collab-topbar {
+        top: 54px; left: 12px; right: 12px; max-width: calc(100vw - 24px);
+        padding: 6px 8px; gap: 5px; border-radius: var(--radius-md);
+      }
+      #collab-topbar .conn-pill { padding: 0 6px 0 2px; border-right: none; font-size: 11px; }
+      #collab-topbar .mode-group {
+        width: 100%; justify-content: space-between; overflow-x: auto;
+        flex-wrap: nowrap; scrollbar-width: none; gap: 2px; padding: 2px;
+      }
+      #collab-topbar .mode-group::-webkit-scrollbar { display: none; }
+      #collab-topbar .mode-btn { padding: 4px 6px; font-size: 11px; gap: 3px; flex-shrink: 0; }
+      #collab-topbar .mode-btn .svg-icon { width: 12px; height: 12px; }
+      #collab-topbar .roster-row { max-width: 100%; }
+      #collab-topbar .top-btn { padding: 3px 8px; font-size: 11px; }
+      #collab-panel {
+        top: 146px; right: 12px; left: 12px; width: auto;
+        height: 42vh; max-height: calc(100vh - 224px); bottom: auto;
+      }
       #bottom-dock { bottom: 12px; width: calc(100vw - 24px); }
     }
     @media (max-width: 979px), (pointer: coarse) {
@@ -1060,11 +1076,14 @@
     let shadowsEnabled = !IS_MOBILE;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let autoRotateEnabled = !prefersReducedMotion;
+    const VIEWER_BUILD = '20261124_opt4';
     let rafId = 0;
+    let inAnimate = false;
     let dirtyFrames = 14;
     let lastRenderMs = 0;
     let renderedFrames = 0;
     let rightOrbitCount = 0;
+    let webglContextLost = false;
 
     const container = document.getElementById('canvas-container');
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -1076,6 +1095,7 @@
     renderer.shadowMap.enabled = shadowsEnabled;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = shadowsEnabled;
     renderer.domElement.style.touchAction = 'none';
     container.appendChild(renderer.domElement);
 
@@ -1083,7 +1103,10 @@
     scene.background = new THREE.Color(0x16171a);
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    const roomEnv = new RoomEnvironment();
+    scene.environment = pmremGenerator.fromScene(roomEnv, 0.04).texture;
+    roomEnv.dispose();
+    pmremGenerator.dispose();
     scene.environmentIntensity = IS_MOBILE ? 0.55 : 0.65;
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.08, 250);
@@ -1136,11 +1159,15 @@
     scene.add(pivotRing);
     let pivotRingHideAt = 0;
 
-    function markDirty(frames = 3) {
-      dirtyFrames = Math.max(dirtyFrames, frames);
-      if (!rafId && typeof animate === 'function') {
+    function scheduleAnimate() {
+      if (!rafId && !inAnimate && !webglContextLost && typeof animate === 'function') {
         rafId = requestAnimationFrame(animate);
       }
+    }
+
+    function markDirty(frames = 3) {
+      dirtyFrames = Math.max(dirtyFrames, frames);
+      scheduleAnimate();
     }
 
     function refreshShadows() {
@@ -1152,7 +1179,24 @@
       renderer.shadowMap.needsUpdate = true;
     }
 
-    controls.addEventListener('change', () => markDirty(4));
+    renderer.domElement.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      webglContextLost = true;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+      if (typeof syncBodyState === 'function') syncBodyState();
+      console.warn('WebGL context lost');
+    });
+
+    renderer.domElement.addEventListener('webglcontextrestored', () => {
+      webglContextLost = false;
+      if (typeof syncBodyState === 'function') syncBodyState();
+      refreshShadows();
+      markDirty(10);
+    });
+
+    controls.addEventListener('change', () => {
+      if (!inAnimate) markDirty(4);
+    });
 
     const floorGroups = {
       '2F': new THREE.Group(),
@@ -1194,12 +1238,31 @@
     let hideWalls = true;
 
     function syncBodyState() {
+      document.body.dataset.viewerBuild = VIEWER_BUILD;
+      document.body.dataset.webglContextLost = String(webglContextLost);
       document.body.dataset.modelsLoaded = String(modelsLoaded);
       document.body.dataset.hideWalls = String(hideWalls);
       document.body.dataset.hideCeilings = String(hideCeilings);
       document.body.dataset.autoRotate = String(autoRotateEnabled);
       document.body.dataset.rightOrbitCount = String(rightOrbitCount);
       document.body.dataset.shadowsEnabled = String(shadowsEnabled);
+    }
+
+    function syncMobileCollabLayout() {
+      const topbar = document.getElementById('collab-topbar');
+      const panel = document.getElementById('collab-panel');
+      const dock = document.getElementById('bottom-dock');
+      if (!topbar || !panel) return;
+      if (window.innerWidth <= 979 && document.body.classList.contains('collab-open')) {
+        const tbRect = topbar.getBoundingClientRect();
+        const topPx = Math.ceil(tbRect.bottom + 8);
+        const dockH = dock ? dock.getBoundingClientRect().height : 56;
+        panel.style.top = `${topPx}px`;
+        panel.style.maxHeight = `${Math.max(180, Math.floor(window.innerHeight - topPx - dockH - 22))}px`;
+      } else {
+        panel.style.top = '';
+        panel.style.maxHeight = '';
+      }
     }
 
     function setAutoRotate(enabled) {
@@ -1377,6 +1440,7 @@
         closeViewPopover();
         pauseAutoRotate();
       }
+      requestAnimationFrame(syncMobileCollabLayout);
       markDirty(4);
     }
     document.getElementById('btn-enter-collab').addEventListener('click', () => {
@@ -1719,6 +1783,7 @@
         st.textContent = `HTTP同步 · ${onlineUsers.length}人`;
       }
       updateBriefSummary();
+      requestAnimationFrame(syncMobileCollabLayout);
     }
 
     function focusPin(pin) {
@@ -3313,6 +3378,7 @@
       camera.updateProjectionMatrix();
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_DPR));
       renderer.setSize(window.innerWidth, window.innerHeight);
+      syncMobileCollabLayout();
       markDirty(4);
     });
 
@@ -3388,6 +3454,7 @@
         controlsTarget: controls.target.toArray(),
       }),
       perf: () => ({
+        viewerBuild: VIEWER_BUILD,
         calls: renderer.info.render.calls,
         triangles: renderer.info.render.triangles,
         geometries: renderer.info.memory.geometries,
@@ -3399,6 +3466,8 @@
         hideWalls,
         hideCeilings,
         renderedFrames,
+        rafId,
+        webglContextLost,
       }),
       findInteractableScreenPoint: (pattern = 'door|slant|leaf|cab') => {
         const re = new RegExp(pattern, 'i');
@@ -3449,112 +3518,121 @@
 
     function animate(nowMs = performance.now()) {
       rafId = 0;
-      const dt = Math.min(clock.getDelta(), 0.05);
-      const hasKeyMotion = keys.size > 0 && !isTyping();
-      const hasHardAnim = Boolean(
-        camAnim || hasKeyMotion || springAnimations.length > 0 || doorAnimations.length > 0 || peekDrag || rightOrbitDrag
-      );
+      if (webglContextLost) return;
+      inAnimate = true;
+      let stillNeedFrames = false;
 
-      if (IS_MOBILE && autoRotateEnabled && !hasHardAnim && dirtyFrames <= 0 && (nowMs - lastRenderMs < 32)) {
-        rafId = requestAnimationFrame(animate);
-        return;
-      }
+      try {
+        const dt = Math.min(clock.getDelta(), 0.05);
+        const hasKeyMotion = keys.size > 0 && !isTyping();
+        const hasHardAnim = Boolean(
+          camAnim || hasKeyMotion || springAnimations.length > 0 || doorAnimations.length > 0 || peekDrag || rightOrbitDrag
+        );
 
-      if (pivotRing.visible && nowMs >= pivotRingHideAt && !rightOrbitDrag) {
-        pivotRing.visible = false;
-        dirtyFrames = Math.max(dirtyFrames, 1);
-      }
-
-      if (camAnim) {
-        camAnim.t = Math.min(1, camAnim.t + dt * 2.6);
-        const s = camAnim.t * camAnim.t * (3 - 2 * camAnim.t);
-        camera.position.lerpVectors(camAnim.startPos, camAnim.endPos, s);
-        controls.target.lerpVectors(camAnim.startTarget, camAnim.endTarget, s);
-        if (camAnim.t >= 1) camAnim = null;
-      }
-
-      if (hasKeyMotion) {
-        const speed = (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 6.0 : 2.8) * dt;
-        camera.getWorldDirection(forward);
-        forward.y = 0;
-        if (forward.lengthSq() > 1e-6) forward.normalize();
-        right.crossVectors(forward, camera.up).normalize();
-        const delta = new THREE.Vector3();
-        if (keys.has('KeyW') || keys.has('ArrowUp')) delta.addScaledVector(forward, speed);
-        if (keys.has('KeyS') || keys.has('ArrowDown')) delta.addScaledVector(forward, -speed);
-        if (keys.has('KeyD') || keys.has('ArrowRight')) delta.addScaledVector(right, speed);
-        if (keys.has('KeyA') || keys.has('ArrowLeft')) delta.addScaledVector(right, -speed);
-        if (keys.has('KeyE')) delta.y += speed;
-        if (keys.has('KeyQ')) delta.y -= speed;
-        if (delta.lengthSq() > 0) {
-          camera.position.add(delta);
-          controls.target.add(delta);
-          camAnim = null;
-          followingUserId = null;
+        if (IS_MOBILE && autoRotateEnabled && !hasHardAnim && dirtyFrames <= 0 && (nowMs - lastRenderMs < 32)) {
+          stillNeedFrames = true;
+          return;
         }
-      }
 
-      // Guaranteed Peek Spring-Back (easeOutCubic)
-      let shadowDirty = false;
-      for (let i = springAnimations.length - 1; i >= 0; i--) {
-        const a = springAnimations[i];
-        a.t = Math.min(1, a.t + dt / (a.duration || 0.35));
-        const ease = 1 - Math.pow(1 - a.t, 3);
-        a.mesh.position.lerpVectors(a.startPos, a.targetPos, ease);
-        if (a.t >= 1 || a.mesh.position.distanceTo(a.targetPos) < 0.001) {
-          a.mesh.position.copy(a.targetPos);
-          springAnimations.splice(i, 1);
-          shadowDirty = true;
+        if (pivotRing.visible && nowMs >= pivotRingHideAt && !rightOrbitDrag) {
+          pivotRing.visible = false;
+          dirtyFrames = Math.max(dirtyFrames, 1);
         }
-      }
 
-      // Exact In-Place Door Hinge / Drawer Slide Animation
-      for (let i = doorAnimations.length - 1; i >= 0; i--) {
-        const d = doorAnimations[i];
-        d.t = Math.min(1, d.t + dt / (d.duration || 0.36));
-        const ease = 1 - Math.pow(1 - d.t, 3);
-        if (d.kind === 'drawer') {
-          const curSlide = THREE.MathUtils.lerp(d.startSlide, d.endSlide, ease);
-          d.mesh.position.copy(d.basePos).addScaledVector(d.slideParent, curSlide);
-          d.mesh.quaternion.copy(d.baseQuat);
-          d.mesh.userData._curSlide = curSlide;
-        } else {
-          const curDelta = THREE.MathUtils.lerp(d.startDelta, d.endDelta, ease);
-          const qRot = new THREE.Quaternion().setFromAxisAngle(d.axisParent, curDelta);
-          d.mesh.quaternion.copy(qRot).multiply(d.baseQuat);
-          const off = d.basePos.clone().sub(d.pivotParent).applyQuaternion(qRot);
-          d.mesh.position.copy(d.pivotParent).add(off);
-          d.mesh.userData._curDoorDelta = curDelta;
+        if (camAnim) {
+          camAnim.t = Math.min(1, camAnim.t + dt * 2.6);
+          const s = camAnim.t * camAnim.t * (3 - 2 * camAnim.t);
+          camera.position.lerpVectors(camAnim.startPos, camAnim.endPos, s);
+          controls.target.lerpVectors(camAnim.startTarget, camAnim.endTarget, s);
+          if (camAnim.t >= 1) camAnim = null;
         }
-        if (d.t >= 1) {
-          d.mesh.userData._peekOrigin = d.mesh.position.clone();
-          doorAnimations.splice(i, 1);
-          shadowDirty = true;
+
+        if (hasKeyMotion) {
+          const speed = (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 6.0 : 2.8) * dt;
+          camera.getWorldDirection(forward);
+          forward.y = 0;
+          if (forward.lengthSq() > 1e-6) forward.normalize();
+          right.crossVectors(forward, camera.up).normalize();
+          const delta = new THREE.Vector3();
+          if (keys.has('KeyW') || keys.has('ArrowUp')) delta.addScaledVector(forward, speed);
+          if (keys.has('KeyS') || keys.has('ArrowDown')) delta.addScaledVector(forward, -speed);
+          if (keys.has('KeyD') || keys.has('ArrowRight')) delta.addScaledVector(right, speed);
+          if (keys.has('KeyA') || keys.has('ArrowLeft')) delta.addScaledVector(right, -speed);
+          if (keys.has('KeyE')) delta.y += speed;
+          if (keys.has('KeyQ')) delta.y -= speed;
+          if (delta.lengthSq() > 0) {
+            camera.position.add(delta);
+            controls.target.add(delta);
+            camAnim = null;
+            followingUserId = null;
+          }
         }
-      }
-      if (shadowDirty) refreshShadows();
 
-      _prevCamPos.copy(camera.position);
-      _prevCamTgt.copy(controls.target);
-      if (!rightOrbitDrag) {
-        controls.update(dt);
-      }
-      const camDelta = camera.position.distanceToSquared(_prevCamPos) + controls.target.distanceToSquared(_prevCamTgt);
-      const camMoved = camDelta > 1e-10;
-      const shouldRender = dirtyFrames > 0 || camMoved || hasHardAnim || autoRotateEnabled || pivotRing.visible;
+        // Guaranteed Peek Spring-Back (easeOutCubic)
+        let shadowDirty = false;
+        for (let i = springAnimations.length - 1; i >= 0; i--) {
+          const a = springAnimations[i];
+          a.t = Math.min(1, a.t + dt / (a.duration || 0.35));
+          const ease = 1 - Math.pow(1 - a.t, 3);
+          a.mesh.position.lerpVectors(a.startPos, a.targetPos, ease);
+          if (a.t >= 1 || a.mesh.position.distanceTo(a.targetPos) < 0.001) {
+            a.mesh.position.copy(a.targetPos);
+            springAnimations.splice(i, 1);
+            shadowDirty = true;
+          }
+        }
 
-      if (shouldRender) {
-        updateOverlays();
-        maybeBroadcastCamera();
-        renderer.render(scene, camera);
-        renderedFrames += 1;
-        lastRenderMs = nowMs;
-        if (dirtyFrames > 0) dirtyFrames -= 1;
+        // Exact In-Place Door Hinge / Drawer Slide Animation
+        for (let i = doorAnimations.length - 1; i >= 0; i--) {
+          const d = doorAnimations[i];
+          d.t = Math.min(1, d.t + dt / (d.duration || 0.36));
+          const ease = 1 - Math.pow(1 - d.t, 3);
+          if (d.kind === 'drawer') {
+            const curSlide = THREE.MathUtils.lerp(d.startSlide, d.endSlide, ease);
+            d.mesh.position.copy(d.basePos).addScaledVector(d.slideParent, curSlide);
+            d.mesh.quaternion.copy(d.baseQuat);
+            d.mesh.userData._curSlide = curSlide;
+          } else {
+            const curDelta = THREE.MathUtils.lerp(d.startDelta, d.endDelta, ease);
+            const qRot = new THREE.Quaternion().setFromAxisAngle(d.axisParent, curDelta);
+            d.mesh.quaternion.copy(qRot).multiply(d.baseQuat);
+            const off = d.basePos.clone().sub(d.pivotParent).applyQuaternion(qRot);
+            d.mesh.position.copy(d.pivotParent).add(off);
+            d.mesh.userData._curDoorDelta = curDelta;
+          }
+          if (d.t >= 1) {
+            d.mesh.userData._peekOrigin = d.mesh.position.clone();
+            doorAnimations.splice(i, 1);
+            shadowDirty = true;
+          }
+        }
+        if (shadowDirty) refreshShadows();
+
+        _prevCamPos.copy(camera.position);
+        _prevCamTgt.copy(controls.target);
+        if (!rightOrbitDrag) {
+          controls.update(dt);
+        }
+        const camDelta = camera.position.distanceToSquared(_prevCamPos) + controls.target.distanceToSquared(_prevCamTgt);
+        const camMoved = camDelta > 1e-10;
+        const shouldRender = dirtyFrames > 0 || camMoved || hasHardAnim || autoRotateEnabled || pivotRing.visible;
+
+        if (shouldRender) {
+          updateOverlays();
+          maybeBroadcastCamera();
+          renderer.render(scene, camera);
+          renderedFrames += 1;
+          lastRenderMs = nowMs;
+          if (dirtyFrames > 0) dirtyFrames -= 1;
+        }
+
+        stillNeedFrames = dirtyFrames > 0 || camMoved || hasHardAnim || autoRotateEnabled || pivotRing.visible;
+      } finally {
+        inAnimate = false;
       }
 
-      const stillNeedFrames = dirtyFrames > 0 || camMoved || hasHardAnim || autoRotateEnabled || pivotRing.visible;
       if (stillNeedFrames) {
-        rafId = requestAnimationFrame(animate);
+        scheduleAnimate();
       }
     }
     markDirty(14);
