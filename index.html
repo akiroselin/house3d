@@ -79,21 +79,30 @@
     /* =====================================================================
        ULTRA-MINIMALIST INITIAL LANDING HUD (Shown cleanly by default)
        ===================================================================== */
-    #minimal-brief-card {
+    #left-hud-stack {
       position: fixed; top: 16px; left: 16px;
-      width: min(344px, calc(100vw - 260px));
+      width: min(344px, calc(100vw - 180px));
+      z-index: 36;
+      display: flex; flex-direction: column; align-items: stretch; gap: 8px;
+      pointer-events: none;
+      transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out), visibility 0.22s;
+    }
+    #left-hud-stack > * { pointer-events: auto; }
+    body.collab-open #left-hud-stack { top: 64px; }
+
+    #minimal-brief-card {
+      position: relative; width: 100%; order: 1;
       background: var(--surface-glass);
-      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--border-hairline);
       border-radius: var(--radius-lg);
       padding: 13px 15px;
       box-shadow: var(--shadow-glass);
-      z-index: 26;
       display: flex; flex-direction: column; gap: 9px;
       transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out), visibility 0.22s;
     }
     body.collab-open #minimal-brief-card {
-      opacity: 0; pointer-events: none; visibility: hidden; transform: translateY(-8px);
+      display: none;
     }
 
     .brief-brand-line {
@@ -141,12 +150,12 @@
 
     /* Goal Full Detail Popover (triggered strictly on demand) */
     #goal-popover {
-      position: fixed; top: 148px; left: 16px; width: min(360px, calc(100vw - 32px));
-      max-height: 360px; overflow-y: auto;
+      position: relative; width: 100%; order: 2;
+      max-height: min(320px, calc(100vh - 240px)); overflow-y: auto;
       background: var(--surface-elevated);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--border-gold); border-radius: var(--radius-md);
-      padding: 14px; box-shadow: var(--shadow-glass); z-index: 44;
+      padding: 14px; box-shadow: var(--shadow-glass);
       display: none; flex-direction: column; gap: 8px;
     }
     #goal-popover.open { display: flex; }
@@ -156,7 +165,7 @@
       font-size: 13px; font-weight: 600; color: var(--accent-gold-hover);
     }
 
-    /* Top-Right Minimal Actions (View/Floors + Enter/Close Collab) */
+    /* Top-Right Minimal Action (Enter/Close Collab) */
     #minimal-actions {
       position: fixed; top: 16px; right: 16px; z-index: 36;
       display: flex; align-items: center; gap: 8px;
@@ -165,7 +174,7 @@
       display: inline-flex; align-items: center; gap: 6px;
       height: 36px; padding: 0 13px; border-radius: var(--radius-pill);
       background: var(--surface-glass);
-      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--border-hairline);
       color: var(--text-primary); font-size: 12.5px; font-weight: 500;
       box-shadow: 0 10px 26px rgba(0, 0, 0, 0.42);
@@ -173,6 +182,26 @@
     }
     .hud-pill-btn:hover { background: var(--surface-elevated); border-color: rgba(255, 255, 255, 0.24); }
     .hud-pill-btn[aria-expanded="true"] { border-color: var(--accent-gold); color: var(--accent-gold-hover); }
+    .left-view-card-btn {
+      order: 3; width: 100%; justify-content: space-between;
+      height: auto; min-height: 38px; padding: 8px 14px;
+      border-radius: var(--radius-md);
+      background: var(--surface-glass);
+    }
+    .left-view-card-btn .view-btn-left {
+      display: inline-flex; align-items: center; gap: 7px; font-weight: 600;
+    }
+    .left-view-card-btn .view-btn-right {
+      display: inline-flex; align-items: center; gap: 6px; min-width: 0;
+      font-size: 11px; color: var(--accent-gold-hover);
+    }
+    .left-view-card-btn #view-card-badge {
+      max-width: 148px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      padding: 1px 7px; border-radius: var(--radius-pill);
+      background: rgba(201, 162, 75, 0.14); border: 1px solid var(--border-gold);
+    }
+    .left-view-card-btn[aria-expanded="true"] .view-chevron { transform: rotate(180deg); }
+    .view-chevron { transition: transform 0.18s var(--ease-out); color: var(--text-secondary); }
 
     .cta-gold-btn {
       background: var(--accent-gold); border-color: var(--accent-gold);
@@ -187,14 +216,14 @@
       background: rgba(201, 162, 75, 0.16); color: var(--accent-gold-hover);
     }
 
-    /* Floating View & Floor Popover (replaces permanent left sidebar clutter) */
+    /* Floor & View Preset Popover stacked cleanly beneath the Residence Card */
     #view-popover {
-      position: fixed; top: 60px; right: 16px; width: min(300px, calc(100vw - 32px));
-      max-height: calc(100vh - 152px); overflow-y: auto;
+      position: relative; width: 100%; order: 4;
+      max-height: min(440px, calc(100vh - 260px)); overflow-y: auto;
       background: var(--surface-elevated);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--border-hairline); border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-glass); z-index: 45;
+      box-shadow: var(--shadow-glass);
       display: none; flex-direction: column;
     }
     #view-popover.open { display: flex; }
@@ -232,7 +261,7 @@
       max-width: calc(100vw - 262px);
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       background: var(--surface-glass);
-      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--border-hairline); border-radius: var(--radius-pill);
       padding: 5px 10px; box-shadow: var(--shadow-glass);
       z-index: 32; font-size: 12px;
@@ -285,7 +314,7 @@
       width: min(368px, calc(100vw - 32px));
       display: flex; flex-direction: column;
       background: var(--surface-glass);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--border-hairline); border-radius: var(--radius-lg);
       box-shadow: var(--shadow-glass);
       z-index: 28; overflow: hidden;
@@ -384,7 +413,7 @@
     #object-context-bar {
       width: 100%;
       background: var(--surface-elevated);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--border-gold); border-radius: var(--radius-lg);
       padding: 10px 12px; box-shadow: var(--shadow-glass);
       display: none; flex-direction: column; gap: 8px;
@@ -433,7 +462,7 @@
     #house-qa-answer {
       width: 100%;
       background: var(--surface-elevated);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--border-hairline); border-radius: var(--radius-lg);
       padding: 12px 14px; box-shadow: var(--shadow-glass);
       display: none; flex-direction: column; gap: 8px;
@@ -469,7 +498,7 @@
     }
     #house-qa-suggestions.open { display: flex; }
     .qa-sugg-btn {
-      background: var(--surface-glass); backdrop-filter: blur(12px);
+      background: var(--surface-glass); backdrop-filter: blur(8px);
       border: 1px solid var(--border-hairline); border-radius: var(--radius-pill);
       color: var(--text-secondary); padding: 4px 10px; font-size: 11.5px;
       transition: all 0.16s;
@@ -480,7 +509,7 @@
     #house-qa-form {
       width: 100%; display: flex; align-items: center; gap: 8px;
       background: var(--surface-glass);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--border-hairline); border-radius: var(--radius-pill);
       padding: 5px 6px 5px 14px; box-shadow: var(--shadow-glass);
       transition: border-color 0.2s var(--ease-out);
@@ -538,7 +567,7 @@
     /* Pin Comment Popover */
     #pin-popover {
       position: fixed; z-index: 48; width: 295px; display: none;
-      background: var(--surface-elevated); backdrop-filter: blur(18px);
+      background: var(--surface-elevated); backdrop-filter: blur(10px);
       border: 1px solid var(--accent-gold); border-radius: var(--radius-md); padding: 13px;
       box-shadow: var(--shadow-glass);
     }
@@ -554,7 +583,7 @@
     /* Login Modal */
     #login-modal {
       position: fixed; inset: 0; z-index: 60;
-      background: rgba(10, 10, 12, 0.78); backdrop-filter: blur(14px);
+      background: rgba(10, 10, 12, 0.78); backdrop-filter: blur(10px);
       display: flex; align-items: center; justify-content: center; padding: 16px;
     }
     #login-modal.hidden { display: none; }
@@ -600,11 +629,26 @@
     .login-submit:hover { background: var(--accent-gold-hover); }
 
     @media (max-width: 979px) {
-      #minimal-brief-card { top: 58px; left: 12px; right: 12px; width: auto; }
+      #left-hud-stack { top: 56px; left: 12px; right: 12px; width: auto; max-width: calc(100vw - 24px); }
+      body.collab-open #left-hud-stack { opacity: 0; pointer-events: none; visibility: hidden; }
+      #view-popover { max-height: min(340px, calc(100vh - 270px)); }
       #minimal-actions { top: 12px; right: 12px; }
       #collab-topbar { top: 56px; left: 12px; right: 12px; max-width: calc(100vw - 24px); border-radius: var(--radius-md); }
       #collab-panel { top: 112px; right: 12px; left: 12px; width: auto; height: 46vh; bottom: auto; }
       #bottom-dock { bottom: 12px; width: calc(100vw - 24px); }
+    }
+    @media (max-width: 979px), (pointer: coarse) {
+      #minimal-brief-card, #goal-popover, .hud-pill-btn, #view-popover,
+      #collab-topbar, #collab-panel, #object-context-bar, #house-qa-answer,
+      .qa-sugg-btn, #house-qa-form, #pin-popover, #login-modal {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(18, 18, 22, 0.94);
+      }
+      .cta-gold-btn { background: var(--accent-gold) !important; }
+      body.collab-open .cta-gold-btn { background: rgba(26, 26, 30, 0.96) !important; }
+      .qa-sugg-btn { background: rgba(24, 24, 29, 0.94); }
+      #login-modal { background: rgba(10, 10, 12, 0.92); }
     }
   </style>
 </head>
@@ -613,75 +657,87 @@
   <div id="overlay-layer"></div>
   <div id="toast-banner" role="status" aria-live="polite"></div>
 
-  <!-- Minimal Initial Landing Card (ONLY User / Goal / House Status) -->
-  <section id="minimal-brief-card" aria-label="空间概览">
-    <div class="brief-brand-line">
-      <span class="brief-brand-title">四层当代中式宅邸</span>
-      <span class="brief-online-badge" id="brief-online-count">0 人在线</span>
-    </div>
-    <div class="brief-row">
-      <span class="brief-k">用户</span>
-      <div class="brief-v">
-        <span class="dot" id="brief-user-dot" style="background:#C9A24B;"></span>
-        <strong class="brief-ellipsis" id="brief-user-name">未登录</strong>
-        <span class="brief-role-tag" id="brief-user-role">访客</span>
+  <!-- Left HUD Stack: Residence Brief Card -> Floor & View Card directly beneath -->
+  <div id="left-hud-stack">
+    <section id="minimal-brief-card" aria-label="空间概览">
+      <div class="brief-brand-line">
+        <span class="brief-brand-title">四层当代中式宅邸</span>
+        <span class="brief-online-badge" id="brief-online-count">0 人在线</span>
       </div>
-      <button type="button" class="brief-link-btn" id="brief-switch-btn">切换</button>
-    </div>
-    <div class="brief-row">
-      <span class="brief-k">目标</span>
-      <div class="brief-v">
-        <span class="brief-ellipsis" id="brief-goal-text">B1夹层1.9m · 双楼梯稳固衔接 · 定制柜与原样平铺</span>
+      <div class="brief-row">
+        <span class="brief-k">用户</span>
+        <div class="brief-v">
+          <span class="dot" id="brief-user-dot" style="background:#C9A24B;"></span>
+          <strong class="brief-ellipsis" id="brief-user-name">未登录</strong>
+          <span class="brief-role-tag" id="brief-user-role">访客</span>
+        </div>
+        <button type="button" class="brief-link-btn" id="brief-switch-btn">切换</button>
       </div>
-      <button type="button" class="brief-link-btn" id="brief-goal-expand-btn" aria-expanded="false">详情</button>
-    </div>
-    <div class="brief-row">
-      <span class="brief-k">状态</span>
-      <div class="brief-v">
-        <span class="dot" id="brief-status-dot"></span>
-        <span class="brief-ellipsis" id="brief-house-status">正在加载 4 层 3D 模型...</span>
+      <div class="brief-row">
+        <span class="brief-k">目标</span>
+        <div class="brief-v">
+          <span class="brief-ellipsis" id="brief-goal-text">B1夹层1.9m · 双楼梯稳固衔接 · 定制柜与原样平铺</span>
+        </div>
+        <button type="button" class="brief-link-btn" id="brief-goal-expand-btn" aria-expanded="false">详情</button>
       </div>
-    </div>
-  </section>
+      <div class="brief-row">
+        <span class="brief-k">状态</span>
+        <div class="brief-v">
+          <span class="dot" id="brief-status-dot"></span>
+          <span class="brief-ellipsis" id="brief-house-status">正在加载 4 层 3D 模型...</span>
+        </div>
+      </div>
+    </section>
 
-  <!-- Progressive-Disclosure Customer Goal Detail Popover -->
-  <div id="goal-popover" role="dialog" aria-label="顾客目标明细">
-    <div class="popover-head">
-      <span>顾客目标与对齐状态</span>
-      <button type="button" class="brief-link-btn" id="goal-pop-close">关闭</button>
+    <!-- Progressive-Disclosure Customer Goal Detail Popover -->
+    <div id="goal-popover" role="dialog" aria-label="顾客目标明细">
+      <div class="popover-head">
+        <span>顾客目标与对齐状态</span>
+        <button type="button" class="brief-link-btn" id="goal-pop-close">关闭</button>
+      </div>
+      <div id="goal-pop-list" style="display:flex;flex-direction:column;gap:6px;"></div>
     </div>
-    <div id="goal-pop-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+
+    <!-- Floor & Camera View Trigger Card positioned strictly below the Residence Card -->
+    <button type="button" class="hud-pill-btn left-view-card-btn" id="btn-view-popover" aria-expanded="false">
+      <span class="view-btn-left">
+        <svg class="svg-icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        <span>视角 / 楼层</span>
+      </span>
+      <span class="view-btn-right">
+        <span id="view-card-badge">全屋去墙透视</span>
+        <svg class="svg-icon view-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </span>
+    </button>
+
+    <!-- On-Demand Floors & Camera Presets Popover -->
+    <div id="view-popover" role="dialog" aria-label="楼层与房间视角">
+      <div class="section">
+        <div class="section-title">楼层与结构显示</div>
+        <div class="check-grid">
+          <label class="check-item"><input type="checkbox" data-floor="2F" checked /> 2F 二层</label>
+          <label class="check-item"><input type="checkbox" data-floor="1F" checked /> 1F 一层</label>
+          <label class="check-item"><input type="checkbox" data-floor="B1" checked /> B1 夹层</label>
+          <label class="check-item"><input type="checkbox" data-floor="B2" checked /> B2 地下室</label>
+          <label class="check-item check-full"><input type="checkbox" id="hide-ceilings" checked /> 隐藏吊顶</label>
+          <label class="check-item check-full" style="border-top:none;padding-top:0;"><input type="checkbox" id="hide-walls" checked /> 隐藏四周墙壁</label>
+          <label class="check-item check-full" style="border-top:none;padding-top:0;"><input type="checkbox" id="toggle-autorotate" checked /> 自动慢速旋转</label>
+          <label class="check-item check-full" style="border-top:none;padding-top:0;"><input type="checkbox" id="toggle-shadows" /> 桌面静态阴影</label>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">房间视角预设</div>
+        <div class="preset-list" id="preset-list"></div>
+      </div>
+    </div>
   </div>
 
-  <!-- Top-Right Minimal Actions (View/Floors + Start Collaboration) -->
+  <!-- Top-Right Minimal Action (Start Collaboration only) -->
   <div id="minimal-actions">
-    <button type="button" class="hud-pill-btn" id="btn-view-popover" aria-expanded="false">
-      <svg class="svg-icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-      <span>视角 / 楼层</span>
-    </button>
     <button type="button" class="hud-pill-btn cta-gold-btn" id="btn-enter-collab" aria-pressed="false">
       <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span id="btn-enter-collab-txt">开始协作</span>
     </button>
-  </div>
-
-  <!-- On-Demand Floors & Camera Presets Popover -->
-  <div id="view-popover" role="dialog" aria-label="楼层与房间视角">
-    <div class="section">
-      <div class="section-title">楼层与结构显示</div>
-      <div class="check-grid">
-        <label class="check-item"><input type="checkbox" data-floor="2F" checked /> 2F 二层</label>
-        <label class="check-item"><input type="checkbox" data-floor="1F" checked /> 1F 一层</label>
-        <label class="check-item"><input type="checkbox" data-floor="B1" checked /> B1 夹层</label>
-        <label class="check-item"><input type="checkbox" data-floor="B2" checked /> B2 地下室</label>
-        <label class="check-item check-full"><input type="checkbox" id="hide-ceilings" checked /> 隐藏吊顶</label>
-        <label class="check-item check-full" style="border-top:none;padding-top:0;"><input type="checkbox" id="hide-walls" /> 隐藏四周墙壁</label>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-title">房间视角预设</div>
-      <div class="preset-list" id="preset-list"></div>
-    </div>
   </div>
 
   <!-- Top Collaborative Mode & Roster Bar (Visible ONLY in Collab Mode) -->
@@ -933,6 +989,9 @@
       '2F_NorthBed_HeadCove_',
       '2F_NorthBed_OppCab_CeilingCove',
       '2F_NorthBed_OppCab_CeilingLED',
+      '2F_MBR_OppCab_Soffit',
+      '2F_NorthBed_OppCab_Soffit',
+      '2F_NorthBed_Wardrobe_Soffit',
     ];
 
     const WALL_PREFIXES = [
@@ -947,7 +1006,9 @@
       '1F_Living_CurvedWall',
       '1F_Dining_WestReturn_BackWall',
       '1F_Dining_EastReturn_HallWall',
+      '1F_Win_',
       '2F_CurvedWall_Parent',
+      '2F_Win_',
     ];
 
     function isPerimeterWall(obj) {
@@ -958,51 +1019,64 @@
     function isStructuralMesh(mesh) {
       if (!mesh) return true;
       const n = (mesh.name || '').toLowerCase();
-      if (/(door|leaf|slant|drw|drawer|cab|shelf|chair|sofa|table|lion|wine|lamp|bed|mirror|tv|bench|desk|vanity|fitness|mahjong)/.test(n)) {
+      if (/(door|leaf|slant|drw|drawer|cab|shelf|chair|sofa|table|lion|wine|lamp|bed|mirror|tv|bench|desk|vanity|fitness|mahjong|bike)/.test(n)) {
         return false;
       }
       return /(wall|slab|floor|ceiling|stair|riser|tread|skylight|manifold|ground|balustrade|glass|spine|cleat|fascia|anchor)/.test(n);
     }
 
     const PRESETS = [
-      { id: 'overview', name: '全屋鸟瞰', cam: [-11.5, 16.5, 17.5], target: [0.0, 1.0, 1.8], floors: ['2F', '1F', 'B1', 'B2'], hideCeilings: true },
-      { id: 'b1_stairs_junction', name: 'B1↔1F & B1↔B2 双楼梯衔接', cam: [0.25, -1.20, 3.85], target: [1.45, -2.35, 0.25], floors: ['B1', 'B2'], hideCeilings: true },
-      { id: 'b2_b1_lounge', name: 'B2+B1 挑空地下室', cam: [2.15, -3.00, 5.32], target: [2.15, -2.60, -0.20], floors: ['B1', 'B2'], hideCeilings: false },
-      { id: 'b1_site_room', name: 'B1 负一楼实景书柜(图3)', cam: [2.35, -1.05, 1.35], target: [4.25, -1.35, -0.80], floors: ['B1', 'B2'], hideCeilings: false },
-      { id: 'b1_to_b2_stair', name: 'B1 夹层下B2旋转楼梯', cam: [0.65, -0.90, 0.45], target: [2.00, -3.20, 1.40], floors: ['B1', 'B2'], hideCeilings: false },
-      { id: 'b2_wine_tall', name: 'B2 酒柜/铝管酒架/镜柜/高柜', cam: [2.40, -3.15, 3.30], target: [5.10, -3.20, 0.05], floors: ['B1', 'B2'], hideCeilings: false },
-      { id: '2f_bird', name: '2F 俯瞰', cam: [-1.0, 18.5, 10.8], target: [-1.0, 4.0, 1.9], floors: ['2F'], hideCeilings: true },
-      { id: '2f_north_grille', name: '2F 次卧床头 (圆弧格栅)', cam: [5.05, 4.45, 1.32], target: [5.05, 4.45, -1.35], floors: ['2F'], hideCeilings: false },
-      { id: '2f_mbr_vanity', name: '2F 主卧梳妆台 (光学木影)', cam: [5.90, 4.42, 2.60], target: [5.96, 4.42, 5.05], floors: ['2F'], hideCeilings: false },
-      { id: '2f_mbr_wardrobe', name: '2F 主卧床尾柜 (白影木)', cam: [4.805, 4.48, 4.65], target: [4.805, 4.48, 2.35], floors: ['2F'], hideCeilings: false },
-      { id: '2f_wic_mirror', name: '2F 主卧衣帽间 (三门镜面南柜)', cam: [1.65, 4.48, 3.58], target: [0.36, 4.42, 4.68], floors: ['2F'], hideCeilings: false },
-      { id: '2f_wic_north', name: '2F 主卧衣帽间 (四门光学木影北柜)', cam: [1.70, 4.55, 4.18], target: [0.15, 4.55, 3.35], floors: ['2F'], hideCeilings: false },
-      { id: '2f_wic_bath_door', name: '2F 衣帽间通往主卫 (对开移门)', cam: [1.35, 4.48, 4.02], target: [-0.55, 4.46, 4.02], floors: ['2F'], hideCeilings: false },
-      { id: '2f_north_bath_door', name: '2F 次卫磨砂玻璃门', cam: [3.45, 4.42, 1.24], target: [2.05, 4.42, 0.42], floors: ['2F'], hideCeilings: false },
-      { id: '2f_north_cab', name: '2F 次卧床对面柜', cam: [4.22, 4.48, -0.90], target: [4.22, 4.46, 1.55], floors: ['2F'], hideCeilings: false },
-      { id: '2f_north_wardrobe', name: '2F 次卧撞色镜脚衣柜(图2)', cam: [4.95, 4.45, -0.35], target: [3.58, 4.45, -0.55], floors: ['2F'], hideCeilings: false },
-      { id: '1f_toilet_door', name: '1F 客卫隐形门', cam: [-0.30, 1.30, 2.02], target: [-0.30, 1.24, 4.28], floors: ['1F'], hideCeilings: false },
-      { id: '1f_living_fireplace', name: '1F 客厅雕塑壁炉背景墙', cam: [2.7235, 1.34, 0.15], target: [2.7235, 1.32, 5.51], floors: ['1F'], hideCeilings: false },
-      { id: '1f_living_wave', name: '1F 客厅波浪天花', cam: [3.65, 1.32, 2.75], target: [3.65, 1.32, -1.13], floors: ['1F'], hideCeilings: false },
-      { id: '1f_dining', name: '1F 餐厅餐边柜 & 夹丝玻璃', cam: [-2.62, 1.24, 3.12], target: [-3.78, 1.22, 0.15], floors: ['1F'], hideCeilings: false },
-      { id: '1f_dining_song', name: '1F 餐厅宋氏木桌椅 & 45cm卡座', cam: [-2.10, 1.38, 3.05], target: [-3.40, 0.90, 0.85], floors: ['1F'], hideCeilings: false },
-      { id: '1f_living_rug', name: '1F 客厅放射状黑白地毯', cam: [2.72, 2.55, 5.20], target: [2.72, 0.25, 2.75], floors: ['1F'], hideCeilings: false },
-      { id: '1f_dining_caisson', name: '1F 餐厅过道 (立体盘凤藻井)', cam: [-2.25, 1.35, 3.55], target: [-3.35, 2.82, 2.28], floors: ['1F'], hideCeilings: false },
+      { id: 'overview', name: '全屋鸟瞰', cam: [-10.8, 12.6, 16.2], target: [0.2, 0.9, 1.9], floors: ['2F', '1F', 'B1', 'B2'], hideCeilings: true, hideWalls: true },
+      { id: 'b1_stairs_junction', name: 'B1↔1F & B1↔B2 双楼梯衔接', cam: [0.25, -1.20, 3.85], target: [1.45, -2.35, 0.25], floors: ['B1', 'B2'], hideCeilings: true, hideWalls: false },
+      { id: 'b2_b1_lounge', name: 'B2+B1 挑空地下室', cam: [2.15, -3.00, 5.32], target: [2.15, -2.60, -0.20], floors: ['B1', 'B2'], hideCeilings: false, hideWalls: false },
+      { id: 'b1_site_room', name: 'B1 负一楼实景书柜(图3)', cam: [2.35, -1.05, 1.35], target: [4.25, -1.35, -0.80], floors: ['B1', 'B2'], hideCeilings: false, hideWalls: false },
+      { id: 'b1_to_b2_stair', name: 'B1 夹层下B2旋转楼梯', cam: [0.65, -0.90, 0.45], target: [2.00, -3.20, 1.40], floors: ['B1', 'B2'], hideCeilings: false, hideWalls: false },
+      { id: 'b2_wine_tall', name: 'B2 酒柜/铝管酒架/镜柜/高柜', cam: [2.40, -3.15, 3.30], target: [5.10, -3.20, 0.05], floors: ['B1', 'B2'], hideCeilings: false, hideWalls: false },
+      { id: '2f_bird', name: '2F 俯瞰', cam: [-1.0, 18.5, 10.8], target: [-1.0, 4.0, 1.9], floors: ['2F'], hideCeilings: true, hideWalls: true },
+      { id: '2f_north_grille', name: '2F 次卧床头 (圆弧格栅)', cam: [5.05, 4.45, 1.32], target: [5.05, 4.45, -1.35], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_mbr_vanity', name: '2F 主卧梳妆台 (光学木影)', cam: [5.90, 4.42, 2.60], target: [5.96, 4.42, 5.05], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_mbr_wardrobe', name: '2F 主卧床尾柜 (白影木)', cam: [4.805, 4.48, 4.65], target: [4.805, 4.48, 2.35], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_wic_mirror', name: '2F 主卧衣帽间 (三门镜面南柜)', cam: [1.65, 4.48, 3.58], target: [0.36, 4.42, 4.68], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_wic_north', name: '2F 主卧衣帽间 (四门光学木影北柜)', cam: [1.70, 4.55, 4.18], target: [0.15, 4.55, 3.35], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_wic_bath_door', name: '2F 衣帽间通往主卫 (对开移门)', cam: [1.35, 4.48, 4.02], target: [-0.55, 4.46, 4.02], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_north_bath_door', name: '2F 次卫磨砂玻璃门', cam: [3.45, 4.42, 1.24], target: [2.05, 4.42, 0.42], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_north_cab', name: '2F 次卧床对面柜', cam: [4.22, 4.48, -0.90], target: [4.22, 4.46, 1.55], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_north_wardrobe', name: '2F 次卧撞色镜脚衣柜(图2)', cam: [4.95, 4.45, -0.35], target: [3.58, 4.45, -0.55], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '1f_toilet_door', name: '1F 客卫隐形门', cam: [-0.30, 1.30, 2.02], target: [-0.30, 1.24, 4.28], floors: ['1F'], hideCeilings: false, hideWalls: false },
+      { id: '1f_living_fireplace', name: '1F 客厅雕塑壁炉背景墙', cam: [2.7235, 1.34, 0.15], target: [2.7235, 1.32, 5.51], floors: ['1F'], hideCeilings: false, hideWalls: false },
+      { id: '1f_living_wave', name: '1F 客厅波浪天花', cam: [3.65, 1.32, 2.75], target: [3.65, 1.32, -1.13], floors: ['1F'], hideCeilings: false, hideWalls: false },
+      { id: '1f_dining', name: '1F 餐厅餐边柜 & 夹丝玻璃', cam: [-2.62, 1.24, 3.12], target: [-3.78, 1.22, 0.15], floors: ['1F'], hideCeilings: false, hideWalls: false },
+      { id: '1f_dining_song', name: '1F 餐厅宋氏木桌椅 & 45cm卡座', cam: [-2.10, 1.38, 3.05], target: [-3.40, 0.90, 0.85], floors: ['1F'], hideCeilings: false, hideWalls: false },
+      { id: '1f_living_rug', name: '1F 客厅放射状黑白地毯', cam: [2.72, 2.55, 5.20], target: [2.72, 0.25, 2.75], floors: ['1F'], hideCeilings: false, hideWalls: false },
+      { id: '1f_dining_caisson', name: '1F 餐厅过道 (立体盘凤藻井)', cam: [-2.25, 1.35, 3.55], target: [-3.35, 2.82, 2.28], floors: ['1F'], hideCeilings: false, hideWalls: false },
     ];
 
     const USER_COLORS = ['#C9A24B', '#38BDF8', '#34D399', '#F472B6', '#A78BFA', '#FB7185', '#2DD4BF', '#FACC15'];
     const PRICE_VISIBLE_ROLES = new Set(['客户/业主', '项目总监', '业主', '客户', 'director', 'client']);
 
     // Three.js Scene Setup
+    const IS_MOBILE = window.matchMedia('(pointer: coarse)').matches || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    const MAX_DPR = IS_MOBILE ? 1.25 : 1.5;
+    let shadowsEnabled = !IS_MOBILE;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let autoRotateEnabled = !prefersReducedMotion;
+    let rafId = 0;
+    let dirtyFrames = 14;
+    let lastRenderMs = 0;
+    let renderedFrames = 0;
+    let rightOrbitCount = 0;
+
     const container = document.getElementById('canvas-container');
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_DPR));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.06;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.enabled = shadowsEnabled;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
+    renderer.shadowMap.autoUpdate = false;
+    renderer.domElement.style.touchAction = 'none';
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -1010,7 +1084,7 @@
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environmentIntensity = 0.65;
+    scene.environmentIntensity = IS_MOBILE ? 0.55 : 0.65;
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.08, 250);
     camera.position.set(...PRESETS[0].cam);
@@ -1021,6 +1095,14 @@
     controls.dampingFactor = 0.08;
     controls.maxDistance = 80;
     controls.minDistance = 0.25;
+    controls.screenSpacePanning = true;
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.PAN,
+      RIGHT: THREE.MOUSE.ROTATE,
+    };
+    controls.autoRotate = autoRotateEnabled;
+    controls.autoRotateSpeed = 0.55;
     controls.update();
 
     const hemiLight = new THREE.HemisphereLight(0xf6f8ff, 0x3b362f, 0.95);
@@ -1029,7 +1111,7 @@
     const sunLight = new THREE.DirectionalLight(0xfff4e0, 1.85);
     sunLight.position.set(12, 22, 14);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.set(2048, 2048);
+    sunLight.shadow.mapSize.set(1024, 1024);
     sunLight.shadow.camera.near = 1;
     sunLight.shadow.camera.far = 65;
     sunLight.shadow.camera.left = -18;
@@ -1042,6 +1124,35 @@
     const fillLight = new THREE.DirectionalLight(0xdbeafe, 0.65);
     fillLight.position.set(-14, 12, -10);
     scene.add(fillLight);
+
+    // Transient gold ring indicating the exact 3D right-click orbit pivot
+    const pivotRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.055, 0.088, 28),
+      new THREE.MeshBasicMaterial({ color: 0xC9A24B, side: THREE.DoubleSide, transparent: true, opacity: 0.92, depthTest: false })
+    );
+    pivotRing.rotation.x = -Math.PI / 2;
+    pivotRing.visible = false;
+    pivotRing.renderOrder = 999;
+    scene.add(pivotRing);
+    let pivotRingHideAt = 0;
+
+    function markDirty(frames = 3) {
+      dirtyFrames = Math.max(dirtyFrames, frames);
+      if (!rafId && typeof animate === 'function') {
+        rafId = requestAnimationFrame(animate);
+      }
+    }
+
+    function refreshShadows() {
+      if (!shadowsEnabled) {
+        renderer.shadowMap.enabled = false;
+        return;
+      }
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.needsUpdate = true;
+    }
+
+    controls.addEventListener('change', () => markDirty(4));
 
     const floorGroups = {
       '2F': new THREE.Group(),
@@ -1080,7 +1191,31 @@
     const ceilingNodes = [];
     let hideCeilings = true;
     const wallNodes = [];
-    let hideWalls = false;
+    let hideWalls = true;
+
+    function syncBodyState() {
+      document.body.dataset.modelsLoaded = String(modelsLoaded);
+      document.body.dataset.hideWalls = String(hideWalls);
+      document.body.dataset.hideCeilings = String(hideCeilings);
+      document.body.dataset.autoRotate = String(autoRotateEnabled);
+      document.body.dataset.rightOrbitCount = String(rightOrbitCount);
+      document.body.dataset.shadowsEnabled = String(shadowsEnabled);
+    }
+
+    function setAutoRotate(enabled) {
+      autoRotateEnabled = Boolean(enabled);
+      controls.autoRotate = autoRotateEnabled;
+      const cb = document.getElementById('toggle-autorotate');
+      if (cb) cb.checked = autoRotateEnabled;
+      syncBodyState();
+      markDirty(4);
+    }
+
+    function pauseAutoRotate() {
+      if (autoRotateEnabled || controls.autoRotate) {
+        setAutoRotate(false);
+      }
+    }
 
     let toastTimer = null;
     function showToast(msg) {
@@ -1096,13 +1231,25 @@
       return !!(priceVisible || (currentUser && PRICE_VISIBLE_ROLES.has(currentUser.role)));
     }
 
-    function applyCeilingVisibility() { for (const o of ceilingNodes) o.visible = !hideCeilings; }
-    function applyWallVisibility() { for (const o of wallNodes) o.visible = !hideWalls; }
+    function applyCeilingVisibility() {
+      for (const o of ceilingNodes) o.visible = !hideCeilings;
+      syncBodyState();
+      refreshShadows();
+      markDirty(4);
+    }
+    function applyWallVisibility() {
+      for (const o of wallNodes) o.visible = !hideWalls;
+      syncBodyState();
+      refreshShadows();
+      markDirty(4);
+    }
     function applyFloorCheckboxes() {
       document.querySelectorAll('input[data-floor]').forEach((cb) => {
         const key = cb.getAttribute('data-floor');
         if (floorGroups[key]) floorGroups[key].visible = cb.checked;
       });
+      refreshShadows();
+      markDirty(4);
     }
     function setFloors(activeFloors) {
       document.querySelectorAll('input[data-floor]').forEach((cb) => {
@@ -1117,8 +1264,9 @@
     }
 
     let camAnim = null;
-    function flyCamera(posArr, targetArr, floorKey = '') {
+    function flyCamera(posArr, targetArr, floorKey = '', keepAutoRotate = false) {
       if (floorKey) ensureFloorVisible(floorKey);
+      if (!keepAutoRotate) pauseAutoRotate();
       followingUserId = null;
       renderRoster();
       camAnim = {
@@ -1128,18 +1276,24 @@
         endTarget: new THREE.Vector3(...targetArr),
         t: 0,
       };
+      markDirty(8);
     }
 
     function animateToPreset(preset) {
       if (!preset) return;
       setFloors(preset.floors);
-      hideCeilings = preset.hideCeilings;
+      hideCeilings = !!preset.hideCeilings;
+      hideWalls = !!preset.hideWalls;
       document.getElementById('hide-ceilings').checked = hideCeilings;
+      document.getElementById('hide-walls').checked = hideWalls;
+      const badgeEl = document.getElementById('view-card-badge');
+      if (badgeEl) badgeEl.textContent = preset.id === 'overview' && hideWalls ? '全屋去墙透视' : preset.name;
       applyCeilingVisibility();
+      applyWallVisibility();
       document.querySelectorAll('.preset-btn').forEach((b) => {
         b.classList.toggle('active', b.dataset.presetId === preset.id);
       });
-      flyCamera(preset.cam, preset.target);
+      flyCamera(preset.cam, preset.target, '', preset.id === 'overview');
     }
 
     function jumpToPresetById(presetId) {
@@ -1164,6 +1318,22 @@
     document.querySelectorAll('input[data-floor]').forEach((cb) => cb.addEventListener('change', applyFloorCheckboxes));
     document.getElementById('hide-ceilings').addEventListener('change', (e) => { hideCeilings = e.target.checked; applyCeilingVisibility(); });
     document.getElementById('hide-walls').addEventListener('change', (e) => { hideWalls = e.target.checked; applyWallVisibility(); });
+    const autoRotCb = document.getElementById('toggle-autorotate');
+    if (autoRotCb) {
+      autoRotCb.checked = autoRotateEnabled;
+      autoRotCb.addEventListener('change', (e) => setAutoRotate(e.target.checked));
+    }
+    const shadowsCb = document.getElementById('toggle-shadows');
+    if (shadowsCb) {
+      shadowsCb.checked = shadowsEnabled;
+      shadowsCb.addEventListener('change', (e) => {
+        shadowsEnabled = e.target.checked;
+        refreshShadows();
+        syncBodyState();
+        markDirty(6);
+      });
+    }
+    syncBodyState();
 
     // Minimal Popover & Collaboration Disclosure Controls
     const viewPopEl = document.getElementById('view-popover');
@@ -1202,7 +1372,12 @@
       const txt = document.getElementById('btn-enter-collab-txt');
       btn.setAttribute('aria-pressed', String(open));
       txt.textContent = open ? '收起协作' : '开始协作';
-      if (open) closeGoalPopover();
+      if (open) {
+        closeGoalPopover();
+        closeViewPopover();
+        pauseAutoRotate();
+      }
+      markDirty(4);
     }
     document.getElementById('btn-enter-collab').addEventListener('click', () => {
       setCollabOpen(!document.body.classList.contains('collab-open'));
@@ -1217,16 +1392,33 @@
       }
     });
 
-    // Load 4 GLB Floor Models
+    // Progressive Cacheable 4-GLB Loader (priority 1F -> B1 -> B2 -> 2F)
     const floorFiles = [
-      ['B2', `${MODELS_BASE}/B2.glb`],
-      ['B1', `${MODELS_BASE}/B1.glb`],
       ['1F', `${MODELS_BASE}/1F.glb`],
+      ['B1', `${MODELS_BASE}/B1.glb`],
+      ['B2', `${MODELS_BASE}/B2.glb`],
       ['2F', `${MODELS_BASE}/2F.glb`],
     ];
     const loader = new GLTFLoader();
-    const versionTag = Date.now();
+    const ASSET_VERSION = '20261124_opt3';
+    const MAX_TEX_ANISO = IS_MOBILE ? 2 : 4;
     let loadedCount = 0;
+
+    function sanitizeMeshMaterial(mat) {
+      if (!mat) return;
+      if ('transmission' in mat && mat.transmission > 0) {
+        mat.transmission = 0;
+        mat.transparent = true;
+        if (typeof mat.opacity !== 'number' || mat.opacity > 0.85) mat.opacity = 0.28;
+      }
+      if ('envMapIntensity' in mat) mat.envMapIntensity = IS_MOBILE ? 0.48 : 0.65;
+      for (const tk of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap']) {
+        if (mat[tk] && typeof mat[tk].anisotropy === 'number') {
+          mat[tk].anisotropy = Math.min(mat[tk].anisotropy || 1, MAX_TEX_ANISO);
+        }
+      }
+      mat.needsUpdate = true;
+    }
 
     function updateBriefSummary() {
       const nameEl = document.getElementById('brief-user-name');
@@ -1286,52 +1478,76 @@
       }
     }
 
-    Promise.all(
-      floorFiles.map(([floorKey, url]) =>
-        new Promise((resolve, reject) => {
-          loader.load(
-            `${url}?v=${versionTag}`,
-            (gltf) => {
-              const root = gltf.scene;
-              root.traverse((child) => {
-                if (child.isMesh) {
-                  child.userData.floorKey = floorKey;
-                  child.castShadow = true;
-                  child.receiveShadow = true;
-                  if (child.material && child.material.transparent) child.castShadow = false;
-                  if (child.name === '1F_Living_Fireplace_MoonGateWall') {
-                    child.castShadow = false;
-                    child.receiveShadow = false;
-                  } else if (child.name === '1F_Living_Fireplace_LingnanWallpaper') {
-                    child.receiveShadow = false;
-                  }
-                  if (CEILING_PREFIXES.some((pfx) => child.name.startsWith(pfx))) ceilingNodes.push(child);
-                  if (isPerimeterWall(child)) wallNodes.push(child);
+    function loadFloorModel(floorKey, url) {
+      return new Promise((resolve, reject) => {
+        loader.load(
+          `${url}?v=${ASSET_VERSION}`,
+          async (gltf) => {
+            const root = gltf.scene;
+            root.traverse((child) => {
+              if (child.isMesh) {
+                child.userData.floorKey = floorKey;
+                const mats = Array.isArray(child.material) ? child.material : [child.material];
+                let hasTransparent = false;
+                for (const m of mats) {
+                  sanitizeMeshMaterial(m);
+                  if (m && m.transparent) hasTransparent = true;
                 }
-              });
-              floorGroups[floorKey].add(root);
-              loadedCount += 1;
-              updateBriefSummary();
-              resolve();
-            },
-            undefined,
-            (err) => reject(err)
-          );
-        })
-      )
-    )
-      .then(() => {
-        modelsLoaded = true;
-        applyCeilingVisibility();
-        applyWallVisibility();
-        applyFloorCheckboxes();
-        updateBriefSummary();
-      })
-      .catch((err) => {
-        console.error('GLB load failed:', err);
-        modelsLoadFailed = true;
-        updateBriefSummary();
+                const nmLow = (child.name || '').toLowerCase();
+                const smallDetail = /(pull|knob|handle|roller|led|glass|baffle|slant)/.test(nmLow);
+                child.castShadow = !hasTransparent && !smallDetail && child.name !== '1F_Living_Fireplace_MoonGateWall';
+                child.receiveShadow = child.name !== '1F_Living_Fireplace_MoonGateWall' && child.name !== '1F_Living_Fireplace_LingnanWallpaper';
+                if (CEILING_PREFIXES.some((pfx) => child.name.startsWith(pfx))) {
+                  ceilingNodes.push(child);
+                  child.visible = !hideCeilings;
+                }
+                if (isPerimeterWall(child)) {
+                  wallNodes.push(child);
+                  child.visible = !hideWalls;
+                }
+              }
+            });
+            floorGroups[floorKey].add(root);
+            loadedCount += 1;
+            refreshShadows();
+            syncBodyState();
+            updateBriefSummary();
+            markDirty(6);
+            await new Promise((r) => requestAnimationFrame(r));
+            resolve();
+          },
+          undefined,
+          (err) => reject(err)
+        );
       });
+    }
+
+    async function loadAllFloorsProgressive() {
+      const queue = [...floorFiles];
+      const concurrency = IS_MOBILE ? 1 : 2;
+      const workers = Array.from({ length: concurrency }, async () => {
+        while (queue.length > 0) {
+          const [fk, u] = queue.shift();
+          await loadFloorModel(fk, u);
+        }
+      });
+      await Promise.all(workers);
+      modelsLoaded = true;
+      applyCeilingVisibility();
+      applyWallVisibility();
+      applyFloorCheckboxes();
+      refreshShadows();
+      syncBodyState();
+      updateBriefSummary();
+      markDirty(8);
+    }
+
+    loadAllFloorsProgressive().catch((err) => {
+      console.error('GLB load failed:', err);
+      modelsLoadFailed = true;
+      syncBodyState();
+      updateBriefSummary();
+    });
 
     function detectFloor(obj) {
       let cur = obj;
@@ -1846,6 +2062,7 @@
         renderMeasuresTab();
       }
       if (pkt.seq) lastSeq = Math.max(lastSeq, pkt.seq);
+      markDirty(3);
     }
 
     async function sendCollabEvent(payload) {
@@ -1989,6 +2206,7 @@
       draftPointA.visible = false;
       draftLine.visible = false;
       draftLabelEl.style.display = 'none';
+      markDirty(2);
     }
 
     // Home Tab, Versions Tab, BOM Tab
@@ -2226,6 +2444,7 @@
         mesh.material = mesh.material ? mesh.material.clone() : new THREE.MeshStandardMaterial();
         mesh.material.map = tex;
         mesh.material.needsUpdate = true;
+        markDirty(4);
       });
     }
 
@@ -2243,6 +2462,8 @@
         }
       }
       if (draftAsset?.group) customAssetsGroup.add(draftAsset.group);
+      refreshShadows();
+      markDirty(4);
     }
 
     async function readSelectedImageDataUrl() {
@@ -2259,10 +2480,11 @@
     function showDraftBox() {
       const box = document.getElementById('draft-asset-box');
       const info = document.getElementById('draft-asset-info');
-      if (!draftAsset) { box.style.display = 'none'; return; }
+      if (!draftAsset) { box.style.display = 'none'; markDirty(3); return; }
       box.style.display = 'block';
       const s = draftAsset.spec;
       info.textContent = `${draftAsset.description} · 尺寸 ${s.widthMm}×${s.depthMm}×${s.heightMm} mm`;
+      markDirty(4);
     }
 
     document.getElementById('gen-3d-btn')?.addEventListener('click', async () => {
@@ -2445,15 +2667,29 @@
         });
       }
       updateObjectContextBarUI();
+      markDirty(12);
     }
 
-    // Raycasting & Pointer Handlers
+    // Raycasting, Right-Click Pivot Orbit & Pointer Handlers
     const raycaster = new THREE.Raycaster();
     const pointerDown = { x: 0, y: 0, time: 0 };
     let lastCursorSent = 0;
+    let lastHoverRaycast = 0;
     let peekDrag = null;
+    let rightOrbitDrag = null;
     const _dragPlane = new THREE.Plane();
     const _dragHit = new THREE.Vector3();
+    const _upAxis = new THREE.Vector3(0, 1, 0);
+    const _roRight = new THREE.Vector3();
+    const _roLook = new THREE.Vector3();
+    const _roHoriz = new THREE.Vector3();
+    const _roQYaw = new THREE.Quaternion();
+    const _roQPitch = new THREE.Quaternion();
+    const _roVCam = new THREE.Vector3();
+    const _roVTgt = new THREE.Vector3();
+    const _roCandCam = new THREE.Vector3();
+    const _roCandTgt = new THREE.Vector3();
+    const _roCandLook = new THREE.Vector3();
 
     function raycastModel(clientX, clientY) {
       const ndc = new THREE.Vector2((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
@@ -2477,10 +2713,111 @@
       });
       peekDrag = null;
       controls.enabled = true;
-      renderer.domElement.style.cursor = toolMode === 'peek' ? 'grab' : '';
+      renderer.domElement.style.cursor = toolMode === 'peek' ? 'grab' : toolMode === 'interact' ? 'pointer' : '';
+      markDirty(12);
     }
 
+    function finishRightOrbitDrag() {
+      if (!rightOrbitDrag) return;
+      try { renderer.domElement.releasePointerCapture(rightOrbitDrag.pointerId); } catch (_) {}
+      rightOrbitDrag = null;
+      renderer.domElement.style.cursor = toolMode === 'peek' ? 'grab' : toolMode === 'interact' ? 'pointer' : '';
+      controls.update();
+      markDirty(6);
+    }
+
+    renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    renderer.domElement.addEventListener('wheel', () => {
+      pauseAutoRotate();
+      markDirty(6);
+    }, { passive: true });
+
+    // Capture right-click orbit so dragging with the right mouse button revolves smoothly around the clicked 3D surface point
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      if (e.button === 2 && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        pauseAutoRotate();
+        camAnim = null;
+        if (followingUserId) { followingUserId = null; renderRoster(); }
+        const hits = raycastModel(e.clientX, e.clientY);
+        const pivot = hits.length > 0 ? hits[0].point.clone() : controls.target.clone();
+        if (hits.length > 0) {
+          pivotRing.position.copy(pivot);
+          if (hits[0].face) {
+            const n = hits[0].face.normal.clone().transformDirection(hits[0].object.matrixWorld).normalize();
+            pivotRing.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
+          } else {
+            pivotRing.rotation.set(-Math.PI / 2, 0, 0);
+          }
+          pivotRing.visible = true;
+          pivotRingHideAt = performance.now() + 900;
+        }
+        rightOrbitDrag = {
+          pointerId: e.pointerId,
+          pivot,
+          lastX: e.clientX,
+          lastY: e.clientY,
+          moved: false,
+        };
+        rightOrbitCount += 1;
+        syncBodyState();
+        try { renderer.domElement.setPointerCapture(e.pointerId); } catch (_) {}
+        renderer.domElement.style.cursor = 'grabbing';
+        markDirty(6);
+      }
+    }, { capture: true });
+
     window.addEventListener('pointermove', (e) => {
+      if (rightOrbitDrag) {
+        if ((e.buttons & 2) === 0 && e.pointerType === 'mouse') {
+          finishRightOrbitDrag();
+          return;
+        }
+        const dx = e.clientX - rightOrbitDrag.lastX;
+        const dy = e.clientY - rightOrbitDrag.lastY;
+        rightOrbitDrag.lastX = e.clientX;
+        rightOrbitDrag.lastY = e.clientY;
+        if (dx !== 0 || dy !== 0) {
+          const rotScale = (2 * Math.PI) / Math.max(window.innerHeight, 420);
+          const yawAngle = -dx * rotScale * 0.9;
+          const pitchAngle = dy * rotScale * 0.8;
+          _roVCam.copy(camera.position).sub(rightOrbitDrag.pivot);
+          _roVTgt.copy(controls.target).sub(rightOrbitDrag.pivot);
+          _roQYaw.setFromAxisAngle(_upAxis, yawAngle);
+          _roVCam.applyQuaternion(_roQYaw);
+          _roVTgt.applyQuaternion(_roQYaw);
+
+          _roLook.copy(_roVTgt).sub(_roVCam);
+          const lookLen = _roLook.length();
+          if (lookLen > 1e-5) {
+            _roLook.divideScalar(lookLen);
+            _roHoriz.set(_roLook.x, 0, _roLook.z);
+            if (_roHoriz.lengthSq() > 1e-5) _roHoriz.normalize();
+            _roRight.crossVectors(_roLook, _upAxis);
+            if (_roRight.lengthSq() > 1e-6 && pitchAngle !== 0) {
+              _roRight.normalize();
+              _roQPitch.setFromAxisAngle(_roRight, pitchAngle);
+              _roCandCam.copy(_roVCam).applyQuaternion(_roQPitch);
+              _roCandTgt.copy(_roVTgt).applyQuaternion(_roQPitch);
+              _roCandLook.copy(_roCandTgt).sub(_roCandCam).normalize();
+              if ((_roCandLook.x * _roHoriz.x + _roCandLook.z * _roHoriz.z) > 0.14) {
+                _roVCam.copy(_roCandCam);
+                _roVTgt.copy(_roCandTgt);
+              }
+            }
+          }
+          camera.position.copy(rightOrbitDrag.pivot).add(_roVCam);
+          controls.target.copy(rightOrbitDrag.pivot).add(_roVTgt);
+          camera.lookAt(controls.target);
+          rightOrbitDrag.moved = true;
+          pivotRingHideAt = performance.now() + 650;
+          markDirty(6);
+        }
+        return;
+      }
+
       if (peekDrag) {
         if ((e.buttons & 1) === 0 && e.pointerType === 'mouse') {
           finishPeekDrag();
@@ -2500,19 +2837,29 @@
           } else {
             peekDrag.mesh.position.copy(peekDrag.dragStartLocalPos).add(worldDelta);
           }
+          markDirty(4);
         }
         return;
       }
 
       if (e.target !== renderer.domElement) return;
-      const hits = raycastModel(e.clientX, e.clientY);
+      const needHoverRaycast = toolMode === 'measure' || toolMode === 'pin' || (!!currentUser && !IS_MOBILE);
+      if (!needHoverRaycast || e.buttons !== 0) {
+        if (hoverDot.visible) { hoverDot.visible = false; markDirty(2); }
+        return;
+      }
       const now = performance.now();
+      if (now - lastHoverRaycast < 90) return;
+      lastHoverRaycast = now;
+
+      const hits = raycastModel(e.clientX, e.clientY);
 
       if (hits.length > 0) {
         const hit = hits[0];
         if (toolMode === 'measure' || toolMode === 'pin') {
           hoverDot.position.copy(hit.point);
           hoverDot.visible = true;
+          markDirty(2);
         } else {
           hoverDot.visible = false;
         }
@@ -2526,6 +2873,7 @@
           const dzMm = Math.round(Math.abs(measureEndPreview.y - measureStart.y) * 1000);
           draftLabelEl.innerHTML = `<strong>${distMm} mm</strong> (${(distMm / 1000).toFixed(2)}m) <span class="sub">东西${dxMm} · 南北${dyMm} · 高${dzMm} · 单击定终点</span>`;
           draftLabelEl.style.display = 'block';
+          markDirty(2);
         }
         if (currentUser && now - lastCursorSent >= 50) {
           lastCursorSent = now;
@@ -2540,14 +2888,19 @@
           });
         }
       } else {
-        hoverDot.visible = false;
+        if (hoverDot.visible) {
+          hoverDot.visible = false;
+          markDirty(2);
+        }
       }
     });
 
     renderer.domElement.addEventListener('pointerdown', (e) => {
+      pauseAutoRotate();
       pointerDown.x = e.clientX;
       pointerDown.y = e.clientY;
       pointerDown.time = performance.now();
+      markDirty(6);
       if (followingUserId) { followingUserId = null; renderRoster(); }
       if (toolMode === 'peek' && e.button === 0) {
         const hits = raycastModel(e.clientX, e.clientY);
@@ -2578,14 +2931,20 @@
     });
 
     window.addEventListener('pointerup', (e) => {
+      if (rightOrbitDrag) {
+        finishRightOrbitDrag();
+        return;
+      }
       if (peekDrag) {
         finishPeekDrag();
         return;
       }
       if (e.target !== renderer.domElement) return;
       if (e.button === 2 && toolMode === 'measure' && measureStart) { cancelMeasureDraft(); return; }
+      if (e.button !== 0) return;
+      const tapThresh = e.pointerType === 'touch' ? 12 : 6;
       const dist = Math.hypot(e.clientX - pointerDown.x, e.clientY - pointerDown.y);
-      if (dist > 6) return;
+      if (dist > tapThresh) return;
 
       const hits = raycastModel(e.clientX, e.clientY);
       if (hits.length === 0) {
@@ -2594,6 +2953,7 @@
           lastClickedHit = null;
           updateObjectContextBarUI();
         }
+        markDirty(2);
         return;
       }
 
@@ -2601,6 +2961,7 @@
       selectedMesh = hit.object;
       lastClickedHit = hit;
       updateObjectContextBarUI();
+      markDirty(4);
 
       if (toolMode === 'interact') {
         toggleMeshInteract(hit.object);
@@ -2634,8 +2995,8 @@
       }
     });
 
-    window.addEventListener('pointercancel', finishPeekDrag);
-    window.addEventListener('blur', finishPeekDrag);
+    window.addEventListener('pointercancel', () => { finishRightOrbitDrag(); finishPeekDrag(); });
+    window.addEventListener('blur', () => { finishRightOrbitDrag(); finishPeekDrag(); });
 
     // Contextual Object Action Bar Event Wiring
     document.getElementById('ctx-btn-close').addEventListener('click', () => {
@@ -2707,25 +3068,25 @@
       const blocks = [];
       const hl = [];
 
-      if (/(b1|夹层|负一|净高|板厚|15cm|1\.9|书柜|鱼池)/.test(ql)) {
+      if (/(b1|夹层|负一|净高|板厚|15cm|1\.9|书柜|鱼池|灯带|竖板|斜倾|斜板|弹压)/.test(ql)) {
         presetId = 'b1_site_room'; presetName = 'B1 负一楼实景书柜(图3)';
-        blocks.push('【B1 夹层与柜体】B1 夹层净高 1.90 m，楼板厚 15 cm（150 mm），清玻护栏无金边；北墙闭门白柜 5110×320×1880 mm（含 6 处斜板灯带），鱼池下黑金矮柜 2440×300×870 mm。');
+        blocks.push('【B1 夹层与韵律书柜】B1 夹层净高 1.90 m，楼板厚 15 cm（150 mm），清玻护栏无金边；北墙 5110×320×1880 mm 闭门白柜采用错落三行格子与不同韵律灯带——14 处竖向灯带挡板左侧加装齐平弹压门板，右侧设透光斜倾木板透出竖板琥珀暖光；鱼池下黑金矮柜配底座与层板下错落灯带。');
         hl.push({ label: 'B1 净高/板厚', value: '1.90 m / 15 cm' });
       }
       if (/(楼梯|旋转|踏步|镂空|扶手|悬空)/.test(ql)) {
         presetId = 'b1_stairs_junction'; presetName = 'B1↔1F & B1↔B2 双楼梯衔接';
-        blocks.push('【双楼梯结构】1F→B1 旋转楼梯贴西墙与北墙稳固锚固，踏步宽 930 mm 平行 TV 墙起步、落于 B1 西北沿；B1→B2 悬空弧梯从 B1 夹层锚入，踏步下全镂空，右侧香槟金钢板 / 左侧无边清玻。');
-        hl.push({ label: '双梯工艺', value: '左清玻右金板·下全镂空' });
+        blocks.push('【双楼梯结构】1F→B1 旋转楼梯贴西墙与北墙稳固锚固，13 级踏步 90°→270° 旋转，底部与顶部踏步接触线均与北墙柜体严格 90° 垂直并落于矩形西北平台；B1→B2 悬空弧梯从 B1 夹层锚入，踏步下全镂空，右侧香槟金钢板 / 左侧无边清玻。');
+        hl.push({ label: '1F→B1 踏步衔接', value: '90° 垂直北墙柜体' });
       }
-      if (/(b2|负二|地下室|电视|水波纹|瓷砖|鱼肚白|鞋柜|狮子|酒架|麻将|健身)/.test(ql)) {
+      if (/(b2|负二|地下室|电视|水波纹|瓷砖|鱼肚白|鞋柜|狮子|酒架|麻将|健身|单车|自行车)/.test(ql)) {
         presetId = 'b2_b1_lounge'; presetName = 'B2+B1 挑空地下室';
-        blocks.push('【B2 地下室】灰白鱼肚白 800×800 瓷砖；电视墙突出 15 cm 且底部弧弯空心、上方水光灯照射；十字鞋柜离地减半至 175 mm 配石狮子；铝管搭建红酒架；茶座区改放麻将桌、原区放健身器材。');
-        hl.push({ label: 'TV 墙/鞋柜', value: '突出15cm / 离地175mm' });
+        blocks.push('【B2 地下室】灰白鱼肚白 800×800 瓷砖；电视墙突出 15 cm 且底部弧弯空心、上方水光灯照射；十字鞋柜离地减半至 175 mm 配石狮子；铝管搭建红酒架；茶座区改放麻将桌、原区仅放置 1 台红色健身动感单车配防滑垫，空间通透不拥挤。');
+        hl.push({ label: 'B2 健身区', value: '单台红色健身自行车' });
       }
-      if (/(1f|一层|一楼|餐边柜|门檐|1\.2|藻井|客卫|隐形门)/.test(ql)) {
+      if (/(1f|一层|一楼|餐边柜|门檐|1\.2|藻井|客卫|隐形门|灶台|台面|48|厨房)/.test(ql)) {
         presetId = '1f_dining'; presetName = '1F 餐厅餐边柜 & 夹丝玻璃';
-        blocks.push('【1F 一层】飞檐斗拱餐边柜门檐下净宽 1.20 m，两侧玻璃门到倒数第二格底板（1.50 m），配宋氏桌椅与立体盘凤藻井；已去掉多余横梁并改纯白帕斯卡隐形门。');
-        hl.push({ label: '门檐净宽', value: '1.20 m' });
+        blocks.push('【1F 一层】飞檐斗拱餐边柜门檐下净宽 1.20 m，两侧玻璃门到倒数第二格底板（1.50 m），配宋氏桌椅与立体盘凤藻井；厨房灶台台面深度收窄至 480 mm（48 cm），显著拓宽中岛过道至 82.3 cm；已去掉多余横梁并改纯白帕斯卡隐形门。');
+        hl.push({ label: '灶台台面深', value: '48 cm (过道 82.3 cm)' });
       }
       if (/(2f|二层|二楼|主卧|次卧|床尾柜|45cm|60cm|格栅|10cm)/.test(ql)) {
         presetId = '2f_mbr_wardrobe'; presetName = '2F 主卧床尾柜 (白影木)';
@@ -2742,7 +3103,7 @@
         }
       }
       if (blocks.length === 0) {
-        blocks.push(`这是 4 层当代中式精装宅邸（Base v${baseVersion}），包含 B2/B1/1F/2F 精确家具与结构模型。支持询问夹层净高（1.9m/15cm）、双楼梯结构、餐边柜与卧室尺寸、材料工艺或全屋造价。`);
+        blocks.push(`这是 4 层当代中式精装宅邸（Base v${baseVersion}），默认开启去墙去吊顶全景透视并缓慢自转，支持鼠标右键按住任意构件位置旋转视角。支持询问 B1 韵律灯带书柜、48 cm 灶台深度、90° 垂直楼梯、B2 红色健身单车或全屋造价。`);
       }
       return { ok: true, answer: blocks.join('\n\n'), highlights: hl, presetId, presetName, priceHidden: !showPrice };
     }
@@ -2939,14 +3300,20 @@
       if (e.key === '3') { setToolMode('interact'); return; }
       if (e.key === '4') { setToolMode('pin'); return; }
       if (e.key === '5') { setToolMode('measure'); return; }
+      if (/^(KeyW|KeyA|KeyS|KeyD|KeyQ|KeyE|ArrowUp|ArrowDown|ArrowLeft|ArrowRight)$/.test(e.code)) {
+        pauseAutoRotate();
+        markDirty(4);
+      }
       keys.add(e.code);
     });
-    window.addEventListener('keyup', (e) => keys.delete(e.code));
+    window.addEventListener('keyup', (e) => { keys.delete(e.code); markDirty(2); });
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_DPR));
       renderer.setSize(window.innerWidth, window.innerHeight);
+      markDirty(4);
     });
 
     const _proj = new THREE.Vector3();
@@ -3008,10 +3375,30 @@
         selectedMeshName: selectedMesh?.name || null,
         selectedOpened: !!selectedMesh?.userData?._opened,
         peekActive: !!peekDrag,
+        rightOrbitActive: !!rightOrbitDrag,
+        rightOrbitCount,
+        hideWalls,
+        hideCeilings,
+        autoRotate: autoRotateEnabled,
+        wallCount: wallNodes.length,
+        ceilingCount: ceilingNodes.length,
         springCount: springAnimations.length,
         doorAnimCount: doorAnimations.length,
         cameraPos: camera.position.toArray(),
         controlsTarget: controls.target.toArray(),
+      }),
+      perf: () => ({
+        calls: renderer.info.render.calls,
+        triangles: renderer.info.render.triangles,
+        geometries: renderer.info.memory.geometries,
+        textures: renderer.info.memory.textures,
+        pixelRatio: renderer.getPixelRatio(),
+        isMobile: IS_MOBILE,
+        shadowsEnabled,
+        autoRotate: autoRotateEnabled,
+        hideWalls,
+        hideCeilings,
+        renderedFrames,
       }),
       findInteractableScreenPoint: (pattern = 'door|slant|leaf|cab') => {
         const re = new RegExp(pattern, 'i');
@@ -3057,10 +3444,26 @@
     const clock = new THREE.Clock();
     const forward = new THREE.Vector3();
     const right = new THREE.Vector3();
+    const _prevCamPos = new THREE.Vector3();
+    const _prevCamTgt = new THREE.Vector3();
 
-    function animate() {
-      requestAnimationFrame(animate);
+    function animate(nowMs = performance.now()) {
+      rafId = 0;
       const dt = Math.min(clock.getDelta(), 0.05);
+      const hasKeyMotion = keys.size > 0 && !isTyping();
+      const hasHardAnim = Boolean(
+        camAnim || hasKeyMotion || springAnimations.length > 0 || doorAnimations.length > 0 || peekDrag || rightOrbitDrag
+      );
+
+      if (IS_MOBILE && autoRotateEnabled && !hasHardAnim && dirtyFrames <= 0 && (nowMs - lastRenderMs < 32)) {
+        rafId = requestAnimationFrame(animate);
+        return;
+      }
+
+      if (pivotRing.visible && nowMs >= pivotRingHideAt && !rightOrbitDrag) {
+        pivotRing.visible = false;
+        dirtyFrames = Math.max(dirtyFrames, 1);
+      }
 
       if (camAnim) {
         camAnim.t = Math.min(1, camAnim.t + dt * 2.6);
@@ -3070,7 +3473,7 @@
         if (camAnim.t >= 1) camAnim = null;
       }
 
-      if (keys.size > 0 && !isTyping()) {
+      if (hasKeyMotion) {
         const speed = (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 6.0 : 2.8) * dt;
         camera.getWorldDirection(forward);
         forward.y = 0;
@@ -3092,6 +3495,7 @@
       }
 
       // Guaranteed Peek Spring-Back (easeOutCubic)
+      let shadowDirty = false;
       for (let i = springAnimations.length - 1; i >= 0; i--) {
         const a = springAnimations[i];
         a.t = Math.min(1, a.t + dt / (a.duration || 0.35));
@@ -3100,6 +3504,7 @@
         if (a.t >= 1 || a.mesh.position.distanceTo(a.targetPos) < 0.001) {
           a.mesh.position.copy(a.targetPos);
           springAnimations.splice(i, 1);
+          shadowDirty = true;
         }
       }
 
@@ -3124,15 +3529,35 @@
         if (d.t >= 1) {
           d.mesh.userData._peekOrigin = d.mesh.position.clone();
           doorAnimations.splice(i, 1);
+          shadowDirty = true;
         }
       }
+      if (shadowDirty) refreshShadows();
 
-      controls.update();
-      updateOverlays();
-      maybeBroadcastCamera();
-      renderer.render(scene, camera);
+      _prevCamPos.copy(camera.position);
+      _prevCamTgt.copy(controls.target);
+      if (!rightOrbitDrag) {
+        controls.update(dt);
+      }
+      const camDelta = camera.position.distanceToSquared(_prevCamPos) + controls.target.distanceToSquared(_prevCamTgt);
+      const camMoved = camDelta > 1e-10;
+      const shouldRender = dirtyFrames > 0 || camMoved || hasHardAnim || autoRotateEnabled || pivotRing.visible;
+
+      if (shouldRender) {
+        updateOverlays();
+        maybeBroadcastCamera();
+        renderer.render(scene, camera);
+        renderedFrames += 1;
+        lastRenderMs = nowMs;
+        if (dirtyFrames > 0) dirtyFrames -= 1;
+      }
+
+      const stillNeedFrames = dirtyFrames > 0 || camMoved || hasHardAnim || autoRotateEnabled || pivotRing.visible;
+      if (stillNeedFrames) {
+        rafId = requestAnimationFrame(animate);
+      }
     }
-    animate();
+    markDirty(14);
   </script>
 </body>
 </html>
