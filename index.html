@@ -1076,7 +1076,7 @@
     let shadowsEnabled = !IS_MOBILE;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let autoRotateEnabled = !prefersReducedMotion;
-    const VIEWER_BUILD = '20261124_opt4';
+    const VIEWER_BUILD = '20261125_opt5';
     let rafId = 0;
     let inAnimate = false;
     let dirtyFrames = 14;
@@ -1086,7 +1086,27 @@
     let webglContextLost = false;
 
     const container = document.getElementById('canvas-container');
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    function showWebglFatal(err) {
+      const modal = document.getElementById('login-modal');
+      if (modal) modal.classList.add('hidden');
+      const st = document.getElementById('brief-house-status');
+      if (st) st.textContent = '当前浏览器无法启用 3D（WebGL 不可用）';
+      const box = document.createElement('div');
+      box.setAttribute('role', 'alert');
+      box.style.cssText = 'position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;padding:24px;background:#121214;color:#F7F6F2;font:15px/1.7 -apple-system,PingFang SC,sans-serif;text-align:center;';
+      box.innerHTML = '<div style="max-width:420px"><div style="font-size:18px;font-weight:600;margin-bottom:10px;color:#D8B665">3D 无法在此浏览器启动</div>当前浏览器的 WebGL / GPU 已被禁用。<br>请用 Chrome、Safari 或手机浏览器打开本页，<br>或完全退出并重启当前应用后再试。</div>';
+      document.body.appendChild(box);
+      document.body.dataset.webglFatal = 'true';
+      console.error('WebGL init failed:', err);
+    }
+
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: !IS_MOBILE, powerPreference: 'high-performance' });
+    } catch (err) {
+      showWebglFatal(err);
+      throw err;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_DPR));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -1467,6 +1487,13 @@
     const ASSET_VERSION = '20261124_opt3';
     const MAX_TEX_ANISO = IS_MOBILE ? 2 : 4;
     let loadedCount = 0;
+    const FLOOR_BYTES_EST = { '1F': 7007312, 'B1': 905056, 'B2': 2607684, '2F': 5157676 };
+    const floorBytesLoaded = { '1F': 0, 'B1': 0, 'B2': 0, '2F': 0 };
+    function loadPercent() {
+      const tot = Object.values(FLOOR_BYTES_EST).reduce((a, b) => a + b, 0);
+      const got = Object.keys(FLOOR_BYTES_EST).reduce((a, k) => a + Math.min(floorBytesLoaded[k], FLOOR_BYTES_EST[k]), 0);
+      return Math.min(100, Math.round((got / tot) * 100));
+    }
 
     function sanitizeMeshMaterial(mat) {
       if (!mat) return;
@@ -1512,7 +1539,7 @@
         stTxt.textContent = '3D 模型加载失败（请检查网络）';
       } else if (!modelsLoaded) {
         stDot.className = 'dot';
-        stTxt.textContent = `加载中 (${loadedCount}/4) · Base v${baseVersion}`;
+        stTxt.textContent = `加载中 ${loadPercent()}% (${loadedCount}/4 层) · Base v${baseVersion}`;
       } else {
         stDot.className = 'dot ready';
         stTxt.textContent = `4层已就绪 · Base v${baseVersion} · 待审 ${pendingVer} · 标注 ${openPins}`;
@@ -1573,14 +1600,24 @@
             });
             floorGroups[floorKey].add(root);
             loadedCount += 1;
+            floorBytesLoaded[floorKey] = FLOOR_BYTES_EST[floorKey];
             refreshShadows();
             syncBodyState();
             updateBriefSummary();
             markDirty(6);
-            await new Promise((r) => requestAnimationFrame(r));
+            await new Promise((r) => setTimeout(r, 0));
             resolve();
           },
-          undefined,
+          (xhr) => {
+            if (xhr && xhr.loaded) {
+              floorBytesLoaded[floorKey] = xhr.loaded;
+              const now = performance.now();
+              if (!loadFloorModel._t || now - loadFloorModel._t > 250) {
+                loadFloorModel._t = now;
+                updateBriefSummary();
+              }
+            }
+          },
           (err) => reject(err)
         );
       });
@@ -1588,7 +1625,7 @@
 
     async function loadAllFloorsProgressive() {
       const queue = [...floorFiles];
-      const concurrency = IS_MOBILE ? 1 : 2;
+      const concurrency = 2;
       const workers = Array.from({ length: concurrency }, async () => {
         while (queue.length > 0) {
           const [fk, u] = queue.shift();
