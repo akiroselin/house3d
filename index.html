@@ -1015,8 +1015,6 @@
       'B2_Wall_North_Full',
       'B2_Wall_South_Full',
       'B2_Wall_East_',
-      'B1_East_Win_',
-      'B2_East_Win_',
       'B1_East_Skylight_',
       'B2_East_Skylight_',
       '1F_Living_CurvedWall',
@@ -1076,7 +1074,7 @@
     let shadowsEnabled = !IS_MOBILE;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let autoRotateEnabled = !prefersReducedMotion;
-    const VIEWER_BUILD = '20261127_opt11';
+    const VIEWER_BUILD = '20261127_opt12';
     let rafId = 0;
     let inAnimate = false;
     let dirtyFrames = 14;
@@ -1484,7 +1482,7 @@
       ['2F', `${MODELS_BASE}/2F.glb`],
     ];
     const loader = new GLTFLoader();
-    const ASSET_VERSION = '20261127_opt11';
+    const ASSET_VERSION = '20261127_opt12';
     const MAX_TEX_ANISO = IS_MOBILE ? 2 : 4;
     let loadedCount = 0;
     const FLOOR_BYTES_EST = { '1F': 7007312, 'B1': 905056, 'B2': 2607684, '2F': 5157676 };
