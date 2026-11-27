@@ -1076,7 +1076,7 @@
     let shadowsEnabled = !IS_MOBILE;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let autoRotateEnabled = !prefersReducedMotion;
-    const VIEWER_BUILD = '20261127_opt10';
+    const VIEWER_BUILD = '20261127_opt11';
     let rafId = 0;
     let inAnimate = false;
     let dirtyFrames = 14;
@@ -1484,7 +1484,7 @@
       ['2F', `${MODELS_BASE}/2F.glb`],
     ];
     const loader = new GLTFLoader();
-    const ASSET_VERSION = '20261127_opt10';
+    const ASSET_VERSION = '20261127_opt11';
     const MAX_TEX_ANISO = IS_MOBILE ? 2 : 4;
     let loadedCount = 0;
     const FLOOR_BYTES_EST = { '1F': 7007312, 'B1': 905056, 'B2': 2607684, '2F': 5157676 };
@@ -2021,8 +2021,31 @@
       sendCollabEvent({ type: 'measure_clear' });
     });
 
+    function pruneRemoteCursors() {
+      const activeIds = new Set(onlineUsers.map((u) => u.id));
+      const nowMs = performance.now();
+      for (const [uid, entry] of remoteCursorMeshes.entries()) {
+        if (!activeIds.has(uid) || (entry.lastUpdatedAt && nowMs - entry.lastUpdatedAt > 15000)) {
+          hideRemoteCursor(uid);
+        }
+      }
+    }
+
     function updateRemoteCursor(cur) {
       if (!cur || !cur.userId || cur.userId === selfId) return;
+      // Filter out ghost/anonymous cursors (e.g. unauthenticated "成员") and offline or stale (>15s) cursors
+      if (!cur.role && (!cur.name || cur.name === '成员')) {
+        hideRemoteCursor(cur.userId);
+        return;
+      }
+      if (!onlineUsers.some((u) => u.id === cur.userId)) {
+        hideRemoteCursor(cur.userId);
+        return;
+      }
+      if (cur.ts && (Date.now() / 1000 - cur.ts) > 15) {
+        hideRemoteCursor(cur.userId);
+        return;
+      }
       let entry = remoteCursorMeshes.get(cur.userId);
       if (!entry) {
         const g = new THREE.Group();
@@ -2044,13 +2067,14 @@
         el.textContent = `${cur.name}${cur.role ? ' · ' + cur.role : ''}`;
         overlayLayer.appendChild(el);
 
-        entry = { group: g, ring, el, targetPos: new THREE.Vector3(cur.x, cur.y, cur.z), visible: true };
+        entry = { group: g, ring, el, targetPos: new THREE.Vector3(cur.x, cur.y, cur.z), visible: true, lastUpdatedAt: performance.now() };
         remoteCursorMeshes.set(cur.userId, entry);
       }
       entry.targetPos.set(cur.x, cur.y, cur.z);
       entry.ring.lookAt(cur.nx || 0, cur.ny || 1, cur.nz || 0);
       entry.visible = cur.visible !== false;
       entry.group.visible = entry.visible;
+      entry.lastUpdatedAt = performance.now();
     }
 
     function hideRemoteCursor(uid) {
@@ -2079,6 +2103,7 @@
         basePatches = pkt.basePatches || [];
         priceVisible = !!pkt.priceVisible;
         if (pkt.cursors) Object.values(pkt.cursors).forEach(updateRemoteCursor);
+        pruneRemoteCursors();
         renderRoster(); renderHomeTab(); renderChat(); renderVersionsTab(); renderBomTab(); renderPinsTab(); renderMeasuresTab();
         syncBasePatchesToScene();
         updateBriefSummary();
@@ -2203,6 +2228,7 @@
             onlineUsers = d.users || onlineUsers;
             renderRoster();
             if (d.cursors) Object.values(d.cursors).forEach(updateRemoteCursor);
+            pruneRemoteCursors();
             if (Array.isArray(d.events)) {
               for (const ev of d.events) {
                 if (ev.type === 'chat') handleIncomingPacket({ type: 'chat', message: ev.data, seq: ev.seq });
@@ -2977,7 +3003,7 @@
           draftLabelEl.style.display = 'block';
           markDirty(2);
         }
-        if (currentUser && now - lastCursorSent >= 50) {
+        if (currentUser && selfId && ws && wsConnected && ws.readyState === WebSocket.OPEN && now - lastCursorSent >= 80) {
           lastCursorSent = now;
           const n = hit.face ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld) : new THREE.Vector3(0, 1, 0);
           sendCollabEvent({
