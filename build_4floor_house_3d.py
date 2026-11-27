@@ -6697,8 +6697,10 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     z_2f, h_2f = p_2f["z0"], p_2f["h"]
     zf_2f = z_2f + 0.005
 
-    add_box_mm("2F_Slab_Washing", -8980, -6871, -1480, 1020, z_2f - 0.15, z_2f, MATS["Slab_Tile_Bath"], col_2f)
-    add_box_mm("2F_Slab_Child_Balcony", -6869, -3480, -4560, 380, z_2f - 0.15, z_2f, MATS["Slab_Wood"], col_2f)
+    add_box_mm("2F_Slab_Washing", -8980, -6871, -1480, 1020, z_2f - 0.15, z_2f, MATS["Slab_Wood"], col_2f)
+    add_box_mm("2F_Slab_Child_Balcony", -6869, -3480, -2660, 380, z_2f - 0.15, z_2f, MATS["Slab_Wood"], col_2f)
+    add_box_mm("2F_Slab_ChildWIC", -5270, -3480, -4560, -2660, z_2f - 0.15, z_2f, MATS["Slab_Wood"], col_2f)
+    add_box_mm("2F_Slab_SW_Laundry", -6869, -5270, -4560, -2660, z_2f - 0.15, z_2f, MATS["Slab_Tile_Bath"], col_2f)
     add_box_mm("2F_Slab_Child_EntryHall", -3480, -1552, -2660, -1605, z_2f - 0.15, z_2f, MATS["Slab_Wood"], col_2f)
     add_box_mm("2F_Slab_ChildBath", -3480, -1552, -1605, 380, z_2f - 0.15, z_2f, MATS["Slab_Tile_Bath"], col_2f)
     add_box_mm("2F_Slab_MasterBath", -3490, -542, -5400, -2682, z_2f - 0.15, z_2f, MATS["Slab_Tile_Bath"], col_2f)
@@ -6800,12 +6802,38 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     build_double_sliding_glass_door("2F_Door_WIC_Bath", -610, -450, -4540, -3485, z_2f + 0.002, h_2f, 2.340, col_2f)
 
     # 2F Furniture & Fixtures (West/SW calibrated to Kujiale 装修图纸.dwg)
-    # NW Washing Alcove (open to 18.12 m² Child Bedroom)
-    add_box_mm("2F_Washing_Counter", -8920, -7030, 260, 845, zf_2f, zf_2f + 0.88, MATS["Cabinet_Cream"], col_2f)
-    add_box_mm("2F_Washing_Machine_L", -8850, -8250, 248, 820, zf_2f, zf_2f + 0.84, MATS["Sanitary_White"], col_2f)
-    add_box_mm("2F_Washing_Machine_R", -8200, -7600, 248, 820, zf_2f, zf_2f + 0.84, MATS["Sanitary_White"], col_2f)
-    add_box_mm("2F_Washing_Machine_L_Door", -8720, -8380, 240, 250, zf_2f + 0.25, zf_2f + 0.59, MATS["Cabinet_Charcoal"], col_2f, r_corner=40.0)
-    add_box_mm("2F_Washing_Machine_R_Door", -8070, -7730, 240, 250, zf_2f + 0.25, zf_2f + 0.59, MATS["Cabinet_Charcoal"], col_2f, r_corner=40.0)
+    # NW Window Alcove: Tatami Platform + Hanging Wardrobe (per 全屋定制_CAD 5088/5091/5093/5095, total height 2515mm)
+    add_box_mm("2F_ChildTatami_Base", -8919, -7030, -1400, 950, zf_2f, z_2f + 0.410, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildTatami_Top", -8919, -7030, -1400, 360, z_2f + 0.410, z_2f + 0.441, MATS["Cabinet_Walnut"], col_2f)
+    add_box_mm("2F_ChildTatami_Mat", -8870, -7080, -1350, 320, z_2f + 0.441, z_2f + 0.475, MATS["Bed_Linen"], col_2f)
+    for _td_i, (_dy0, _dy1) in enumerate(((-1340.0, -520.0), (-500.0, 320.0)), 1):
+        add_box_mm(f"2F_ChildTatami_Drawer_{_td_i}", -7030.0, -7008.0, _dy0, _dy1, z_2f + 0.050, z_2f + 0.390, MATS["Cabinet_Cream"], col_2f)
+        _dym = 0.5 * (_dy0 + _dy1)
+        add_box_mm(f"2F_ChildTatami_DrawerPull_{_td_i}", -7008.0, -6996.0, _dym - 90.0, _dym + 90.0, z_2f + 0.340, z_2f + 0.360, MATS["Cabinet_Charcoal"], col_2f)
+
+    # North-Wall Hanging Wardrobe resting on 441mm Tatami platform (top z_2f + 2.515m)
+    _tw_z0, _tw_z1 = z_2f + 0.441, z_2f + 2.515
+    add_box_mm("2F_ChildTatami_Wardrobe_Back", -8919.0, -7030.0, 937.0, 955.0, _tw_z0, _tw_z1, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildTatami_Wardrobe_SideL", -8919.0, -8901.0, 382.0, 937.0, _tw_z0, _tw_z1, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildTatami_Wardrobe_SideR", -7048.0, -7030.0, 382.0, 937.0, _tw_z0, _tw_z1, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildTatami_Wardrobe_Bot", -8901.0, -7048.0, 382.0, 937.0, _tw_z0, _tw_z0 + 0.020, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildTatami_Wardrobe_Top", -8901.0, -7048.0, 382.0, 937.0, _tw_z1 - 0.020, _tw_z1, MATS["Cabinet_Cream"], col_2f)
+    # 3-column interior (left hang -8901..-8310, center cubbies -8310..-7490, right 441mm hang -7490..-7048)
+    add_box_mm("2F_ChildTatami_Wardrobe_DivL", -8328.0, -8310.0, 390.0, 937.0, _tw_z0 + 0.020, _tw_z1 - 0.020, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildTatami_Wardrobe_DivR", -7490.0, -7472.0, 390.0, 937.0, _tw_z0 + 0.020, _tw_z1 - 0.020, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildTatami_Wardrobe_MidV", -7910.0, -7892.0, 410.0, 937.0, _tw_z0 + 0.020, _tw_z1 - 0.020, MATS["Cabinet_Cream"], col_2f)
+    for _si, _sz in enumerate((_tw_z0 + 0.420, _tw_z0 + 0.860, _tw_z0 + 1.300, _tw_z0 + 1.720), 1):
+        add_box_mm(f"2F_ChildTatami_Wardrobe_Shelf_{_si}", -8310.0, -7490.0, 410.0, 937.0, _sz, _sz + 0.018, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildTatami_Wardrobe_RodL", -8896.0, -8332.0, 650.0, 675.0, _tw_z1 - 0.140, _tw_z1 - 0.115, MATS["B2_Chrome_Silver"], col_2f)
+    add_box_mm("2F_ChildTatami_Wardrobe_RodR", -7468.0, -7052.0, 650.0, 675.0, _tw_z1 - 0.140, _tw_z1 - 0.115, MATS["B2_Chrome_Silver"], col_2f)
+    _tw_dw = (-7030.0 - (-8919.0)) / 4.0
+    for _di in range(4):
+        _dx0 = -8919.0 + _di * _tw_dw + 1.5
+        _dx1 = -8919.0 + (_di + 1) * _tw_dw - 1.5
+        add_box_mm(f"2F_ChildTatami_Wardrobe_Door_{_di+1}", _dx0, _dx1, 360.0, 382.0, z_2f + 0.445, z_2f + 2.510, MATS["OLO_Cab_White"], col_2f)
+        _hx = _dx1 - 24.0 if _di % 2 == 0 else _dx0 + 24.0
+        add_box_mm(f"2F_ChildTatami_Wardrobe_Handle_{_di+1}", _hx - 5.0, _hx + 5.0, 350.0, 360.0, z_2f + 0.900, z_2f + 1.450, MATS["Cabinet_Charcoal"], col_2f)
+    add_box_mm("2F_ChildTatami_Soffit", -8919.0, -7030.0, 360.0, 955.0, z_2f + 2.515, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
 
     # Child Bedroom Sleeping Zone (18.12 m²)
     build_bed("2F_Child_Bed", -5986, -4186, -1740, 260, z_2f, "top", col_2f)
@@ -6827,10 +6855,33 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     add_box_mm("2F_ChildWIC_Cab_E", -4023, -3475, -3826, -2715, zf_2f, zf_2f + 2.35, MATS["Cabinet_Cream"], col_2f)
     add_box_mm("2F_ChildWIC_Cab_W", -5220, -4820, -3826, -2715, zf_2f, zf_2f + 2.35, MATS["Cabinet_Cream"], col_2f)
 
-    # SW Study Corner
-    add_box_mm("2F_Child_Desk", -6810, -5500, -4360, -3780, zf_2f, zf_2f + 0.75, MATS["Cabinet_Walnut"], col_2f)
-    add_box_mm("2F_Child_Chair", -6360, -5880, -3720, -3260, zf_2f, zf_2f + 0.82, MATS["Accent_Leather"], col_2f, r_corner=40.0)
-    add_box_mm("2F_Child_StudyCab", -5915, -5320, -3278, -2715, zf_2f, zf_2f + 2.20, MATS["Cabinet_Cream"], col_2f)
+    # SW Window Alcove: Stacked Washer + Dryer Tower (#41) + Utility Basin/Cabinets (#66/#47, CH 2500mm)
+    add_box_mm("2F_SW_Laundry_SideL", -5915, -5320, -3296, -3278, zf_2f, z_2f + 2.500, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_SW_Laundry_Washer", -5900, -5330, -3268, -2725, zf_2f, z_2f + 0.850, MATS["Sanitary_White"], col_2f)
+    add_box_mm("2F_SW_Laundry_WasherDoor", -5914, -5900, -3160, -2830, z_2f + 0.240, z_2f + 0.570, MATS["Cabinet_Charcoal"], col_2f, r_corner=50.0)
+    add_box_mm("2F_SW_Laundry_WasherPanel", -5910, -5898, -3240, -2750, z_2f + 0.720, z_2f + 0.840, MATS["Cabinet_Charcoal"], col_2f)
+    add_box_mm("2F_SW_Laundry_StackShelf", -5915, -5320, -3278, -2715, z_2f + 0.850, z_2f + 0.880, MATS["Cabinet_Walnut"], col_2f)
+    add_box_mm("2F_SW_Laundry_Dryer", -5900, -5330, -3268, -2725, z_2f + 0.880, z_2f + 1.730, MATS["Sanitary_White"], col_2f)
+    add_box_mm("2F_SW_Laundry_DryerDoor", -5914, -5900, -3160, -2830, z_2f + 1.120, z_2f + 1.450, MATS["Cabinet_Charcoal"], col_2f, r_corner=50.0)
+    add_box_mm("2F_SW_Laundry_DryerPanel", -5910, -5898, -3240, -2750, z_2f + 1.600, z_2f + 1.720, MATS["Cabinet_Charcoal"], col_2f)
+    add_box_mm("2F_SW_Laundry_UpperCab", -5915, -5320, -3278, -2715, z_2f + 1.730, z_2f + 2.500, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_SW_Laundry_Soffit", -5915, -5320, -3296, -2715, z_2f + 2.500, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
+
+    # Adjacent Utility Base/Wall Cabinet & Basin (#66, L-cornered cleanly with South Window Low Cab #47)
+    add_box_mm("2F_SW_Utility_BaseCab", -5955, -5320, -4378, -3296, zf_2f, z_2f + 0.850, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_SW_Utility_CounterTop", -5955, -5320, -4378, -3296, z_2f + 0.850, z_2f + 0.880, MATS["Sanitary_White"], col_2f)
+    add_box_mm("2F_SW_Utility_Basin", -5860, -5420, -3780, -3380, z_2f + 0.875, z_2f + 0.900, MATS["Cabinet_Charcoal"], col_2f)
+    add_cyl_mm("2F_SW_Utility_Faucet", -5380, -3580, 14.0, z_2f + 0.880, z_2f + 1.140, MATS["Gold_Brass"], col_2f)
+    add_box_mm("2F_SW_Utility_FaucetSpout", -5500, -5380, -3592, -3568, z_2f + 1.120, z_2f + 1.145, MATS["Gold_Brass"], col_2f)
+    add_box_mm("2F_SW_Utility_WallCab", -5750, -5320, -3868, -3296, z_2f + 1.500, z_2f + 2.500, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_SW_Utility_Soffit", -5750, -5320, -3868, -3296, z_2f + 2.500, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
+
+    # South Window Utility Low Cabinet (#47, non-overlapping west of Utility_BaseCab at -5960)
+    add_box_mm("2F_SW_WinCab_Body", -6810, -5960, -4378, -3800, zf_2f, z_2f + 0.820, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_SW_WinCab_Top", -6810, -5960, -4378, -3780, z_2f + 0.820, z_2f + 0.850, MATS["Cabinet_Walnut"], col_2f)
+    _wc_dw = (-5960.0 - (-6810.0)) / 3.0
+    for _wi in range(3):
+        add_box_mm(f"2F_SW_WinCab_Door_{_wi+1}", -6810.0 + _wi * _wc_dw + 1.5, -6810.0 + (_wi + 1) * _wc_dw - 1.5, -3800.0, -3780.0, zf_2f + 0.020, z_2f + 0.818, MATS["OLO_Cab_White"], col_2f)
 
     # Updated Master Bathroom (7.24 m², wet/dry partition)
     pts_tub = []
