@@ -6799,10 +6799,10 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
                 for pk, pz in enumerate((z_floor + 0.94, z_floor + 1.28), 1):
                     add_box_mm(f"{name}_{ltag}_Post{sgn_i}_{pk}", sx0, sx1, hy - 5.0, hy + 5.0, pz - 0.005, pz + 0.005, frame_mat, col)
 
-    build_double_sliding_glass_door("2F_Door_WIC_Bath", -610, -450, -4540, -3485, z_2f + 0.002, h_2f, 2.340, col_2f)
+    build_double_sliding_glass_door("2F_Door_WIC_Bath", -610, -450, -4540, -3485, z_2f + 0.002, h_2f, 2.500, col_2f)
 
     # 2F Furniture & Fixtures (West/SW calibrated to Kujiale 装修图纸.dwg)
-    # NW Window Alcove: Tatami Platform + Hanging Wardrobe (per 全屋定制_CAD 5088/5091/5093/5095, total height 2515mm)
+    # NW Window Alcove: Tatami Platform + Hanging Wardrobe (unified 2.50m datum)
     add_box_mm("2F_ChildTatami_Base", -8919, -7030, -1400, 950, zf_2f, z_2f + 0.410, MATS["Cabinet_Cream"], col_2f)
     add_box_mm("2F_ChildTatami_Top", -8919, -7030, -1400, 360, z_2f + 0.410, z_2f + 0.441, MATS["Cabinet_Walnut"], col_2f)
     add_box_mm("2F_ChildTatami_Mat", -8870, -7080, -1350, 320, z_2f + 0.441, z_2f + 0.475, MATS["Bed_Linen"], col_2f)
@@ -6811,8 +6811,8 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         _dym = 0.5 * (_dy0 + _dy1)
         add_box_mm(f"2F_ChildTatami_DrawerPull_{_td_i}", -7008.0, -6996.0, _dym - 90.0, _dym + 90.0, z_2f + 0.340, z_2f + 0.360, MATS["Cabinet_Charcoal"], col_2f)
 
-    # North-Wall Hanging Wardrobe resting on 441mm Tatami platform (top z_2f + 2.515m)
-    _tw_z0, _tw_z1 = z_2f + 0.441, z_2f + 2.515
+    # North-Wall Hanging Wardrobe resting on 441mm Tatami platform (unified top z_2f + 2.500m)
+    _tw_z0, _tw_z1 = z_2f + 0.441, z_2f + 2.500
     add_box_mm("2F_ChildTatami_Wardrobe_Back", -8919.0, -7030.0, 937.0, 955.0, _tw_z0, _tw_z1, MATS["Cabinet_Cream"], col_2f)
     add_box_mm("2F_ChildTatami_Wardrobe_SideL", -8919.0, -8901.0, 382.0, 937.0, _tw_z0, _tw_z1, MATS["Cabinet_Cream"], col_2f)
     add_box_mm("2F_ChildTatami_Wardrobe_SideR", -7048.0, -7030.0, 382.0, 937.0, _tw_z0, _tw_z1, MATS["Cabinet_Cream"], col_2f)
@@ -6830,10 +6830,10 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     for _di in range(4):
         _dx0 = -8919.0 + _di * _tw_dw + 1.5
         _dx1 = -8919.0 + (_di + 1) * _tw_dw - 1.5
-        add_box_mm(f"2F_ChildTatami_Wardrobe_Door_{_di+1}", _dx0, _dx1, 360.0, 382.0, z_2f + 0.445, z_2f + 2.510, MATS["OLO_Cab_White"], col_2f)
+        add_box_mm(f"2F_ChildTatami_Wardrobe_Door_{_di+1}", _dx0, _dx1, 360.0, 382.0, z_2f + 0.445, z_2f + 2.496, MATS["OLO_Cab_White"], col_2f)
         _hx = _dx1 - 24.0 if _di % 2 == 0 else _dx0 + 24.0
         add_box_mm(f"2F_ChildTatami_Wardrobe_Handle_{_di+1}", _hx - 5.0, _hx + 5.0, 350.0, 360.0, z_2f + 0.900, z_2f + 1.450, MATS["Cabinet_Charcoal"], col_2f)
-    add_box_mm("2F_ChildTatami_Soffit", -8919.0, -7030.0, 360.0, 955.0, z_2f + 2.515, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
+    add_box_mm("2F_ChildTatami_Soffit", -8919.0, -7030.0, 360.0, 955.0, z_2f + 2.500, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
 
     # Child Bedroom Sleeping Zone (18.12 m²)
     build_bed("2F_Child_Bed", -5986, -4186, -1740, 260, z_2f, "top", col_2f)
@@ -6850,10 +6850,13 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     add_box_mm("2F_ChildBath_Toilet", -2260, -1640, -1420, -1040, zf_2f, zf_2f + 0.42, MATS["Sanitary_White"], col_2f, r_corner=60.0)
     add_box_mm("2F_ChildBath_ToiletTank", -1830, -1640, -1420, -1040, zf_2f, zf_2f + 0.78, MATS["Sanitary_White"], col_2f, r_corner=30.0)
 
-    # New Child Walk-In Closet (2.93 m², U-shaped wardrobes)
-    add_box_mm("2F_ChildWIC_Cab_S", -5220, -3475, -4375, -3826, zf_2f, zf_2f + 2.35, MATS["Cabinet_Cream"], col_2f)
-    add_box_mm("2F_ChildWIC_Cab_E", -4023, -3475, -3826, -2715, zf_2f, zf_2f + 2.35, MATS["Cabinet_Cream"], col_2f)
-    add_box_mm("2F_ChildWIC_Cab_W", -5220, -4820, -3826, -2715, zf_2f, zf_2f + 2.35, MATS["Cabinet_Cream"], col_2f)
+    # New Child Walk-In Closet (2.93 m², U-shaped wardrobes, unified 2.50m + ceiling soffits)
+    add_box_mm("2F_ChildWIC_Cab_S", -5220, -3475, -4375, -3826, zf_2f, z_2f + 2.500, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildWIC_Cab_E", -4023, -3475, -3826, -2715, zf_2f, z_2f + 2.500, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildWIC_Cab_W", -5220, -4820, -3826, -2715, zf_2f, z_2f + 2.500, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_ChildWIC_Soffit_S", -5220, -3475, -4375, -3826, z_2f + 2.500, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
+    add_box_mm("2F_ChildWIC_Soffit_E", -4023, -3475, -3826, -2715, z_2f + 2.500, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
+    add_box_mm("2F_ChildWIC_Soffit_W", -5220, -4820, -3826, -2715, z_2f + 2.500, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
 
     # SW Window Alcove: Stacked Washer + Dryer Tower (#41) + Utility Basin/Cabinets (#66/#47, CH 2500mm)
     add_box_mm("2F_SW_Laundry_SideL", -5915, -5320, -3296, -3278, zf_2f, z_2f + 2.500, MATS["Cabinet_Cream"], col_2f)
@@ -6905,14 +6908,14 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     add_box_mm("2F_WIC_Partition_N2", 1360.0, 1500.0, -2850.0, -2846.0, z_2f + 0.0000, z_2f + 2.8300, MATS["Wall_New"], col_2f)
     def build_2f_wic_n_optical_wardrobe():
         # 2F Master Walk-In Closet North Run (swapped with South):
-        # 4-door Pearlescent Optical Wood Shadow Wardrobe (`2340 mm` high + upper bulkhead `2.340..2.830`, facing South `-Y`)
+        # 4-door Pearlescent Optical Wood Shadow Wardrobe (`2500 mm` unified height + upper bulkhead `2.500..2.830`, facing South `-Y`)
         x0, x1 = -450.0, 1220.0
         yb_n, yf_n = -2850.0, -3450.0
         yc_f = -3428.0
         z0 = z_2f
-        h_n = 2.340
+        h_n = 2.500
 
-        # Ceiling soffit/bulkhead above the 2340 mm North wardrobe and its adjacent 见光板 (z: 2.340..2.830)
+        # Ceiling soffit/bulkhead above the 2500 mm North wardrobe and its adjacent 见光板 (z: 2.500..2.830)
         add_box_mm("2F_WIC_N_Bulkhead_Main", x0, x1, yf_n, yb_n, z0 + h_n, z0 + 2.830, MATS["Wall_New"], col_2f)
         add_box_mm("2F_WIC_N_Bulkhead_Pass", 1220.0, 1500.0, yf_n, yc_f, z0 + h_n, z0 + 2.830, MATS["Wall_New"], col_2f)
 
@@ -6922,15 +6925,15 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         add_box_mm("2F_WIC_N_CheekR", x1 - 18.0, x1, yc_f, yb_n - 20.0, z0, z0 + h_n, MATS["White_Shadow_Wood_Base"], col_2f)
         add_box_mm("2F_WIC_N_Plinth", x0 + 18.0, x1 - 18.0, yc_f + 18.0, yb_n - 20.0, z0, z0 + 0.045, MATS["OLO_ToeKick_Black"], col_2f)
         add_box_mm("2F_WIC_N_Bottom", x0 + 18.0, x1 - 18.0, yc_f, yb_n - 20.0, z0 + 0.045, z0 + 0.065, MATS["White_Shadow_Wood_Base"], col_2f)
-        add_box_mm("2F_WIC_N_Top", x0, x1, yc_f, yb_n - 20.0, z0 + 2.315, z0 + h_n, MATS["White_Shadow_Wood_Base"], col_2f)
-        add_box_mm("2F_WIC_N_PartCenter", 376.0, 394.0, yc_f, yb_n - 20.0, z0 + 0.065, z0 + 2.315, MATS["White_Shadow_Wood_Base"], col_2f)
+        add_box_mm("2F_WIC_N_Top", x0, x1, yc_f, yb_n - 20.0, z0 + 2.475, z0 + h_n, MATS["White_Shadow_Wood_Base"], col_2f)
+        add_box_mm("2F_WIC_N_PartCenter", 376.0, 394.0, yc_f, yb_n - 20.0, z0 + 0.065, z0 + 2.475, MATS["White_Shadow_Wood_Base"], col_2f)
 
         # Left Internal Module (-432..376): top shelf, hanging rod, shelf 0.89, 逐影系列首饰盒, 逐影系列裤抽, lower bay
         lx1, lx2 = -432.0, 376.0
         for s_i, sz_m in enumerate([0.890, 2.020], 1):
             add_box_mm(f"2F_WIC_N_ModL_Shelf_{s_i}", lx1, lx2, yc_f + 28.0, yb_n - 20.0, z0 + sz_m, z0 + sz_m + 0.020, MATS["White_Shadow_Wood_Base"], col_2f)
             add_box_mm(f"2F_WIC_N_ModL_LED_{s_i}", lx1 + 12.0, lx2 - 12.0, yb_n - 42.0, yb_n - 24.0, z0 + sz_m - 0.008, z0 + sz_m, MATS["Warm_LED_Glow"], col_2f)
-        add_box_mm("2F_WIC_N_ModL_TopLED", lx1 + 12.0, lx2 - 12.0, yb_n - 42.0, yb_n - 24.0, z0 + 2.307, z0 + 2.315, MATS["Warm_LED_Glow"], col_2f)
+        add_box_mm("2F_WIC_N_ModL_TopLED", lx1 + 12.0, lx2 - 12.0, yb_n - 42.0, yb_n - 24.0, z0 + 2.467, z0 + 2.475, MATS["Warm_LED_Glow"], col_2f)
         # Hanging rod under 2.020 shelf
         add_box_mm("2F_WIC_N_ModL_RodDropL", lx1 + 36.0, lx1 + 48.0, -3150.0, -3138.0, z0 + 1.905, z0 + 2.020, MATS["Gold_Brass"], col_2f)
         add_box_mm("2F_WIC_N_ModL_RodDropR", lx2 - 48.0, lx2 - 36.0, -3150.0, -3138.0, z0 + 1.905, z0 + 2.020, MATS["Gold_Brass"], col_2f)
@@ -6951,7 +6954,7 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         for r_i, rz_m in enumerate([0.890, 1.260, 1.640, 2.020], 1):
             add_box_mm(f"2F_WIC_N_ModR_Shelf_{r_i}", rx1, rx2, yc_f + 28.0, yb_n - 20.0, z0 + rz_m, z0 + rz_m + 0.020, MATS["White_Shadow_Wood_Base"], col_2f)
             add_box_mm(f"2F_WIC_N_ModR_LED_{r_i}", rx1 + 12.0, rx2 - 12.0, yb_n - 42.0, yb_n - 24.0, z0 + rz_m - 0.008, z0 + rz_m, MATS["Warm_LED_Glow"], col_2f)
-        add_box_mm("2F_WIC_N_ModR_TopLED", rx1 + 12.0, rx2 - 12.0, yb_n - 42.0, yb_n - 24.0, z0 + 2.307, z0 + 2.315, MATS["Warm_LED_Glow"], col_2f)
+        add_box_mm("2F_WIC_N_ModR_TopLED", rx1 + 12.0, rx2 - 12.0, yb_n - 42.0, yb_n - 24.0, z0 + 2.467, z0 + 2.475, MATS["Warm_LED_Glow"], col_2f)
         add_box_mm("2F_WIC_N_ModR_SlimShelf", rx1 + 6.0, rx2 - 6.0, yc_f + 26.0, yb_n - 24.0, z0 + 0.820, z0 + 0.840, MATS["White_Shadow_Wood_Base"], col_2f)
         # Lower 2-door internal mini cabinet (0.065..0.798, two round brass knobs facing -Y)
         add_box_mm("2F_WIC_N_ModR_MiniCabShelf", rx1, rx2, yc_f + 24.0, yb_n - 20.0, z0 + 0.785, z0 + 0.805, MATS["White_Shadow_Wood_Base"], col_2f)
@@ -6960,13 +6963,13 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         for kn_i, kn_x in enumerate((764.0, 832.0), 1):
             add_cyl_mm(f"2F_WIC_N_ModR_MiniKnob_{kn_i}", kn_x, yc_f + 20.0, 12.0, z0 + 0.715, z0 + 0.735, MATS["Gold_Brass"], col_2f, segs=16)
 
-        # Exterior 4 Full-Height Pearlescent Optical Wood Shadow Doors (2340 mm, aspect-preserving seamless 0.50x0.75m tile)
+        # Exterior 4 Full-Height Pearlescent Optical Wood Shadow Doors (2500 mm, aspect-preserving seamless 0.50x0.75m tile)
         s_doors = [(-448.5, -34.0, 0.00), (-31.0, 383.5, 0.37), (386.5, 801.0, 0.71), (804.0, 1218.5, 0.19)]
         s_handle_xs = (-98.0, 16.0, 737.0, 851.0)
         for d_i, (dx1, dx2, u_off) in enumerate(s_doors, 1):
             w_m = abs(dx2 - dx1) * MM
-            h_door_m = 2.322
-            add_uv_front_box_mm(f"2F_WIC_N_Door_{d_i}", dx1, dx2, yf_n, yc_f, z0 + 0.010, z0 + 2.332, u_off, u_off + w_m / 0.50, 0.0, h_door_m / 0.75, MATS["Optical_Wood_Shadow_WIC"], col_2f)
+            h_door_m = 2.482
+            add_uv_front_box_mm(f"2F_WIC_N_Door_{d_i}", dx1, dx2, yf_n, yc_f, z0 + 0.010, z0 + 2.492, u_off, u_off + w_m / 0.50, 0.0, h_door_m / 0.75, MATS["Optical_Wood_Shadow_WIC"], col_2f)
             # Paired 48x48 mm brushed-brass square inset handles at waist height (1.115..1.163 m)
             hx1 = s_handle_xs[d_i - 1]
             hx2 = hx1 + 48.0
@@ -6978,10 +6981,13 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     build_2f_wic_n_optical_wardrobe()
 
     def build_2f_wic_s_mirror_wardrobe():
-        # 2F Master Walk-In Closet South Run (swapped with North): 3-Door Tucson Semi-Transparent Mirror-Glass Wardrobe (x: -450..1220, y: -5260..-4660, facing North +Y)
+        # 2F Master Walk-In Closet South Run (swapped with North): 3-Door Tucson Semi-Transparent Mirror-Glass Wardrobe (unified 2.50m + bulkhead, x: -450..1220, y: -5260..-4660, facing North +Y)
         yb_s, yf_s = -5260.0, -4660.0
         z0 = z_2f
-        h_s = 2.830
+        h_s = 2.500
+
+        # Ceiling soffit/bulkhead above 2500mm South wardrobe (z: 2.500..2.830)
+        add_box_mm("2F_WIC_S_Bulkhead_Main", -450.0, 1220.0, yb_s, yf_s, z0 + h_s, z0 + h_2f, MATS["Wall_New"], col_2f)
 
         # Hollow warm-champagne interior carcass (2 internal partitions -> 3 equal CAD bays)
         add_box_mm("2F_WIC_S_BackWall", -450.0, 1220.0, yb_s, yb_s + 20.0, z0, z0 + h_s, MATS["Shelf_Back_Linen"], col_2f)
@@ -6989,24 +6995,24 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         add_box_mm("2F_WIC_S_CheekR", 1202.0, 1220.0, yb_s + 20.0, yf_s - 22.0, z0, z0 + h_s, MATS["White_Shadow_Wood_Base"], col_2f)
         add_box_mm("2F_WIC_S_Plinth", -432.0, 1202.0, yb_s + 20.0, yf_s - 42.0, z0, z0 + 0.064, MATS["OLO_ToeKick_Black"], col_2f)
         add_box_mm("2F_WIC_S_Bottom", -432.0, 1202.0, yb_s + 20.0, yf_s - 22.0, z0 + 0.064, z0 + 0.084, MATS["White_Shadow_Wood_Base"], col_2f)
-        add_box_mm("2F_WIC_S_HeaderBand", -432.0, 1202.0, yb_s + 20.0, yf_s - 22.0, z0 + 2.756, z0 + 2.776, MATS["White_Shadow_Wood_Base"], col_2f)
-        add_box_mm("2F_WIC_S_Top", -450.0, 1220.0, yb_s + 20.0, yf_s - 22.0, z0 + 2.776, z0 + h_s, MATS["White_Shadow_Wood_Base"], col_2f)
+        add_box_mm("2F_WIC_S_HeaderBand", -432.0, 1202.0, yb_s + 20.0, yf_s - 22.0, z0 + 2.436, z0 + 2.456, MATS["White_Shadow_Wood_Base"], col_2f)
+        add_box_mm("2F_WIC_S_Top", -450.0, 1220.0, yb_s + 20.0, yf_s - 22.0, z0 + 2.456, z0 + h_s, MATS["White_Shadow_Wood_Base"], col_2f)
         for p_idx, (px1, px2) in enumerate([(98.0, 116.0), (654.0, 672.0)], 1):
-            add_box_mm(f"2F_WIC_S_Part_{p_idx}", px1, px2, yb_s + 20.0, yf_s - 22.0, z0 + 0.084, z0 + 2.756, MATS["White_Shadow_Wood_Base"], col_2f)
+            add_box_mm(f"2F_WIC_S_Part_{p_idx}", px1, px2, yb_s + 20.0, yf_s - 22.0, z0 + 0.084, z0 + 2.436, MATS["White_Shadow_Wood_Base"], col_2f)
 
         # 3 Exact CAD Bays: (Left: -432..98, Middle: 116..654, Right: 672..1202)
         cad_bays = [
             (1, -432.0, 98.0,   2.010, True),   # Left bay: upper shelf 2.010 + hanging + 2 drawers + lower bay
-            (2,  116.0, 654.0,  2.373, True),   # Middle bay: HIGH upper shelf 2.373 + long coat hanging + 2 drawers + lower bay
+            (2,  116.0, 654.0,  2.080, True),   # Middle bay: HIGH upper shelf 2.080 + long coat hanging + 2 drawers + lower bay
             (3,  672.0, 1202.0, 2.010, False),  # Right bay: upper shelf 2.010 + hanging + mid shelf 0.802 + 2 stacked open trays (抽盒)
         ]
         for b_i, bx1, bx2, z_upper, has_drawers in cad_bays:
             # Upper shelf + under-shelf warm LED + top warm LED + corner vertical LEDs
             add_box_mm(f"2F_WIC_S_Bay{b_i}_UpperShelf", bx1, bx2, yb_s + 20.0, yf_s - 48.0, z0 + z_upper, z0 + z_upper + 0.022, MATS["White_Shadow_Wood_Base"], col_2f)
             add_box_mm(f"2F_WIC_S_Bay{b_i}_UpperLED", bx1 + 10.0, bx2 - 10.0, yb_s + 24.0, yb_s + 42.0, z0 + z_upper - 0.010, z0 + z_upper, MATS["Warm_LED_Glow"], col_2f)
-            add_box_mm(f"2F_WIC_S_Bay{b_i}_TopLED", bx1 + 10.0, bx2 - 10.0, yb_s + 24.0, yb_s + 42.0, z0 + 2.746, z0 + 2.756, MATS["Warm_LED_Glow"], col_2f)
-            add_box_mm(f"2F_WIC_S_Bay{b_i}_VertLED_L", bx1 + 2.0, bx1 + 10.0, yb_s + 20.0, yb_s + 32.0, z0 + 0.09, z0 + 2.74, MATS["Warm_LED_Glow"], col_2f)
-            add_box_mm(f"2F_WIC_S_Bay{b_i}_VertLED_R", bx2 - 10.0, bx2 - 2.0, yb_s + 20.0, yb_s + 32.0, z0 + 0.09, z0 + 2.74, MATS["Warm_LED_Glow"], col_2f)
+            add_box_mm(f"2F_WIC_S_Bay{b_i}_TopLED", bx1 + 10.0, bx2 - 10.0, yb_s + 24.0, yb_s + 42.0, z0 + 2.426, z0 + 2.436, MATS["Warm_LED_Glow"], col_2f)
+            add_box_mm(f"2F_WIC_S_Bay{b_i}_VertLED_L", bx1 + 2.0, bx1 + 10.0, yb_s + 20.0, yb_s + 32.0, z0 + 0.09, z0 + 2.42, MATS["Warm_LED_Glow"], col_2f)
+            add_box_mm(f"2F_WIC_S_Bay{b_i}_VertLED_R", bx2 - 10.0, bx2 - 2.0, yb_s + 20.0, yb_s + 32.0, z0 + 0.09, z0 + 2.42, MATS["Warm_LED_Glow"], col_2f)
 
             # U-drop brass hanging rail right below upper shelf
             z_rod = z_upper - 0.130
@@ -7039,7 +7045,7 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             (665.0,  1218.5, False), # Door 3: pull on left stile
         ]
         for d_i, (dx1, dx2, pull_right) in enumerate(door_spans, 1):
-            dz0, dz1 = z0 + 0.012, z0 + 2.822
+            dz0, dz1 = z0 + 0.012, z0 + 2.492
             add_box_mm(f"2F_WIC_S_Door_{d_i}_FrameL", dx1, dx1 + 14.0, yf_s - 22.0, yf_s, dz0, dz1, MATS["Stair_Bronze_Iron"], col_2f)
             add_box_mm(f"2F_WIC_S_Door_{d_i}_FrameR", dx2 - 14.0, dx2, yf_s - 22.0, yf_s, dz0, dz1, MATS["Stair_Bronze_Iron"], col_2f)
             add_box_mm(f"2F_WIC_S_Door_{d_i}_FrameB", dx1 + 14.0, dx2 - 14.0, yf_s - 22.0, yf_s, dz0, dz0 + 0.014, MATS["Stair_Bronze_Iron"], col_2f)
@@ -7050,17 +7056,18 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             add_box_mm(f"2F_WIC_S_Door_{d_i}_Pull", hx1, hx2, yf_s, yf_s + 10.0, z0 + 1.050, z0 + 1.150, MATS["Stair_Bronze_Iron"], col_2f)
 
     build_2f_wic_s_mirror_wardrobe()
-    add_box_mm("2F_WIC_DispS_Back", 1220.0, 1240.0, -5260.0, -4682.0, z_2f + 0.0000, z_2f + 2.8300, MATS["OLO_Cab_White"], col_2f)
-    add_box_mm("2F_WIC_DispS_SideWall", 1240.0, 1500.0, -5260.0, -5240.0, z_2f + 0.0000, z_2f + 2.8300, MATS["OLO_Cab_White"], col_2f)
-    # 见光板: Exposed end panel matching South 3-door full-height mirror wardrobe (2830 mm, facing +Y)
-    add_box_mm("2F_WIC_DispS_PassPanel", 1220.0, 1500.0, -4682.0, -4660.0, z_2f + 0.5840, z_2f + 2.8300, MATS["Wardrobe_WaveGrain"], col_2f)
+    add_box_mm("2F_WIC_DispS_Bulkhead", 1220.0, 1500.0, -5260.0, -4660.0, z_2f + 2.5000, z_2f + h_2f, MATS["Wall_New"], col_2f)
+    add_box_mm("2F_WIC_DispS_Back", 1220.0, 1240.0, -5260.0, -4682.0, z_2f + 0.0000, z_2f + 2.5000, MATS["OLO_Cab_White"], col_2f)
+    add_box_mm("2F_WIC_DispS_SideWall", 1240.0, 1500.0, -5260.0, -5240.0, z_2f + 0.0000, z_2f + 2.5000, MATS["OLO_Cab_White"], col_2f)
+    # 见光板: Exposed end panel matching South 3-door mirror wardrobe (2500 mm, facing +Y)
+    add_box_mm("2F_WIC_DispS_PassPanel", 1220.0, 1500.0, -4682.0, -4660.0, z_2f + 0.5840, z_2f + 2.5000, MATS["Wardrobe_WaveGrain"], col_2f)
     add_box_mm("2F_WIC_DispS_PassMirror", 1220.0, 1500.0, -4682.0, -4660.0, z_2f + 0.0000, z_2f + 0.5800, MATS["Mirror_Bronze"], col_2f)
     add_box_mm("2F_WIC_DispS_PassMirrorTop", 1220.0, 1500.0, -4682.0, -4660.0, z_2f + 0.5720, z_2f + 0.5800, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispS_PassMullion", 1486.0, 1500.0, -4682.0, -4660.0, z_2f + 0.0000, z_2f + 0.5800, MATS["RoseGold_Metal"], col_2f)
-    for g_idx, gz in enumerate([0.7196, 0.8602, 1.0009, 1.1415, 1.2821, 1.4228, 1.5634, 1.7040, 1.8446, 1.9853, 2.1259, 2.2665, 2.4071, 2.5478, 2.6884], 1):
+    for g_idx, gz in enumerate([0.7196, 0.8602, 1.0009, 1.1415, 1.2821, 1.4228, 1.5634, 1.7040, 1.8446, 1.9853, 2.1259, 2.2665, 2.4071], 1):
         add_box_mm(f"2F_WIC_DispS_PassGrain_{g_idx}", 1224.0, 1496.0, -4660.0, -4659.0, z_2f + gz, z_2f + gz + 0.0020, MATS["Wall_Panel_Cream"], col_2f)
-    add_box_mm("2F_WIC_DispS_Top", 1240.0, 1500.0, -5240.0, -4682.0, z_2f + 2.7800, z_2f + 2.8300, MATS["Counter_Marble"], col_2f)
-    add_box_mm("2F_WIC_DispS_Glow", 1240.0, 1255.0, -5240.0, -4682.0, z_2f + 0.9000, z_2f + 2.7800, MATS["B2_Backlit_Cream"], col_2f)
+    add_box_mm("2F_WIC_DispS_Top", 1240.0, 1500.0, -5240.0, -4682.0, z_2f + 2.4500, z_2f + 2.5000, MATS["Counter_Marble"], col_2f)
+    add_box_mm("2F_WIC_DispS_Glow", 1240.0, 1255.0, -5240.0, -4682.0, z_2f + 0.9000, z_2f + 2.4500, MATS["B2_Backlit_Cream"], col_2f)
     add_box_mm("2F_WIC_DispS_Base", 1255.0, 1498.0, -5240.0, -4682.0, z_2f + 0.0000, z_2f + 0.8600, MATS["Wall_Panel_Cream"], col_2f)
     add_box_mm("2F_WIC_DispS_Marble", 1255.0, 1510.0, -5240.0, -4682.0, z_2f + 0.8600, z_2f + 0.9000, MATS["Counter_Marble"], col_2f)
     add_box_mm("2F_WIC_DispS_Shelf_0", 1255.0, 1470.0, -5240.0, -4682.0, z_2f + 1.4500, z_2f + 1.4650, MATS["Window_Glass"], col_2f)
@@ -7069,20 +7076,21 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     add_box_mm("2F_WIC_DispS_Shelf_1", 1255.0, 1470.0, -5240.0, -4682.0, z_2f + 2.0500, z_2f + 2.0650, MATS["Window_Glass"], col_2f)
     add_box_mm("2F_WIC_DispS_ShelfRail_1", 1450.0, 1470.0, -5240.0, -4682.0, z_2f + 2.0380, z_2f + 2.0650, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispS_LED_1", 1435.0, 1448.0, -5230.0, -4692.0, z_2f + 2.0420, z_2f + 2.0500, MATS["Warm_LED_Glow"], col_2f)
-    add_box_mm("2F_WIC_DispS_RailA", 1478.0, 1492.0, -5234.0, -5220.0, z_2f + 0.9000, z_2f + 2.7800, MATS["RoseGold_Metal"], col_2f)
+    add_box_mm("2F_WIC_DispS_RailA", 1478.0, 1492.0, -5234.0, -5220.0, z_2f + 0.9000, z_2f + 2.4500, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispS_RailA_Knuckle_0", 1474.0, 1496.0, -5238.0, -5216.0, z_2f + 1.4200, z_2f + 1.4950, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispS_RailA_Knuckle_1", 1474.0, 1496.0, -5238.0, -5216.0, z_2f + 2.0200, z_2f + 2.0950, MATS["RoseGold_Metal"], col_2f)
-    add_box_mm("2F_WIC_DispS_RailB", 1478.0, 1492.0, -4702.0, -4688.0, z_2f + 0.9000, z_2f + 2.7800, MATS["RoseGold_Metal"], col_2f)
+    add_box_mm("2F_WIC_DispS_RailB", 1478.0, 1492.0, -4702.0, -4688.0, z_2f + 0.9000, z_2f + 2.4500, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispS_RailB_Knuckle_0", 1474.0, 1496.0, -4706.0, -4684.0, z_2f + 1.4200, z_2f + 1.4950, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispS_RailB_Knuckle_1", 1474.0, 1496.0, -4706.0, -4684.0, z_2f + 2.0200, z_2f + 2.0950, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispS_Books", 1280.0, 1420.0, -5160.0, -5010.0, z_2f + 0.9000, z_2f + 1.1800, MATS["Book_Cream"], col_2f)
     add_box_mm("2F_WIC_DispS_Vase", 1290.0, 1420.0, -4912.0, -4782.0, z_2f + 1.4650, z_2f + 1.6800, MATS["OLO_Cab_White"], col_2f)
-    add_box_mm("2F_WIC_DispN_Back", 1220.0, 1240.0, -3428.0, -2850.0, z_2f + 0.0000, z_2f + 2.8300, MATS["OLO_Cab_White"], col_2f)
-    add_box_mm("2F_WIC_DispN_SideWall", 1240.0, 1500.0, -2870.0, -2850.0, z_2f + 0.0000, z_2f + 2.8300, MATS["OLO_Cab_White"], col_2f)
-    # 见光板: Exposed end panel matching North 4-door wardrobe in Optical Wood Shadow (0.50x0.75m seamless tile, 280x2340mm)
-    add_uv_front_box_mm("2F_WIC_DispN_PassPanel", 1220.0, 1500.0, -3450.0, -3428.0, z_2f + 0.0000, z_2f + 2.3400, 0.12, 0.12 + 0.280 / 0.50, 0.0, 2.340 / 0.75, MATS["Optical_Wood_Shadow_WIC"], col_2f)
-    add_box_mm("2F_WIC_DispN_Top", 1240.0, 1500.0, -3428.0, -2870.0, z_2f + 2.7800, z_2f + 2.8300, MATS["Counter_Marble"], col_2f)
-    add_box_mm("2F_WIC_DispN_Glow", 1240.0, 1255.0, -3428.0, -2870.0, z_2f + 0.9000, z_2f + 2.7800, MATS["B2_Backlit_Cream"], col_2f)
+    add_box_mm("2F_WIC_DispN_Bulkhead", 1220.0, 1500.0, -3450.0, -2850.0, z_2f + 2.5000, z_2f + h_2f, MATS["Wall_New"], col_2f)
+    add_box_mm("2F_WIC_DispN_Back", 1220.0, 1240.0, -3428.0, -2850.0, z_2f + 0.0000, z_2f + 2.5000, MATS["OLO_Cab_White"], col_2f)
+    add_box_mm("2F_WIC_DispN_SideWall", 1240.0, 1500.0, -2870.0, -2850.0, z_2f + 0.0000, z_2f + 2.5000, MATS["OLO_Cab_White"], col_2f)
+    # 见光板: Exposed end panel matching North 4-door wardrobe in Optical Wood Shadow (0.50x0.75m seamless tile, 280x2500mm)
+    add_uv_front_box_mm("2F_WIC_DispN_PassPanel", 1220.0, 1500.0, -3450.0, -3428.0, z_2f + 0.0000, z_2f + 2.5000, 0.12, 0.12 + 0.280 / 0.50, 0.0, 2.500 / 0.75, MATS["Optical_Wood_Shadow_WIC"], col_2f)
+    add_box_mm("2F_WIC_DispN_Top", 1240.0, 1500.0, -3428.0, -2870.0, z_2f + 2.4500, z_2f + 2.5000, MATS["Counter_Marble"], col_2f)
+    add_box_mm("2F_WIC_DispN_Glow", 1240.0, 1255.0, -3428.0, -2870.0, z_2f + 0.9000, z_2f + 2.4500, MATS["B2_Backlit_Cream"], col_2f)
     add_box_mm("2F_WIC_DispN_Base", 1255.0, 1498.0, -3428.0, -2870.0, z_2f + 0.0000, z_2f + 0.8600, MATS["Wall_Panel_Cream"], col_2f)
     add_box_mm("2F_WIC_DispN_Marble", 1255.0, 1510.0, -3428.0, -2870.0, z_2f + 0.8600, z_2f + 0.9000, MATS["Counter_Marble"], col_2f)
     add_box_mm("2F_WIC_DispN_Shelf_0", 1255.0, 1470.0, -3428.0, -2870.0, z_2f + 1.4500, z_2f + 1.4650, MATS["Window_Glass"], col_2f)
@@ -7091,10 +7099,10 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     add_box_mm("2F_WIC_DispN_Shelf_1", 1255.0, 1470.0, -3428.0, -2870.0, z_2f + 2.0500, z_2f + 2.0650, MATS["Window_Glass"], col_2f)
     add_box_mm("2F_WIC_DispN_ShelfRail_1", 1450.0, 1470.0, -3428.0, -2870.0, z_2f + 2.0380, z_2f + 2.0650, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispN_LED_1", 1435.0, 1448.0, -3418.0, -2880.0, z_2f + 2.0420, z_2f + 2.0500, MATS["Warm_LED_Glow"], col_2f)
-    add_box_mm("2F_WIC_DispN_RailA", 1478.0, 1492.0, -3422.0, -3408.0, z_2f + 0.9000, z_2f + 2.7800, MATS["RoseGold_Metal"], col_2f)
+    add_box_mm("2F_WIC_DispN_RailA", 1478.0, 1492.0, -3422.0, -3408.0, z_2f + 0.9000, z_2f + 2.4500, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispN_RailA_Knuckle_0", 1474.0, 1496.0, -3426.0, -3404.0, z_2f + 1.4200, z_2f + 1.4950, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispN_RailA_Knuckle_1", 1474.0, 1496.0, -3426.0, -3404.0, z_2f + 2.0200, z_2f + 2.0950, MATS["RoseGold_Metal"], col_2f)
-    add_box_mm("2F_WIC_DispN_RailB", 1478.0, 1492.0, -2890.0, -2876.0, z_2f + 0.9000, z_2f + 2.7800, MATS["RoseGold_Metal"], col_2f)
+    add_box_mm("2F_WIC_DispN_RailB", 1478.0, 1492.0, -2890.0, -2876.0, z_2f + 0.9000, z_2f + 2.4500, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispN_RailB_Knuckle_0", 1474.0, 1496.0, -2894.0, -2872.0, z_2f + 1.4200, z_2f + 1.4950, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispN_RailB_Knuckle_1", 1474.0, 1496.0, -2894.0, -2872.0, z_2f + 2.0200, z_2f + 2.0950, MATS["RoseGold_Metal"], col_2f)
     add_box_mm("2F_WIC_DispN_Books", 1280.0, 1420.0, -3348.0, -3198.0, z_2f + 0.9000, z_2f + 1.1800, MATS["Book_Cream"], col_2f)
@@ -7179,11 +7187,12 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     _add_raw_mesh_2f("2F_MBR_Night_E_Gap", [(5.1870, -4.9600, 0.2800), (5.1835, -4.9245, 0.2800), (5.1731, -4.8904, 0.2800), (5.1563, -4.8589, 0.2800), (5.1337, -4.8313, 0.2800), (5.1061, -4.8087, 0.2800), (5.0746, -4.7919, 0.2800), (5.0405, -4.7815, 0.2800), (5.0050, -4.7780, 0.2800), (4.8250, -4.7780, 0.2800), (4.7895, -4.7815, 0.2800), (4.7554, -4.7919, 0.2800), (4.7239, -4.8087, 0.2800), (4.6963, -4.8313, 0.2800), (4.6737, -4.8589, 0.2800), (4.6569, -4.8904, 0.2800), (4.6465, -4.9245, 0.2800), (4.6430, -4.9600, 0.2800), (4.6430, -5.0300, 0.2800), (4.6465, -5.0655, 0.2800), (4.6569, -5.0996, 0.2800), (4.6737, -5.1311, 0.2800), (4.6963, -5.1587, 0.2800), (4.7239, -5.1813, 0.2800), (4.7554, -5.1981, 0.2800), (4.7895, -5.2085, 0.2800), (4.8250, -5.2120, 0.2800), (5.0050, -5.2120, 0.2800), (5.0405, -5.2085, 0.2800), (5.0746, -5.1981, 0.2800), (5.1061, -5.1813, 0.2800), (5.1337, -5.1587, 0.2800), (5.1563, -5.1311, 0.2800), (5.1731, -5.0996, 0.2800), (5.1835, -5.0655, 0.2800), (5.1870, -5.0300, 0.2800), (5.1870, -4.9600, 0.2950), (5.1835, -4.9245, 0.2950), (5.1731, -4.8904, 0.2950), (5.1563, -4.8589, 0.2950), (5.1337, -4.8313, 0.2950), (5.1061, -4.8087, 0.2950), (5.0746, -4.7919, 0.2950), (5.0405, -4.7815, 0.2950), (5.0050, -4.7780, 0.2950), (4.8250, -4.7780, 0.2950), (4.7895, -4.7815, 0.2950), (4.7554, -4.7919, 0.2950), (4.7239, -4.8087, 0.2950), (4.6963, -4.8313, 0.2950), (4.6737, -4.8589, 0.2950), (4.6569, -4.8904, 0.2950), (4.6465, -4.9245, 0.2950), (4.6430, -4.9600, 0.2950), (4.6430, -5.0300, 0.2950), (4.6465, -5.0655, 0.2950), (4.6569, -5.0996, 0.2950), (4.6737, -5.1311, 0.2950), (4.6963, -5.1587, 0.2950), (4.7239, -5.1813, 0.2950), (4.7554, -5.1981, 0.2950), (4.7895, -5.2085, 0.2950), (4.8250, -5.2120, 0.2950), (5.0050, -5.2120, 0.2950), (5.0405, -5.2085, 0.2950), (5.0746, -5.1981, 0.2950), (5.1061, -5.1813, 0.2950), (5.1337, -5.1587, 0.2950), (5.1563, -5.1311, 0.2950), (5.1731, -5.0996, 0.2950), (5.1835, -5.0655, 0.2950), (5.1870, -5.0300, 0.2950)], [(35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0), (36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71), (0, 1, 37, 36), (1, 2, 38, 37), (2, 3, 39, 38), (3, 4, 40, 39), (4, 5, 41, 40), (5, 6, 42, 41), (6, 7, 43, 42), (7, 8, 44, 43), (8, 9, 45, 44), (9, 10, 46, 45), (10, 11, 47, 46), (11, 12, 48, 47), (12, 13, 49, 48), (13, 14, 50, 49), (14, 15, 51, 50), (15, 16, 52, 51), (16, 17, 53, 52), (17, 18, 54, 53), (18, 19, 55, 54), (19, 20, 56, 55), (20, 21, 57, 56), (21, 22, 58, 57), (22, 23, 59, 58), (23, 24, 60, 59), (24, 25, 61, 60), (25, 26, 62, 61), (26, 27, 63, 62), (27, 28, 64, 63), (28, 29, 65, 64), (29, 30, 66, 65), (30, 31, 67, 66), (31, 32, 68, 67), (32, 33, 69, 68), (33, 34, 70, 69), (34, 35, 71, 70), (35, 0, 36, 71)], MATS["OLO_Cab_Greige"])
     _add_raw_mesh_2f("2F_MBR_Night_E_Drawer2", [(5.1950, -4.9600, 0.2950), (5.1913, -4.9229, 0.2950), (5.1805, -4.8873, 0.2950), (5.1630, -4.8544, 0.2950), (5.1394, -4.8256, 0.2950), (5.1106, -4.8020, 0.2950), (5.0777, -4.7845, 0.2950), (5.0421, -4.7737, 0.2950), (5.0050, -4.7700, 0.2950), (4.8250, -4.7700, 0.2950), (4.7879, -4.7737, 0.2950), (4.7523, -4.7845, 0.2950), (4.7194, -4.8020, 0.2950), (4.6906, -4.8256, 0.2950), (4.6670, -4.8544, 0.2950), (4.6495, -4.8873, 0.2950), (4.6387, -4.9229, 0.2950), (4.6350, -4.9600, 0.2950), (4.6350, -5.0300, 0.2950), (4.6387, -5.0671, 0.2950), (4.6495, -5.1027, 0.2950), (4.6670, -5.1356, 0.2950), (4.6906, -5.1644, 0.2950), (4.7194, -5.1880, 0.2950), (4.7523, -5.2055, 0.2950), (4.7879, -5.2163, 0.2950), (4.8250, -5.2200, 0.2950), (5.0050, -5.2200, 0.2950), (5.0421, -5.2163, 0.2950), (5.0777, -5.2055, 0.2950), (5.1106, -5.1880, 0.2950), (5.1394, -5.1644, 0.2950), (5.1630, -5.1356, 0.2950), (5.1805, -5.1027, 0.2950), (5.1913, -5.0671, 0.2950), (5.1950, -5.0300, 0.2950), (5.1950, -4.9600, 0.5000), (5.1913, -4.9229, 0.5000), (5.1805, -4.8873, 0.5000), (5.1630, -4.8544, 0.5000), (5.1394, -4.8256, 0.5000), (5.1106, -4.8020, 0.5000), (5.0777, -4.7845, 0.5000), (5.0421, -4.7737, 0.5000), (5.0050, -4.7700, 0.5000), (4.8250, -4.7700, 0.5000), (4.7879, -4.7737, 0.5000), (4.7523, -4.7845, 0.5000), (4.7194, -4.8020, 0.5000), (4.6906, -4.8256, 0.5000), (4.6670, -4.8544, 0.5000), (4.6495, -4.8873, 0.5000), (4.6387, -4.9229, 0.5000), (4.6350, -4.9600, 0.5000), (4.6350, -5.0300, 0.5000), (4.6387, -5.0671, 0.5000), (4.6495, -5.1027, 0.5000), (4.6670, -5.1356, 0.5000), (4.6906, -5.1644, 0.5000), (4.7194, -5.1880, 0.5000), (4.7523, -5.2055, 0.5000), (4.7879, -5.2163, 0.5000), (4.8250, -5.2200, 0.5000), (5.0050, -5.2200, 0.5000), (5.0421, -5.2163, 0.5000), (5.0777, -5.2055, 0.5000), (5.1106, -5.1880, 0.5000), (5.1394, -5.1644, 0.5000), (5.1630, -5.1356, 0.5000), (5.1805, -5.1027, 0.5000), (5.1913, -5.0671, 0.5000), (5.1950, -5.0300, 0.5000)], [(35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0), (36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71), (0, 1, 37, 36), (1, 2, 38, 37), (2, 3, 39, 38), (3, 4, 40, 39), (4, 5, 41, 40), (5, 6, 42, 41), (6, 7, 43, 42), (7, 8, 44, 43), (8, 9, 45, 44), (9, 10, 46, 45), (10, 11, 47, 46), (11, 12, 48, 47), (12, 13, 49, 48), (13, 14, 50, 49), (14, 15, 51, 50), (15, 16, 52, 51), (16, 17, 53, 52), (17, 18, 54, 53), (18, 19, 55, 54), (19, 20, 56, 55), (20, 21, 57, 56), (21, 22, 58, 57), (22, 23, 59, 58), (23, 24, 60, 59), (24, 25, 61, 60), (25, 26, 62, 61), (26, 27, 63, 62), (27, 28, 64, 63), (28, 29, 65, 64), (29, 30, 66, 65), (30, 31, 67, 66), (31, 32, 68, 67), (32, 33, 69, 68), (33, 34, 70, 69), (34, 35, 71, 70), (35, 0, 36, 71)], MATS["OLO_Cab_White"])
     _add_raw_mesh_2f("2F_MBR_Night_E_Top", [(5.2000, -4.9600, 0.5000), (5.1963, -4.9220, 0.5000), (5.1852, -4.8854, 0.5000), (5.1671, -4.8517, 0.5000), (5.1429, -4.8221, 0.5000), (5.1133, -4.7979, 0.5000), (5.0796, -4.7798, 0.5000), (5.0430, -4.7687, 0.5000), (5.0050, -4.7650, 0.5000), (4.8250, -4.7650, 0.5000), (4.7870, -4.7687, 0.5000), (4.7504, -4.7798, 0.5000), (4.7167, -4.7979, 0.5000), (4.6871, -4.8221, 0.5000), (4.6629, -4.8517, 0.5000), (4.6448, -4.8854, 0.5000), (4.6337, -4.9220, 0.5000), (4.6300, -4.9600, 0.5000), (4.6300, -5.0300, 0.5000), (4.6337, -5.0680, 0.5000), (4.6448, -5.1046, 0.5000), (4.6629, -5.1383, 0.5000), (4.6871, -5.1679, 0.5000), (4.7167, -5.1921, 0.5000), (4.7504, -5.2102, 0.5000), (4.7870, -5.2213, 0.5000), (4.8250, -5.2250, 0.5000), (5.0050, -5.2250, 0.5000), (5.0430, -5.2213, 0.5000), (5.0796, -5.2102, 0.5000), (5.1133, -5.1921, 0.5000), (5.1429, -5.1679, 0.5000), (5.1671, -5.1383, 0.5000), (5.1852, -5.1046, 0.5000), (5.1963, -5.0680, 0.5000), (5.2000, -5.0300, 0.5000), (5.2000, -4.9600, 0.5200), (5.1963, -4.9220, 0.5200), (5.1852, -4.8854, 0.5200), (5.1671, -4.8517, 0.5200), (5.1429, -4.8221, 0.5200), (5.1133, -4.7979, 0.5200), (5.0796, -4.7798, 0.5200), (5.0430, -4.7687, 0.5200), (5.0050, -4.7650, 0.5200), (4.8250, -4.7650, 0.5200), (4.7870, -4.7687, 0.5200), (4.7504, -4.7798, 0.5200), (4.7167, -4.7979, 0.5200), (4.6871, -4.8221, 0.5200), (4.6629, -4.8517, 0.5200), (4.6448, -4.8854, 0.5200), (4.6337, -4.9220, 0.5200), (4.6300, -4.9600, 0.5200), (4.6300, -5.0300, 0.5200), (4.6337, -5.0680, 0.5200), (4.6448, -5.1046, 0.5200), (4.6629, -5.1383, 0.5200), (4.6871, -5.1679, 0.5200), (4.7167, -5.1921, 0.5200), (4.7504, -5.2102, 0.5200), (4.7870, -5.2213, 0.5200), (4.8250, -5.2250, 0.5200), (5.0050, -5.2250, 0.5200), (5.0430, -5.2213, 0.5200), (5.0796, -5.2102, 0.5200), (5.1133, -5.1921, 0.5200), (5.1429, -5.1679, 0.5200), (5.1671, -5.1383, 0.5200), (5.1852, -5.1046, 0.5200), (5.1963, -5.0680, 0.5200), (5.2000, -5.0300, 0.5200)], [(35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0), (36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71), (0, 1, 37, 36), (1, 2, 38, 37), (2, 3, 39, 38), (3, 4, 40, 39), (4, 5, 41, 40), (5, 6, 42, 41), (6, 7, 43, 42), (7, 8, 44, 43), (8, 9, 45, 44), (9, 10, 46, 45), (10, 11, 47, 46), (11, 12, 48, 47), (12, 13, 49, 48), (13, 14, 50, 49), (14, 15, 51, 50), (15, 16, 52, 51), (16, 17, 53, 52), (17, 18, 54, 53), (18, 19, 55, 54), (19, 20, 56, 55), (20, 21, 57, 56), (21, 22, 58, 57), (22, 23, 59, 58), (23, 24, 60, 59), (24, 25, 61, 60), (25, 26, 62, 61), (26, 27, 63, 62), (27, 28, 64, 63), (28, 29, 65, 64), (29, 30, 66, 65), (30, 31, 67, 66), (31, 32, 68, 67), (32, 33, 69, 68), (33, 34, 70, 69), (34, 35, 71, 70), (35, 0, 36, 71)], MATS["OLO_Cab_White"])
-    add_box_mm("2F_MBR_Vanity_Back", 5360.0, 6620.0, -5280.0, -5250.0, z_2f + 0.0000, z_2f + 2.8300, MATS["Wall_Panel_Cream"], col_2f)
-    add_box_mm("2F_MBR_Vanity_Head", 5360.0, 6620.0, -5250.0, -4998.0, z_2f + 2.4000, z_2f + 2.8300, MATS["Optical_Wood_Shadow_Base"], col_2f)
-    add_uv_front_box_mm("2F_MBR_Vanity_Head_Door1", 5360.0, 5778.0, -4998.0, -4980.0, z_2f + 2.4020, z_2f + 2.8280, 0.00, 0.00 + 0.418 / 0.55, 0.0, 0.426 / 0.55, MATS["Optical_Wood_Shadow"], col_2f)
-    add_uv_front_box_mm("2F_MBR_Vanity_Head_Door2", 5781.0, 6199.0, -4998.0, -4980.0, z_2f + 2.4020, z_2f + 2.8280, 0.32, 0.32 + 0.418 / 0.55, 0.0, 0.426 / 0.55, MATS["Optical_Wood_Shadow"], col_2f)
-    add_uv_front_box_mm("2F_MBR_Vanity_Head_Door3", 6202.0, 6620.0, -4998.0, -4980.0, z_2f + 2.4020, z_2f + 2.8280, 0.64, 0.64 + 0.418 / 0.55, 0.0, 0.426 / 0.55, MATS["Optical_Wood_Shadow"], col_2f)
+    add_box_mm("2F_MBR_Vanity_Back", 5360.0, 6620.0, -5280.0, -5250.0, z_2f + 0.0000, z_2f + 2.5000, MATS["Wall_Panel_Cream"], col_2f)
+    add_box_mm("2F_MBR_Vanity_Head", 5360.0, 6620.0, -5250.0, -4998.0, z_2f + 2.4000, z_2f + 2.5000, MATS["Optical_Wood_Shadow_Base"], col_2f)
+    add_uv_front_box_mm("2F_MBR_Vanity_Head_Door1", 5360.0, 5778.0, -4998.0, -4980.0, z_2f + 2.4020, z_2f + 2.4980, 0.00, 0.00 + 0.418 / 0.55, 0.0, 0.096 / 0.55, MATS["Optical_Wood_Shadow"], col_2f)
+    add_uv_front_box_mm("2F_MBR_Vanity_Head_Door2", 5781.0, 6199.0, -4998.0, -4980.0, z_2f + 2.4020, z_2f + 2.4980, 0.32, 0.32 + 0.418 / 0.55, 0.0, 0.096 / 0.55, MATS["Optical_Wood_Shadow"], col_2f)
+    add_uv_front_box_mm("2F_MBR_Vanity_Head_Door3", 6202.0, 6620.0, -4998.0, -4980.0, z_2f + 2.4020, z_2f + 2.4980, 0.64, 0.64 + 0.418 / 0.55, 0.0, 0.096 / 0.55, MATS["Optical_Wood_Shadow"], col_2f)
+    add_box_mm("2F_MBR_Vanity_Soffit", 5360.0, 6620.0, -5280.0, -4980.0, z_2f + 2.5000, z_2f + 2.8300, MATS["Wall_Panel_Cream"], col_2f)
     add_box_mm("2F_MBR_Vanity_NicheL_SideA", 5360.0, 5385.0, -5250.0, -4980.0, z_2f + 0.8000, z_2f + 2.4000, MATS["OLO_Cab_White"], col_2f)
     add_box_mm("2F_MBR_Vanity_NicheL_SideB", 5655.0, 5680.0, -5250.0, -4980.0, z_2f + 0.8000, z_2f + 2.4000, MATS["OLO_Cab_White"], col_2f)
     add_box_mm("2F_MBR_Vanity_NicheL_Glow", 5385.0, 5655.0, -5250.0, -5235.0, z_2f + 0.8000, z_2f + 2.4000, MATS["B2_Backlit_Cream"], col_2f)
@@ -7253,12 +7262,13 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             _ob.data.update()
 
     def build_2f_mbr_opp_wardrobe():
-        # 2F Master Bedroom Foot-of-Bed Cabinet (strict CAD 3790x2340mm, flush to calibrated East window wall x=6500, concave curved bays + Golden Silk Nanmu center alcove)
+        # 2F Master Bedroom Foot-of-Bed Cabinet (unified 3790x2500mm, flush to calibrated East window wall x=6500, concave curved bays + Golden Silk Nanmu center alcove)
         x0, x1 = 2710.0, 6500.0
         yb, yf = -1830.0, -2360.0
         scoop_d = 58.0
         z0 = z_2f
-        h_tot = 2.340
+        h_tot = 2.500
+        h_body = 2.460
 
         def y_concave(px, bay_xa, bay_xb):
             s = max(-1.0, min(1.0, 2.0 * (px - bay_xa) / max(1e-3, bay_xb - bay_xa) - 1.0))
@@ -7335,23 +7345,23 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             link_obj(obj, col_2f)
             return obj
 
-        # Recessed Upper Gypsum Bulkhead (z: 2.340..2.830) following 200mm stepped North wall (Y=-1830 West, Y=-1630 East of x0+2564=5274)
-        add_box_mm("2F_MBR_OppCab_Soffit", x0, x0 + 2564.0, yf + 25.0, yb, z0 + 2.340, z0 + h_2f, MATS["Wall_Panel_Cream"], col_2f)
-        add_box_mm("2F_MBR_OppCab_Soffit_R", x0 + 2564.0, x1, yf + 25.0, yb + 200.0, z0 + 2.340, z0 + h_2f, MATS["Wall_Panel_Cream"], col_2f)
+        # Recessed Upper Gypsum Bulkhead (z: 2.500..2.830) following 200mm stepped North wall (Y=-1830 West, Y=-1630 East of x0+2564=5274)
+        add_box_mm("2F_MBR_OppCab_Soffit", x0, x0 + 2564.0, yf + 25.0, yb, z0 + h_tot, z0 + h_2f, MATS["Wall_Panel_Cream"], col_2f)
+        add_box_mm("2F_MBR_OppCab_Soffit_R", x0 + 2564.0, x1, yf + 25.0, yb + 200.0, z0 + h_tot, z0 + h_2f, MATS["Wall_Panel_Cream"], col_2f)
 
         # Left (48..932 -> 45cm depth: yb_L=-1910) & Right (2564..3500 -> 60cm depth: yb_R=-1760, recessed North wall) Concave White_Shadow_Wood 2-Door Wardrobes
         def build_concave_wardrobe_bay(tag, xa, d1_b, d2_a, xb, c1_x, c2_x, gr_la, gr_lb, gr_ra, gr_rb, bay_yb):
             b_xa, b_xb = x0 + xa, x0 + xb
-            add_box_mm(f"2F_MBR_OppCab_{tag}_Carcass", b_xa, b_xb, yf + 24.0, bay_yb, z0 + 0.060, z0 + 2.300, MATS["White_Shadow_Wood_Base"], col_2f)
-            add_box_mm(f"2F_MBR_OppCab_{tag}_Seam", x0 + d1_b - 6.0, x0 + d2_a + 6.0, yf + 16.0, yf + 24.0, z0 + 0.060, z0 + 2.300, MATS["Dark_Bronze_Recess"], col_2f)
+            add_box_mm(f"2F_MBR_OppCab_{tag}_Carcass", b_xa, b_xb, yf + 24.0, bay_yb, z0 + 0.060, z0 + h_body, MATS["White_Shadow_Wood_Base"], col_2f)
+            add_box_mm(f"2F_MBR_OppCab_{tag}_Seam", x0 + d1_b - 6.0, x0 + d2_a + 6.0, yf + 16.0, yf + 24.0, z0 + 0.060, z0 + h_body, MATS["Dark_Bronze_Recess"], col_2f)
             w1_m = abs((x0 + d1_b) - b_xa) * MM
             w2_m = abs(b_xb - (x0 + d2_a)) * MM
-            add_concave_bay_panel_mm(f"2F_MBR_OppCab_{tag}_Door1", b_xa, b_xb, b_xa, x0 + d1_b, 0.0, 22.0, z0 + 0.060, z0 + 2.300, MATS["White_Shadow_Wood"], n_seg=24, u0=0.0, u1=0.0 + w1_m / 0.62, v0=0.0, v1=2.240 / 0.62)
-            add_concave_bay_panel_mm(f"2F_MBR_OppCab_{tag}_Door2", b_xa, b_xb, x0 + d2_a, b_xb, 0.0, 22.0, z0 + 0.060, z0 + 2.300, MATS["White_Shadow_Wood"], n_seg=24, u0=0.18, u1=0.18 + w2_m / 0.62, v0=0.0, v1=2.240 / 0.62)
-            # CAD 40mm Top Crown (2.300..2.340) & 60mm Bottom Plinth (0.000..0.060) Concave Antique Brass Ribbons + Solid Fill
-            add_concave_bay_panel_mm(f"2F_MBR_OppCab_{tag}_TopBrass", b_xa, b_xb, b_xa, b_xb, -2.0, 62.0, z0 + 2.300, z0 + 2.340, MATS["Antique_Champagne_Brass"], n_seg=32)
+            add_concave_bay_panel_mm(f"2F_MBR_OppCab_{tag}_Door1", b_xa, b_xb, b_xa, x0 + d1_b, 0.0, 22.0, z0 + 0.060, z0 + h_body, MATS["White_Shadow_Wood"], n_seg=24, u0=0.0, u1=0.0 + w1_m / 0.62, v0=0.0, v1=(h_body - 0.060) / 0.62)
+            add_concave_bay_panel_mm(f"2F_MBR_OppCab_{tag}_Door2", b_xa, b_xb, x0 + d2_a, b_xb, 0.0, 22.0, z0 + 0.060, z0 + h_body, MATS["White_Shadow_Wood"], n_seg=24, u0=0.18, u1=0.18 + w2_m / 0.62, v0=0.0, v1=(h_body - 0.060) / 0.62)
+            # CAD 40mm Top Crown (2.460..2.500) & 60mm Bottom Plinth (0.000..0.060) Concave Antique Brass Ribbons + Solid Fill
+            add_concave_bay_panel_mm(f"2F_MBR_OppCab_{tag}_TopBrass", b_xa, b_xb, b_xa, b_xb, -2.0, 62.0, z0 + h_body, z0 + h_tot, MATS["Antique_Champagne_Brass"], n_seg=32)
             add_concave_bay_panel_mm(f"2F_MBR_OppCab_{tag}_BotBrass", b_xa, b_xb, b_xa, b_xb, -2.0, 62.0, z0 + 0.000, z0 + 0.060, MATS["Antique_Champagne_Brass"], n_seg=32)
-            add_box_mm(f"2F_MBR_OppCab_{tag}_TopFill", b_xa, b_xb, yf + 26.0, bay_yb, z0 + 2.300, z0 + 2.340, MATS["White_Shadow_Wood_Base"], col_2f)
+            add_box_mm(f"2F_MBR_OppCab_{tag}_TopFill", b_xa, b_xb, yf + 26.0, bay_yb, z0 + h_body, z0 + h_tot, MATS["White_Shadow_Wood_Base"], col_2f)
             add_box_mm(f"2F_MBR_OppCab_{tag}_BotFill", b_xa, b_xb, yf + 26.0, bay_yb, z0 + 0.000, z0 + 0.060, MATS["Dark_Bronze_Recess"], col_2f)
             # CAD Waist-Height Hairline Concave Bronze Grooves (z = 0.883 & z = 1.291) + Centered Vertical Dark-Bronze Pull Slots
             for s_idx, (ga, gb, cx) in enumerate([(gr_la, gr_lb, c1_x), (gr_ra, gr_rb, c2_x)], 1):
@@ -7377,10 +7387,10 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         build_concave_wardrobe_bay("R", 2564.0, 3030.0, 3034.0, 3500.0, 2795.0, 3265.0, 2610.0, 3030.0, 3034.0, 3450.0, yb + 200.0)
 
         # CAD Left End Cheek (0..48mm) & Shadow Reveals Flanking Center Alcove
-        add_box_mm("2F_MBR_OppCab_LeftGap", x0, x0 + 14.0, yf - scoop_d + 8.0, yb, z0, z0 + 2.340, MATS["Dark_Bronze_Recess"], col_2f)
-        add_box_mm("2F_MBR_OppCab_LeftCheek", x0 + 14.0, x0 + 48.0, yf - scoop_d + 4.0, yb, z0, z0 + 2.340, MATS["White_Shadow_Wood_Base"], col_2f)
-        add_box_mm("2F_MBR_OppCab_SeamAlcL", x0 + 932.0, x0 + 942.0, yf - scoop_d + 4.0, yb, z0, z0 + 2.340, MATS["Dark_Bronze_Recess"], col_2f)
-        add_box_mm("2F_MBR_OppCab_SeamAlcR", x0 + 2554.0, x0 + 2564.0, yf - scoop_d + 4.0, yb, z0, z0 + 2.340, MATS["Dark_Bronze_Recess"], col_2f)
+        add_box_mm("2F_MBR_OppCab_LeftGap", x0, x0 + 14.0, yf - scoop_d + 8.0, yb, z0, z0 + h_tot, MATS["Dark_Bronze_Recess"], col_2f)
+        add_box_mm("2F_MBR_OppCab_LeftCheek", x0 + 14.0, x0 + 48.0, yf - scoop_d + 4.0, yb, z0, z0 + h_tot, MATS["White_Shadow_Wood_Base"], col_2f)
+        add_box_mm("2F_MBR_OppCab_SeamAlcL", x0 + 932.0, x0 + 942.0, yf - scoop_d + 4.0, yb, z0, z0 + h_tot, MATS["Dark_Bronze_Recess"], col_2f)
+        add_box_mm("2F_MBR_OppCab_SeamAlcR", x0 + 2554.0, x0 + 2564.0, yf - scoop_d + 4.0, yb, z0, z0 + h_tot, MATS["Dark_Bronze_Recess"], col_2f)
 
         # Curved-Corner Center Golden Silk Nanmu Alcove (x_local: 942..2554, Left+Center CAD 2554mm)
         def build_alcove_u_profile():
@@ -7463,11 +7473,11 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             link_obj(obj_a, col_2f)
             return obj_a
 
-        create_alcove_solid("2F_MBR_OppCab_Alcove_CurvedWall", alc_pts, z0 + 0.060, z0 + 2.300, MATS["Golden_Silk_Nanmu"], wrap_uv=True)
+        create_alcove_solid("2F_MBR_OppCab_Alcove_CurvedWall", alc_pts, z0 + 0.060, z0 + h_body, MATS["Golden_Silk_Nanmu"], wrap_uv=True)
         alc_trim_pts = [(px, py - 2.0) for px, py in alc_pts]
-        create_alcove_solid("2F_MBR_OppCab_Alcove_TopBrass", alc_trim_pts, z0 + 2.300, z0 + 2.340, MATS["Antique_Champagne_Brass"], wrap_uv=False)
+        create_alcove_solid("2F_MBR_OppCab_Alcove_TopBrass", alc_trim_pts, z0 + h_body, z0 + h_tot, MATS["Antique_Champagne_Brass"], wrap_uv=False)
         create_alcove_solid("2F_MBR_OppCab_Alcove_BotBrass", alc_trim_pts, z0 + 0.000, z0 + 0.060, MATS["Antique_Champagne_Brass"], wrap_uv=False)
-        add_box_mm("2F_MBR_OppCab_Alcove_TopLED", x0 + 1140.0, x0 + 2360.0, yb - 55.0, yb - 30.0, z0 + 2.288, z0 + 2.300, MATS["Warm_LED_Glow"], col_2f)
+        add_box_mm("2F_MBR_OppCab_Alcove_TopLED", x0 + 1140.0, x0 + 2360.0, yb - 55.0, yb - 30.0, z0 + h_body - 0.012, z0 + h_body, MATS["Warm_LED_Glow"], col_2f)
 
         # 3 Ultra-Slim Bronze Floating Shelves at Exact CAD Elevations (z = 1.208, 1.555, 1.872m) + Guardrails
         sx1, sx2 = x0 + 1188.0, x0 + 2355.0
@@ -7511,24 +7521,24 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         # Far-Right CAD 290mm Open Shelf Display Column (x_local: 3500..3790, x: 6210..6500mm inside 200mm stepped wall recess yb+200=-1630)
         rx1, rx2 = x0 + 3500.0, x0 + 3790.0
         yb_col = yb + 200.0
-        add_box_mm("2F_MBR_OppCab_Col_TopBrass", rx1, rx2, yf - scoop_d + 4.0, yb_col, z0 + 2.300, z0 + 2.340, MATS["Antique_Champagne_Brass"], col_2f)
+        add_box_mm("2F_MBR_OppCab_Col_TopBrass", rx1, rx2, yf - scoop_d + 4.0, yb_col, z0 + h_body, z0 + h_tot, MATS["Antique_Champagne_Brass"], col_2f)
         add_box_mm("2F_MBR_OppCab_Col_BotBrass", rx1, rx2, yf - scoop_d + 4.0, yb_col, z0 + 0.000, z0 + 0.060, MATS["Antique_Champagne_Brass"], col_2f)
-        add_box_mm("2F_MBR_OppCab_Col_CheekL", rx1, rx1 + 22.0, yf - scoop_d + 18.0, yb_col, z0 + 0.060, z0 + 2.300, MATS["White_Shadow_Wood_Base"], col_2f)
-        add_box_mm("2F_MBR_OppCab_Col_CheekR", rx2 - 22.0, rx2, yf - scoop_d + 18.0, yb_col, z0 + 0.060, z0 + 2.300, MATS["White_Shadow_Wood_Base"], col_2f)
-        add_box_mm("2F_MBR_OppCab_Col_Back", rx1 + 22.0, rx2 - 22.0, yb_col - 20.0, yb_col, z0 + 0.060, z0 + 2.300, MATS["White_Shadow_Wood_Base"], col_2f)
-        add_box_mm("2F_MBR_OppCab_Col_VertLED", rx1 + 35.0, rx2 - 35.0, yb_col - 36.0, yb_col - 20.0, z0 + 0.080, z0 + 2.280, MATS["Warm_LED_Glow"], col_2f)
-        for ci, cz in enumerate([0.284, 0.508, 0.732, 0.956, 1.180, 1.404, 1.628, 1.852, 2.076], 1):
+        add_box_mm("2F_MBR_OppCab_Col_CheekL", rx1, rx1 + 22.0, yf - scoop_d + 18.0, yb_col, z0 + 0.060, z0 + h_body, MATS["White_Shadow_Wood_Base"], col_2f)
+        add_box_mm("2F_MBR_OppCab_Col_CheekR", rx2 - 22.0, rx2, yf - scoop_d + 18.0, yb_col, z0 + 0.060, z0 + h_body, MATS["White_Shadow_Wood_Base"], col_2f)
+        add_box_mm("2F_MBR_OppCab_Col_Back", rx1 + 22.0, rx2 - 22.0, yb_col - 20.0, yb_col, z0 + 0.060, z0 + h_body, MATS["White_Shadow_Wood_Base"], col_2f)
+        add_box_mm("2F_MBR_OppCab_Col_VertLED", rx1 + 35.0, rx2 - 35.0, yb_col - 36.0, yb_col - 20.0, z0 + 0.080, z0 + h_body - 0.020, MATS["Warm_LED_Glow"], col_2f)
+        for ci, cz in enumerate([0.284, 0.508, 0.732, 0.956, 1.180, 1.404, 1.628, 1.852, 2.076, 2.300], 1):
             add_box_mm(f"2F_MBR_OppCab_Col_Shelf_{ci}", rx1 + 22.0, rx2 - 22.0, yf - scoop_d + 22.0, yb_col - 25.0, z0 + cz, z0 + cz + 0.014, MATS["Fluted_Changhong_Glass"], col_2f)
             add_box_mm(f"2F_MBR_OppCab_Col_Trim_{ci}", rx1 + 22.0, rx2 - 22.0, yf - scoop_d + 18.0, yf - scoop_d + 24.0, z0 + cz - 0.001, z0 + cz + 0.015, MATS["Antique_Champagne_Brass"], col_2f)
 
     build_2f_mbr_opp_wardrobe()
-    # 2F North Bedroom South Wall Opposite-Bed Cabinet & Curved Art Alcove (x: 1800..6633, y: -1720..-1420, depth=300mm, H=2307/2322mm per CAD)
+    # 2F North Bedroom South Wall Opposite-Bed Cabinet & Curved Art Alcove (x: 1800..6633, y: -1720..-1420, depth=300mm, unified H=2485/2500mm)
     def build_2f_northbed_opp_cabinet():
         yb = -1720.0
         yf = -1420.0
         z0 = z_2f
-        h_cab = 2.307
-        h_tot = 2.322
+        h_cab = 2.485
+        h_tot = 2.500
 
         # 1. Rightmost 22mm end filler + 1198mm 2-door flush wardrobe (x: 1800..3020)
         add_box_mm("2F_NorthBed_OppCab_R_Toe", 1800.0, 3020.0, yb, yf - 22.0, z0, z0 + 0.028, MATS["OLO_ToeKick_Black"], col_2f)
@@ -7758,17 +7768,17 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     # Left 3-Door High-Gloss Cream & Smoked-Mirror Kick-Panel Wardrobe flush to calibrated SecBath East wall X=2677 (x: 2677..3229, y: -214..1420, facing East +x)
     # Semicircular EndCorner (y: -490..-214) aligns flush with Door_1 at Y=-214, Wardrobe front X=3229, West wall X=2677, and SecBath corner Y=-490!
     add_box_mm("2F_NorthBed_Wardrobe_ToeKick", 2677.0, 3207.0, -214.0, 1420.0, zf_2f, z_2f + 0.014, MATS["OLO_ToeKick_Black"], col_2f)
-    add_box_mm("2F_NorthBed_Wardrobe_Body", 2677.0, 3207.0, -214.0, 1420.0, z_2f + 0.014, z_2f + 2.55, MATS["NorthBed_Wardrobe_GlossCream"], col_2f)
+    add_box_mm("2F_NorthBed_Wardrobe_Body", 2677.0, 3207.0, -214.0, 1420.0, z_2f + 0.014, z_2f + 2.500, MATS["NorthBed_Wardrobe_GlossCream"], col_2f)
     for wd_i in range(3):
         wy1 = -214.0 + wd_i * 545.0
         wy2 = wy1 + 541.0
-        # Smoked-mirror lower kick panel (`z: 0.014..0.370`) + slim black reveal line (`0.370..0.382`) + high-gloss cream upper door (`0.382..2.546`)
+        # Smoked-mirror lower kick panel (`z: 0.014..0.370`) + slim black reveal line (`0.370..0.382`) + high-gloss cream upper door (`0.382..2.496`)
         add_box_mm(f"2F_NorthBed_Wardrobe_MirrorBase_{wd_i+1}", 3207.0, 3229.0, wy1, wy2, z_2f + 0.014, z_2f + 0.370, MATS["NorthBed_Smoked_Mirror"], col_2f)
         add_box_mm(f"2F_NorthBed_Wardrobe_TrimLine_{wd_i+1}",   3207.0, 3227.0, wy1, wy2, z_2f + 0.370, z_2f + 0.382, MATS["OLO_ToeKick_Black"], col_2f)
-        add_box_mm(f"2F_NorthBed_Wardrobe_Door_{wd_i+1}",       3207.0, 3229.0, wy1, wy2, z_2f + 0.382, z_2f + 2.546, MATS["NorthBed_Wardrobe_GlossCream"], col_2f)
+        add_box_mm(f"2F_NorthBed_Wardrobe_Door_{wd_i+1}",       3207.0, 3229.0, wy1, wy2, z_2f + 0.382, z_2f + 2.496, MATS["NorthBed_Wardrobe_GlossCream"], col_2f)
         hx_y = wy2 - 32.0 if wd_i in (0, 2) else wy1 + 32.0
         add_box_mm(f"2F_NorthBed_Wardrobe_Handle_{wd_i+1}",     3229.0, 3243.0, hx_y - 11.0, hx_y + 11.0, z_2f + 0.56, z_2f + 0.72, MATS["NorthBed_JadeBlack_Pull"], col_2f)
-    add_box_mm("2F_NorthBed_Wardrobe_Soffit", 2677.0, 3229.0, -214.0, 1420.0, z_2f + 2.55, z_2f + 2.83, MATS["Pure_White_Ceiling"], col_2f)
+    add_box_mm("2F_NorthBed_Wardrobe_Soffit", 2677.0, 3229.0, -214.0, 1420.0, z_2f + 2.500, z_2f + 2.830, MATS["Pure_White_Ceiling"], col_2f)
     # True smooth semicircular rounded end column at South end of wardrobe (x: 2677..3229, y: -490..-214, R=276mm)
     _w_cx, _w_cy, _w_r = 2953.0, -214.0, 276.0
     _pts_wcorner = [(_w_cx + _w_r * math.cos(math.radians(a)), _w_cy + _w_r * math.sin(math.radians(a))) for a in [180.0 + 180.0 * k / 32.0 for k in range(33)]]
@@ -7780,7 +7790,7 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     # Headboard Wall Paneling (calibrated clear span x: 3229..6495 = 3266 mm, center 4862 mm, facing South -y)
     add_box_mm("2F_NorthBed_HeadWall_Lower", 3229.0, 6495.0, 1385.0, 1420.0, zf_2f, z_2f + 1.08, MATS["Wall_Panel_Cream"], col_2f)
     bay_edges = [3229.0, 3785.0, 4340.0, 5390.0, 5945.0, 6495.0]
-    add_box_mm("2F_NorthBed_HeadWall_UpperBack", 3229.0, 6495.0, 1392.0, 1420.0, z_2f + 1.08, z_2f + 2.65, MATS["OLO_Cab_Greige"], col_2f)
+    add_box_mm("2F_NorthBed_HeadWall_UpperBack", 3229.0, 6495.0, 1392.0, 1420.0, z_2f + 1.08, z_2f + 2.500, MATS["OLO_Cab_Greige"], col_2f)
 
     def add_wave_grille_panel_mm(pname, x1, x2, y_back, y_valley, wave_depth, z0, z1, pitch_mm, mat, col):
         n_waves = max(12, int(round((x2 - x1) / pitch_mm)))
@@ -7837,13 +7847,13 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         add_wave_grille_panel_mm(
             f"2F_NorthBed_HeadWavePanel_{b_i+1}",
             bx1, bx2, 1420.0, 1390.0, 70.0,
-            z_2f + 1.084, z_2f + 2.646, 34.0,
+            z_2f + 1.084, z_2f + 2.496, 34.0,
             MATS["NorthBed_WaveGrille_Lacquer"], col_2f
         )
 
-    # Center Square Abstract Sea-Wave Painting (centered at x=4865: x: 4245..5485, z: 1.24..2.48m)
-    add_box_mm("2F_NorthBed_HeadArt_Frame", 4235.0, 5495.0, 1354.0, 1370.5, z_2f + 1.23, z_2f + 2.49, MATS["RoseGold_Metal"], col_2f)
-    add_uv_front_box_mm("2F_NorthBed_HeadArt_Canvas", 4245.0, 5485.0, 1348.0, 1360.0, z_2f + 1.24, z_2f + 2.48, 0.0, 1.0, 0.0, 1.0, MATS["NorthBed_Head_Art"], col_2f)
+    # Center Square Abstract Sea-Wave Painting (centered at x=4865: x: 4245..5485, z: 1.19..2.41m)
+    add_box_mm("2F_NorthBed_HeadArt_Frame", 4235.0, 5495.0, 1354.0, 1370.5, z_2f + 1.18, z_2f + 2.42, MATS["RoseGold_Metal"], col_2f)
+    add_uv_front_box_mm("2F_NorthBed_HeadArt_Canvas", 4245.0, 5485.0, 1348.0, 1360.0, z_2f + 1.19, z_2f + 2.41, 0.0, 1.0, 0.0, 1.0, MATS["NorthBed_Head_Art"], col_2f)
 
     # 2 Slim Vertical Linear Wall Sconces (x=3875 & x=5855, z: 1.18..1.98m)
     for sc_i, scx in enumerate([3875.0, 5855.0]):
@@ -7873,9 +7883,9 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     add_cyl_mm("2F_NorthBed_Night_Vase", 3565.0, 1110.0, 65.0, z_2f + 0.53, z_2f + 0.66, MATS["Glass_Blue_Sphere"], col_2f, segs=24)
     add_box_mm("2F_NorthBed_Night_Book", 6055.0, 6225.0, 1040.0, 1220.0, z_2f + 0.53, z_2f + 0.56, MATS["Book_Cream"], col_2f)
 
-    # Tray Cove Ceiling above Bed (hidden during bird's-eye render)
-    add_box_mm("2F_NorthBed_HeadCove_Outer", 3229.0, 6495.0, -1100.0, 1420.0, z_2f + 2.66, z_2f + 2.83, MATS["Pure_White_Ceiling"], col_2f)
-    add_box_mm("2F_NorthBed_HeadCove_LED", 3565.0, 6165.0, -820.0, 1140.0, z_2f + 2.645, z_2f + 2.660, MATS["Warm_LED_Glow"], col_2f)
+    # Tray Cove Ceiling above Bed (unified 2.50m datum, hidden during bird's-eye render)
+    add_box_mm("2F_NorthBed_HeadCove_Outer", 3229.0, 6495.0, -1100.0, 1420.0, z_2f + 2.500, z_2f + 2.830, MATS["Pure_White_Ceiling"], col_2f)
+    add_box_mm("2F_NorthBed_HeadCove_LED", 3565.0, 6165.0, -820.0, 1140.0, z_2f + 2.485, z_2f + 2.500, MATS["Warm_LED_Glow"], col_2f)
 
     add_cad_linework_curve(msp, "2F", p_2f["xr"], p_2f["yr"], *p_2f["orig"], z_2f + 0.008, col_2f)
 
