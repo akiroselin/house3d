@@ -1076,7 +1076,7 @@
     let shadowsEnabled = !IS_MOBILE;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let autoRotateEnabled = !prefersReducedMotion;
-    const VIEWER_BUILD = '20261127_opt6';
+    const VIEWER_BUILD = '20261127_opt7';
     let rafId = 0;
     let inAnimate = false;
     let dirtyFrames = 14;
@@ -1484,7 +1484,7 @@
       ['2F', `${MODELS_BASE}/2F.glb`],
     ];
     const loader = new GLTFLoader();
-    const ASSET_VERSION = '20261127_opt6';
+    const ASSET_VERSION = '20261127_opt7';
     const MAX_TEX_ANISO = IS_MOBILE ? 2 : 4;
     let loadedCount = 0;
     const FLOOR_BYTES_EST = { '1F': 7007312, 'B1': 905056, 'B2': 2607684, '2F': 5157676 };
@@ -3187,7 +3187,7 @@
       }
       if (/(1f|一层|一楼|餐边柜|门檐|1\.2|藻井|客卫|隐形门|灶台|台面|48|厨房)/.test(ql)) {
         presetId = '1f_dining'; presetName = '1F 餐厅餐边柜 & 夹丝玻璃';
-        blocks.push('【1F 一层】飞檐斗拱餐边柜门檐下净宽 1.20 m，两侧夹丝玻璃门从倒数第二格内沿（1.05 m）直通柜顶（2.456 m 齐平高柜），配宋氏桌椅与立体盘凤藻井；厨房灶台台面深度收窄至 480 mm（48 cm），显著拓宽中岛过道至 82.3 cm；已去掉多余横梁并改纯白帕斯卡隐形门。');
+        blocks.push('【1F 一层】飞檐斗拱餐边柜门檐下净宽 1.20 m，两侧夹丝玻璃门从 1.034 m 直通柜顶（2.456 m 齐平高柜），玻璃门下方地柜配同款纯白平开柜门（0.051–1.030 m）封闭，配宋氏桌椅与立体盘凤藻井；厨房灶台台面深度收窄至 480 mm（48 cm），显著拓宽中岛过道至 82.3 cm；已去掉多余横梁并改纯白帕斯卡隐形门。');
         hl.push({ label: '灶台台面深', value: '48 cm (过道 82.3 cm)' });
       }
       if (/(2f|二层|二楼|主卧|次卧|床尾柜|45cm|60cm|格栅|10cm)/.test(ql)) {
