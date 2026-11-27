@@ -1003,6 +1003,16 @@
       '2F_NorthBed_OppCab_CeilingCove',
       '2F_NorthBed_OppCab_CeilingLED',
       '2F_MBR_OppCab_Soffit',
+      '2F_MBR_Vanity_Soffit',
+      '2F_MBR_HeadWall_Soffit',
+      '2F_WIC_N_Bulkhead_',
+      '2F_WIC_S_Bulkhead_',
+      '2F_WIC_DispS_Bulkhead',
+      '2F_WIC_DispN_Bulkhead',
+      '2F_ChildTatami_Soffit',
+      '2F_ChildWIC_Soffit_',
+      '2F_SW_Laundry_Soffit',
+      '2F_SW_Utility_Soffit',
       '2F_NorthBed_OppCab_Soffit',
       '2F_NorthBed_Wardrobe_Soffit',
     ];
@@ -1019,6 +1029,7 @@
       '1F_Dining_EastReturn_HallWall',
       '1F_Win_',
       '2F_CurvedWall_Parent',
+      '2F_WIC_Partition_',
       '2F_Win_',
     ];
 
@@ -1071,7 +1082,7 @@
     let shadowsEnabled = !IS_MOBILE;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let autoRotateEnabled = !prefersReducedMotion;
-    const VIEWER_BUILD = '20261127_opt20';
+    const VIEWER_BUILD = '20261127_opt21';
     let rafId = 0;
     let inAnimate = false;
     let dirtyFrames = 14;
@@ -1479,7 +1490,7 @@
       ['2F', `${MODELS_BASE}/2F.glb`],
     ];
     const loader = new GLTFLoader();
-    const ASSET_VERSION = '20261127_opt20';
+    const ASSET_VERSION = '20261127_opt21';
     const MAX_TEX_ANISO = IS_MOBILE ? 2 : 4;
     let loadedCount = 0;
     const FLOOR_BYTES_EST = { '1F': 7007312, 'B1': 905056, 'B2': 2607684, '2F': 5157676 };

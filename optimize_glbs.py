@@ -43,6 +43,16 @@ CEILING_PREFIXES = (
     "2F_NorthBed_OppCab_CeilingCove",
     "2F_NorthBed_OppCab_CeilingLED",
     "2F_MBR_OppCab_Soffit",
+    "2F_MBR_Vanity_Soffit",
+    "2F_MBR_HeadWall_Soffit",
+    "2F_WIC_N_Bulkhead_",
+    "2F_WIC_S_Bulkhead_",
+    "2F_WIC_DispS_Bulkhead",
+    "2F_WIC_DispN_Bulkhead",
+    "2F_ChildTatami_Soffit",
+    "2F_ChildWIC_Soffit_",
+    "2F_SW_Laundry_Soffit",
+    "2F_SW_Utility_Soffit",
     "2F_NorthBed_OppCab_Soffit",
     "2F_NorthBed_Wardrobe_Soffit",
 )
@@ -59,6 +69,7 @@ WALL_PREFIXES = (
     "1F_Dining_EastReturn_HallWall",
     "1F_Win_",
     "2F_CurvedWall_Parent",
+    "2F_WIC_Partition_",
     "2F_Win_",
 )
 
