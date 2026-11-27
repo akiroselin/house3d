@@ -984,10 +984,7 @@
     </div>
   </div>
 
-  <script>
-    window.COLLAB_API_BASE = "https://house3d-348255-13-1396089953.sh.run.tcloudbase.com";
-    window.MODELS_BASE = "./models";
-  </script>
+  <!-- DEPLOY_CONFIG_HOOK -->
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -1047,15 +1044,15 @@
       { id: 'b1_to_b2_stair', name: 'B1 夹层下B2旋转楼梯', cam: [0.65, -0.90, 0.45], target: [2.00, -3.20, 1.40], floors: ['B1', 'B2'], hideCeilings: false, hideWalls: false },
       { id: 'b2_wine_tall', name: 'B2 酒柜/铝管酒架/镜柜/高柜', cam: [2.40, -3.15, 3.30], target: [5.10, -3.20, 0.05], floors: ['B1', 'B2'], hideCeilings: false, hideWalls: false },
       { id: '2f_bird', name: '2F 俯瞰', cam: [-1.0, 18.5, 10.8], target: [-1.0, 4.0, 1.9], floors: ['2F'], hideCeilings: true, hideWalls: true },
-      { id: '2f_north_grille', name: '2F 次卧床头 (圆弧格栅)', cam: [5.05, 4.45, 1.32], target: [5.05, 4.45, -1.35], floors: ['2F'], hideCeilings: false, hideWalls: false },
-      { id: '2f_mbr_vanity', name: '2F 主卧梳妆台 (光学木影)', cam: [5.90, 4.42, 2.60], target: [5.96, 4.42, 5.05], floors: ['2F'], hideCeilings: false, hideWalls: false },
-      { id: '2f_mbr_wardrobe', name: '2F 主卧床尾柜 (白影木)', cam: [4.805, 4.48, 4.65], target: [4.805, 4.48, 2.35], floors: ['2F'], hideCeilings: false, hideWalls: false },
-      { id: '2f_wic_mirror', name: '2F 主卧衣帽间 (三门镜面南柜)', cam: [1.65, 4.48, 3.58], target: [0.36, 4.42, 4.68], floors: ['2F'], hideCeilings: false, hideWalls: false },
-      { id: '2f_wic_north', name: '2F 主卧衣帽间 (四门光学木影北柜)', cam: [1.70, 4.55, 4.18], target: [0.15, 4.55, 3.35], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_north_grille', name: '2F 次卧床头 (圆弧格栅)', cam: [4.86, 4.45, 1.32], target: [4.86, 4.45, -1.35], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_mbr_vanity', name: '2F 主卧梳妆台 (光学木影)', cam: [5.75, 4.42, 2.60], target: [5.79, 4.42, 5.05], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_mbr_wardrobe', name: '2F 主卧床尾柜 (白影木)', cam: [4.605, 4.48, 4.65], target: [4.605, 4.48, 2.35], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_wic_mirror', name: '2F 主卧衣帽间 (三门镜面南柜)', cam: [1.85, 4.48, 3.58], target: [0.46, 4.42, 4.68], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_wic_north', name: '2F 主卧衣帽间 (四门光学木影北柜)', cam: [1.90, 4.55, 4.18], target: [0.25, 4.55, 3.35], floors: ['2F'], hideCeilings: false, hideWalls: false },
       { id: '2f_wic_bath_door', name: '2F 衣帽间通往主卫 (对开移门)', cam: [1.35, 4.48, 4.02], target: [-0.55, 4.46, 4.02], floors: ['2F'], hideCeilings: false, hideWalls: false },
-      { id: '2f_north_bath_door', name: '2F 次卫磨砂玻璃门', cam: [3.45, 4.42, 1.24], target: [2.05, 4.42, 0.42], floors: ['2F'], hideCeilings: false, hideWalls: false },
-      { id: '2f_north_cab', name: '2F 次卧床对面柜', cam: [4.22, 4.48, -0.90], target: [4.22, 4.46, 1.55], floors: ['2F'], hideCeilings: false, hideWalls: false },
-      { id: '2f_north_wardrobe', name: '2F 次卧撞色镜脚衣柜(图2)', cam: [4.95, 4.45, -0.35], target: [3.58, 4.45, -0.55], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_north_bath_door', name: '2F 次卫磨砂玻璃门', cam: [3.20, 4.42, 1.24], target: [2.05, 4.42, 0.42], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_north_cab', name: '2F 次卧床对面柜', cam: [4.02, 4.48, -0.90], target: [4.02, 4.46, 1.55], floors: ['2F'], hideCeilings: false, hideWalls: false },
+      { id: '2f_north_wardrobe', name: '2F 次卧撞色镜脚衣柜(图2)', cam: [4.65, 4.45, -0.35], target: [3.22, 4.45, -0.55], floors: ['2F'], hideCeilings: false, hideWalls: false },
       { id: '1f_toilet_door', name: '1F 客卫隐形门', cam: [-0.30, 1.30, 2.02], target: [-0.30, 1.24, 4.28], floors: ['1F'], hideCeilings: false, hideWalls: false },
       { id: '1f_living_fireplace', name: '1F 客厅雕塑壁炉背景墙', cam: [2.7235, 1.34, 0.15], target: [2.7235, 1.32, 5.51], floors: ['1F'], hideCeilings: false, hideWalls: false },
       { id: '1f_living_wave', name: '1F 客厅波浪天花', cam: [3.65, 1.32, 2.75], target: [3.65, 1.32, -1.13], floors: ['1F'], hideCeilings: false, hideWalls: false },
@@ -1074,7 +1071,7 @@
     let shadowsEnabled = !IS_MOBILE;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let autoRotateEnabled = !prefersReducedMotion;
-    const VIEWER_BUILD = '20261127_opt12';
+    const VIEWER_BUILD = '20261127_opt13';
     let rafId = 0;
     let inAnimate = false;
     let dirtyFrames = 14;
@@ -1482,7 +1479,7 @@
       ['2F', `${MODELS_BASE}/2F.glb`],
     ];
     const loader = new GLTFLoader();
-    const ASSET_VERSION = '20261127_opt12';
+    const ASSET_VERSION = '20261127_opt13';
     const MAX_TEX_ANISO = IS_MOBILE ? 2 : 4;
     let loadedCount = 0;
     const FLOOR_BYTES_EST = { '1F': 7007312, 'B1': 905056, 'B2': 2607684, '2F': 5157676 };
@@ -3216,8 +3213,8 @@
       }
       if (/(2f|二层|二楼|主卧|次卧|床尾柜|45cm|60cm|格栅|10cm)/.test(ql)) {
         presetId = '2f_mbr_wardrobe'; presetName = '2F 主卧床尾柜 (白影木)';
-        blocks.push('【2F 卧室】主卧床尾柜左深 45 cm、右深 60 cm（北墙右内陷）；次卧柜深 30 cm，波浪格栅厚 10 cm。');
-        hl.push({ label: '主卧/次卧深', value: '45/60 cm · 次卧30/10 cm' });
+        blocks.push('【2F 卧室】已按现场实测图校准：主卧净宽 4788 mm × 3450 mm（床尾柜左深 45 cm、右深 60 cm）；次卧墙到墙宽 3825 mm（扣衣柜净宽 3273 mm），次卫净宽 1886 mm，东外墙与 1F 对齐（6502..6742 mm）。');
+        hl.push({ label: '主卧/次卧/次卫宽', value: '4.79m / 3.83m / 1.89m' });
       }
       if (/(造价|价格|报价|预算|多少钱|费用|人工|材料|五金|bom)/.test(ql)) {
         if (showPrice) {
