@@ -3088,22 +3088,27 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     mat_g_flower = make_mat("Garden_Blossom_Soft",(0.94, 0.88, 0.86, 1.0), metallic=0.0, roughness=0.42)
     mat_g_sky    = make_mat("Garden_Daylight_Sky",(0.84, 0.91, 0.96, 1.0), metallic=0.0, roughness=0.90, emission=(0.82, 0.90, 0.96, 1.0), emission_strength=0.42)
 
-    # Unified Excavated Sunken Flower/Bamboo Garden outside B1 Mezzanine Window (pushed +150cm East toward Gate: X=6565..10150, Y=-1700..+1120)
-    add_box_mm("B1_Garden_SoilBed",    6565, 10030, -1680, 1100, -1.32, -1.155, mat_g_soil, col_b1)
-    add_box_mm("B1_Garden_GravelStrip",6565,  7060, -1620, 1060, -1.160, -1.135, mat_g_gravel, col_b1)
-    add_box_mm("B1_Garden_BackWallLow",10030,10150, -1700, 1120, -1.32, -0.02,  mat_g_wall, col_b1)
-    add_box_mm("B1_Garden_SideWallS",  6565,  8650, -1730, -1670, -1.32, -0.32, mat_g_wall, col_b1)
-    add_box_mm("B1_Garden_SideWallS_Ext",8650,10150,-1730, -1670, -1.32, -0.02, mat_g_wall, col_b1)
-    add_box_mm("B1_Garden_SideWallN",  6565, 10150,  1080,  1140, -1.32, -0.02, mat_g_wall, col_b1)
+    # Unified Excavated Sunken Flower/Bamboo Garden outside B1 Mezzanine Window (CAD-calibrated Front Yard: X=6565..9500, flush North to Wall_N Y=+1585)
+    mat_g_flw_pk  = make_mat("Garden_Blossom_Pink",   (0.95, 0.52, 0.62, 1.0), metallic=0.0, roughness=0.40)
+    mat_g_flw_cor = make_mat("Garden_Blossom_Coral",  (0.96, 0.42, 0.28, 1.0), metallic=0.0, roughness=0.42)
+    mat_g_flw_gld = make_mat("Garden_Blossom_Gold",   (0.98, 0.78, 0.20, 1.0), metallic=0.0, roughness=0.38)
+    mat_g_flw_lav = make_mat("Garden_Blossom_Lav",    (0.70, 0.50, 0.88, 1.0), metallic=0.0, roughness=0.42)
+
+    add_box_mm("B1_Garden_SoilBed",    6565, 9380, -1680, 1460, -1.32, -1.155, mat_g_soil, col_b1)
+    add_box_mm("B1_Garden_GravelStrip",6565, 7060, -1620, 1400, -1.160, -1.135, mat_g_gravel, col_b1)
+    add_box_mm("B1_Garden_BackWallLow",9380, 9500, -1700, 1500, -1.32, -0.02,  mat_g_wall, col_b1)
+    add_box_mm("B1_Garden_SideWallS",  6565, 8650, -1730, -1670, -1.32, -0.32, mat_g_wall, col_b1)
+    add_box_mm("B1_Garden_SideWallS_Ext",8650,9500,-1730, -1670, -1.32, -0.02, mat_g_wall, col_b1)
+    add_box_mm("B1_Garden_SideWallN",  6565, 9500,  1440,  1585, -1.32, -0.02, mat_g_wall, col_b1)
     # Cascading limestone garden steps descending from 1F East Garden (-0.15m) down to Sunken Garden (-1.15m)
     for _sti in range(5):
-        _sx0 = 10030.0 - (_sti + 1) * 280.0
+        _sx0 = 9380.0 - (_sti + 1) * 260.0
         _sz1 = -0.18 - _sti * 0.22
-        add_box_mm(f"B1_Garden_StoneStep_{_sti+1}", _sx0, _sx0 + 290.0, 520, 1060, -1.30, _sz1, mat_g_wall, col_b1)
+        add_box_mm(f"B1_Garden_StoneStep_{_sti+1}", _sx0, _sx0 + 270.0, 920, 1420, -1.30, _sz1, mat_g_wall, col_b1)
 
     # Natural slate stepping stones & mossy Taihu garden rocks (visible right outside sill)
     add_box_mm("B1_Garden_StepStone_1", 6660, 6940, -520, -240, -1.140, -1.105, mat_g_rock, col_b1, r_corner=45.0)
-    add_box_mm("B1_Garden_StepStone_2", 6680, 6960,  180,  460, -1.140, -1.105, mat_g_rock, col_b1, r_corner=45.0)
+    add_box_mm("B1_Garden_StepStone_2", 6680, 6960,  380,  660, -1.140, -1.105, mat_g_rock, col_b1, r_corner=45.0)
 
     def _add_garden_mound(gname, gx, gy, gz, rx_mm, ry_mm, rz_m, mat, segs=12):
         me = bpy.data.meshes.new(gname)
@@ -3125,24 +3130,24 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         link_obj(ob, col_b1)
         return ob
 
-    # Sculpted garden rocks & lush moss cushions along the foreground & extended East sunken terrace
+    # Sculpted garden rocks & lush moss cushions along the foreground & East sunken terrace
     for _ri, (_rx, _ry, _rrx, _rry, _rrz) in enumerate([
-        (6920, -860, 150, 190, 0.14),
-        (7180, -120, 175, 210, 0.18),
-        (6960,  640, 140, 175, 0.13),
-        (8580, -1120, 210, 240, 0.22),
-        (9320,  -480, 190, 225, 0.19),
+        (6920, -1120, 150, 190, 0.14),
+        (7180,  -260, 155, 185, 0.15),
+        (6960,   880, 140, 175, 0.13),
+        (8380, -1260, 195, 225, 0.20),
+        (8960,  -560, 175, 200, 0.17),
     ], 1):
         _add_garden_mound(f"B1_Garden_Rock_{_ri}", _rx, _ry, -1.07, _rrx, _rry, _rrz, mat_g_rock)
         _add_garden_mound(f"B1_Garden_Moss_{_ri}", _rx - 55, _ry + 40, -1.12, _rrx * 1.15, _rry * 1.05, 0.06, mat_g_moss)
 
-    # Ornamental courtyard bamboo culms + delicate 3D leaf clusters (below bridge Y>=120 stays <=-0.16m; open sky zone Y<=-120 reaches up to +0.25m)
+    # Ornamental courtyard bamboo culms + delicate 3D leaf clusters (kept clear & low under bridge, open sky zones grow tall)
     _bamboo_specs = [
-        (7640, -1040, 16.0, -0.22), (7720, -880, 14.0, -0.18), (7580, -720, 15.0, -0.26),
-        (7760,  -460, 15.0, -0.20), (7660, -260, 17.0, -0.15), (7740,   80, 15.0, -0.22),
-        (7620,   380, 16.0, -0.18), (7750,  580, 14.0, -0.24), (7680,  820, 16.0, -0.16),
-        (8450, -1280, 18.0,  0.18), (8850, -960, 17.0,  0.24), (9380, -1220, 18.0, 0.22),
-        (9680, -1120, 17.0,  0.14), (9220,  280, 15.0, -0.18),
+        (7520, -1240, 16.0, -0.22), (7620, -1040, 14.0, -0.18), (7480,  -860, 15.0, -0.26),
+        (7660,  -580, 15.0, -0.24), (7560,  -280, 16.0, -0.22), (7640,    80, 15.0, -0.24),
+        (7540,   440, 16.0, -0.18), (7650,   760, 14.0, -0.20), (7580,  1120, 16.0, -0.16),
+        (8250, -1380, 18.0,  0.18), (8680, -1080, 17.0,  0.22), (9060, -1320, 18.0,  0.20),
+        (9120,   480, 15.0,  0.16), (8780,  1180, 16.0,  0.14),
     ]
     for _bi, (_bx, _by, _br, _btop) in enumerate(_bamboo_specs, 1):
         add_cyl_mm(f"B1_Garden_Bamboo_{_bi}", _bx, _by, _br, -1.17, _btop, mat_g_bamboo, col_b1, segs=10)
@@ -3153,31 +3158,48 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         _add_garden_mound(f"B1_Garden_BambooLeafA_{_bi}", _bx - 90, _by + (55 if _bi % 2 else -55), _leaf_z, 140, 180, 0.075, mat_g_leaf2 if _bi % 2 else mat_g_leaf1)
         _add_garden_mound(f"B1_Garden_BambooLeafB_{_bi}", _bx - 40, _by - (45 if _bi % 2 else -45), _leaf_z + 0.16, 125, 165, 0.065, mat_g_leaf1 if _bi % 2 else mat_g_leaf2)
 
-    # Layered courtyard shrubs, Japanese maple accent & subtle garden blossoms across full 6.57..10.03m sunken flower pit
+    # Dense Flower Carpet & Flowering Shrubs packed all underneath the Glass Bridge (X=6.74..9.30m, Y=-0.92..+0.36m) and across Sunken Pit
     _shrub_specs = [
-        (7260, -960, -0.98, 220, 260, 0.18, mat_g_leaf1),
-        (7180, -560, -1.00, 210, 240, 0.16, mat_g_leaf2),
-        (7360, -240, -0.92, 230, 260, 0.21, mat_g_leaf1),
-        (7150,  160, -1.01, 200, 250, 0.16, mat_g_leaf2),
-        (7340,  480, -0.93, 240, 270, 0.22, mat_g_leaf3),  # Warm Japanese maple accent shrub
-        (7200,  860, -0.99, 210, 240, 0.17, mat_g_leaf1),
-        (8280, -1180, -0.88, 280, 320, 0.24, mat_g_leaf2),
-        (8780, -1340, -0.84, 300, 340, 0.28, mat_g_leaf3),
-        (9120,  -780, -0.86, 290, 310, 0.26, mat_g_leaf1),
-        (9560, -1120, -0.82, 270, 310, 0.26, mat_g_leaf2),
-        (9640,  -160, -0.90, 260, 290, 0.23, mat_g_leaf3),
+        (7260, -1180, -0.98, 220, 260, 0.18, mat_g_leaf1),
+        (7180,  -660, -1.00, 220, 240, 0.16, mat_g_leaf2),
+        (7360,  -280, -0.95, 240, 260, 0.18, mat_g_leaf1),
+        (7150,   120, -1.00, 210, 250, 0.16, mat_g_leaf2),
+        (7340,   580, -0.93, 240, 270, 0.20, mat_g_leaf3),
+        (7200,  1120, -0.98, 220, 240, 0.17, mat_g_leaf1),
+        (8020,  -680, -0.96, 260, 280, 0.19, mat_g_leaf2),
+        (8120,  -260, -0.94, 270, 270, 0.19, mat_g_leaf1),
+        (8060,   160, -0.95, 250, 270, 0.18, mat_g_leaf2),
+        (8680,  -620, -0.90, 280, 290, 0.22, mat_g_leaf1),
+        (8720,  -180, -0.92, 270, 280, 0.21, mat_g_leaf3),
+        (8640,   240, -0.93, 260, 280, 0.20, mat_g_leaf2),
+        (8280, -1380, -0.88, 260, 300, 0.22, mat_g_leaf2),
+        (8860, -1320, -0.85, 270, 300, 0.24, mat_g_leaf3),
+        (9080,  -720, -0.88, 250, 280, 0.22, mat_g_leaf1),
+        (9060,  -240, -0.90, 240, 260, 0.20, mat_g_leaf2),
+        (9040,   220, -0.92, 230, 260, 0.19, mat_g_leaf3),
     ]
     for _si, (_sx, _sy, _sz, _srx, _sry, _srz, _smat) in enumerate(_shrub_specs, 1):
         add_cyl_mm(f"B1_Garden_ShrubStem_{_si}", _sx, _sy, 14.0, -1.17, _sz, mat_g_bark, col_b1, segs=8)
         _add_garden_mound(f"B1_Garden_Shrub_{_si}", _sx, _sy, _sz, _srx, _sry, _srz, _smat)
-    # Soft white/blush camellia blossoms nestled into the sunken shrubs
+
+    # Rich multi-tone Flower Carpet blanketing the entire under-bridge zone (Y=-880..+360) & pit edges (safely below -0.35m under glass bridge)
+    _flw_palette = (mat_g_flw_pk, mat_g_flower, mat_g_flw_cor, mat_g_flw_gld, mat_g_flw_lav)
+    _flw_idx = 0
+    for _row_i, _fx in enumerate(range(6840, 9280, 340)):
+        for _col_i, _fy in enumerate((-780, -500, -240, 40, 300)):
+            _flw_idx += 1
+            _fmat = _flw_palette[(_row_i + _col_i) % len(_flw_palette)]
+            _jx = _fx + ((_col_i % 2) * 90 - 45)
+            _jy = _fy + ((_row_i % 2) * 70 - 35)
+            _fz = -0.86 + 0.08 * ((_row_i + _col_i) % 3)
+            _add_garden_mound(f"B1_Garden_BridgeBush_{_flw_idx}",  _jx, _jy, _fz - 0.11, 175, 165, 0.11, mat_g_leaf2 if _flw_idx % 2 else mat_g_leaf1)
+            _add_garden_mound(f"B1_Garden_BridgeFlower_{_flw_idx}",_jx, _jy, _fz + 0.01, 130, 125, 0.075, _fmat)
+            _add_garden_mound(f"B1_Garden_BridgeBloomB_{_flw_idx}",_jx + 95, _jy - 85, _fz - 0.02, 85, 85, 0.055, _flw_palette[(_row_i + _col_i + 2) % len(_flw_palette)])
     for _fi, (_fx, _fy, _fz) in enumerate([
-        (7060, -640, -0.94), (7120, -490, -0.90), (7020, 120, -0.95),
-        (7090,  250, -0.91), (7140,  780, -0.93),
-        (8240, -1120, -0.68), (8740, -1260, -0.60), (9080, -720, -0.64),
-        (9520, -1060, -0.60), (9600,  -120, -0.70),
+        (7060, -1120, -0.88), (7540, -1240, -0.84), (8240, -1340, -0.70), (8820, -1260, -0.64),
+        (7140,   780, -0.88), (7840,   960, -0.82), (8360,  1140, -0.76), (8920,  1120, -0.74),
     ], 1):
-        _add_garden_mound(f"B1_Garden_Blossom_{_fi}", _fx, _fy, _fz, 42, 42, 0.036, mat_g_flower)
+        _add_garden_mound(f"B1_Garden_Blossom_{_fi}", _fx, _fy, _fz, 120, 115, 0.065, _flw_palette[_fi % len(_flw_palette)])
 
     # 2. South Side Underwater Fish-Pond Window (侧面鱼池窗: SAME width 2050mm as left window y=-4375..-2325, +20cm taller H=780mm z=-1.26..-0.48m)
     add_box_mm("B2_East_Win_Upper_Reveal_Bot",   6340, 6600, -4375, -2325, -1.26,  -1.224, MATS["OLO_ToeKick_Black"], col_b2)
@@ -3557,14 +3579,14 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             link_obj(obj_hr, col_target)
             return obj_hr
 
-        # Left / Outer Helical Balustrade: Structural Champagne-Gold Metallic Plate outside White Fascia (zero coplanar Z-fighting!)
+        # Left / Outer Helical Balustrade (larger radius -> lower curvature): White Fascia + Plain Curved Clear Glass (NO gold cap on glass!)
         build_helical_ribbon("B1_To_1F_Spiral_OuterFascia",     r_out_sp - 16.0, r_out_sp + 8.0,  -0.18,  0.02, MATS["Basement_Warm_Plaster"])
-        build_helical_ribbon("B1_To_1F_Spiral_OuterBalustrade", r_out_sp + 8.5,  r_out_sp + 22.0, -0.18,  0.95, MATS["Gold_Brass"])
+        build_helical_ribbon("B1_To_1F_Spiral_OuterGlass",      r_out_sp - 9.0,  r_out_sp + 9.0,   0.02,  0.92, MATS["Glass_Balustrade_Clear"])
         build_helical_ribbon("B1_To_1F_Spiral_OuterSoffitGlow", r_out_sp - 6.0,  r_out_sp + 6.0,  -0.19, -0.16, MATS["Warm_LED_Glow"])
 
-        # Right / Inner Helical Balustrade: White Fascia + Plain Curved Clear Glass (NO gold cap on glass!)
+        # Right / Inner Helical Balustrade (tighter radius -> higher curvature): Structural Champagne-Gold Metal Plate (zero Z-fighting!)
         build_helical_ribbon("B1_To_1F_Spiral_InnerFascia",     r_in_sp - 14.0,  r_in_sp + 14.0,  -0.18,  0.02, MATS["Basement_Warm_Plaster"])
-        build_helical_ribbon("B1_To_1F_Spiral_InnerGlass",      r_in_sp - 9.0,   r_in_sp + 9.0,    0.02,  0.92, MATS["Glass_Balustrade_Clear"])
+        build_helical_ribbon("B1_To_1F_Spiral_InnerBalustrade", r_in_sp - 28.0,  r_in_sp - 14.5,  -0.18,  0.95, MATS["Gold_Brass"])
 
     build_b1_to_1f_spiral_stair(col_b1)
 
@@ -6747,8 +6769,8 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         bx, by, bz = b['pos']
         add_flying_bird(f"1F_Living_Bird_{b_idx+1}", bx, by, z_1f + bz, b['yaw'], b['pitch'], b['roll'], span_mm=b['span'], flap_mode=b['mode'], col=col_1f)
 
-    # 1F West Back Garden (outside 1F_Main_Entry_Door X=-12600..-7155, Y=-5070..-980)
-    # + East Front Small Garden (X=+6742..+12300, Y=-5760..+1765) surrounding the Open-to-Sky Sunken Garden & Fish Pond
+    # 1F West Back Garden outside 1F_Main_Entry_Door (CAD-calibrated to Zone 4 56#: 4.00m to road center minus 1.75m half-lane = 2.25m, X=-9405..-7155, Y=-5070..-980)
+    # + East Front Small Garden (CAD-calibrated: X=+6742..+10542 = 3.80m, Y=-5760..+1765, plus 1.00m exterior roadside planters X=+10542..+11542)
     # Strictly NO side garden along the North/South flanks between X=-7155 and X=+6742.
     def _build_1f_courtyard():
         gmat, smat, wmat = MATS["Plant_Bamboo_Green"], MATS["Travertine_Stone"], MATS["Wall_Panel_Cream"]
@@ -6789,15 +6811,16 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             _add_yard_mound(f"{tname}_CanopyC", tx + 150, ty - 130, z_1f + top_z - 0.50, 290.0, 320.0, 0.26, leaf_l)
 
         # ---------------------------------------------------------------------
-        # A. West Back Garden outside 1F_Main_Entry_Door (-12600..-7155, Y=-5070..-980)
+        # A. West Back Garden outside 1F_Main_Entry_Door (2.25m real depth: X=-9405..-7155, Y=-5070..-980)
         #    - Kitchen-side Wall (-7850..-7155, Y=-4820..-3120): Big Stone Laundry Trough (Deep Water Basin + Sloped Washboard)
-        #    - Outer West Yard (-11950..-8950, Y=-4420..-2850): Raised-Bed Eco-Farm growing Tomatoes & Trellis Peas
+        #    - Outer West Bed (-9165..-8520): Eco-Farm growing Tomatoes (North) & Trellis Peas (South) with 70cm work aisle
         # ---------------------------------------------------------------------
-        add_box_mm("1F_BackGarden_Porch",        -8950.0, -7155.0, -3050.0, -1350.0, z_1f - 0.15, z_1f - 0.012, cmat, col_1f)
-        add_box_mm("1F_BackGarden_PassageWalk",  -8950.0, -7750.0, -1350.0,  -960.0, z_1f - 0.15, z_1f - 0.012, cmat, col_1f)
-        add_box_mm("1F_BackGarden_LaundryApron", -8950.0, -7155.0, -4890.0, -3050.0, z_1f - 0.15, z_1f - 0.015, smat, col_1f)
-        add_box_mm("1F_BackGarden_EcoFarm_Walk",-11950.0, -8950.0, -4420.0, -1450.0, z_1f - 0.15, z_1f - 0.025, smat, col_1f)
-        add_box_mm("1F_BackGarden_Lawn_NE",     -7750.0, -7155.0, -1350.0, -1160.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_BackGarden_Porch",        -8480.0, -7155.0, -3050.0, -1350.0, z_1f - 0.15, z_1f - 0.012, cmat, col_1f)
+        add_box_mm("1F_BackGarden_PassageWalk",  -8680.0, -7720.0, -1350.0,  -960.0, z_1f - 0.15, z_1f - 0.012, cmat, col_1f)
+        add_box_mm("1F_BackGarden_LaundryApron", -8480.0, -7155.0, -4890.0, -3050.0, z_1f - 0.15, z_1f - 0.015, smat, col_1f)
+        add_box_mm("1F_BackGarden_EcoFarm_Walk", -9225.0, -8480.0, -4890.0, -1350.0, z_1f - 0.15, z_1f - 0.025, smat, col_1f)
+        add_box_mm("1F_BackGarden_Lawn_NE",      -7720.0, -7155.0, -1350.0, -1160.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_BackGarden_Lawn_NW",      -9225.0, -8680.0, -1350.0, -1160.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
 
         # Big Stone Utility Laundry Trough along Kitchen West Wall (-7850..-7155, Y=-4820..-3120; sill is 1.102m)
         add_box_mm("1F_BackGarden_LaundryToe",    -7780.0, -7155.0, -4780.0, -3160.0, z_1f - 0.015, z_1f + 0.055, fmat, col_1f)
@@ -6818,182 +6841,159 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             _wx0 = -7735.0 + _wri * 52.0
             _wz1 = z_1f + 0.680 + _wri * 0.019
             add_box_mm(f"1F_BackGarden_WashRib_{_wri+1}", _wx0, _wx0 + 36.0, -3925.0, -3230.0, z_1f + 0.660, _wz1, cmat, col_1f, r_corner=4.0)
-        add_cyl_mm("1F_BackGarden_LaundryBasket", -8280.0, -3380.0, 195.0, z_1f - 0.015, z_1f + 0.390, dmat, col_1f, segs=16)
+        add_cyl_mm("1F_BackGarden_LaundryBasket", -8140.0, -3380.0, 185.0, z_1f - 0.015, z_1f + 0.380, dmat, col_1f, segs=16)
 
-        # Raised-Bed Eco-Farm (生态农场: Tomato Row North + Pea Trellis Row South, X=-11780..-9280)
-        for _fid, _fy0, _fy1 in (("TomatoBed", -3480.0, -2980.0), ("PeaBed", -4260.0, -3720.0)):
-            add_box_mm(f"1F_BackGarden_EcoFarm_{_fid}_Box",  -11780.0, -9280.0, _fy0,        _fy1,        z_1f - 0.025, z_1f + 0.33, dmat, col_1f)
-            add_box_mm(f"1F_BackGarden_EcoFarm_{_fid}_Soil", -11730.0, -9330.0, _fy0 + 45.0, _fy1 - 45.0, z_1f + 0.320, z_1f + 0.36, soil_mat, col_1f)
+        # Compact Raised-Bed Eco-Farm along West Wall (-9165..-8520): Tomato Bed North (-3100..-1580) & Pea Trellis Bed South (-4820..-3240)
+        for _fid, _fy0, _fy1 in (("TomatoBed", -3100.0, -1580.0), ("PeaBed", -4820.0, -3240.0)):
+            add_box_mm(f"1F_BackGarden_EcoFarm_{_fid}_Box",  -9165.0, -8520.0, _fy0,        _fy1,        z_1f - 0.025, z_1f + 0.33, dmat, col_1f)
+            add_box_mm(f"1F_BackGarden_EcoFarm_{_fid}_Soil", -9120.0, -8565.0, _fy0 + 45.0, _fy1 - 45.0, z_1f + 0.320, z_1f + 0.36, soil_mat, col_1f)
         # Tomato Stakes, Bushy Foliage & Ripening Red Tomatoes (番茄)
-        add_box_mm("1F_BackGarden_EcoFarm_TomatoTieBar", -11650.0, -9410.0, -3240.0, -3220.0, z_1f + 1.22, z_1f + 1.245, gmat, col_1f)
-        for _ti, _tx in enumerate((-11520.0, -11020.0, -10520.0, -10020.0, -9520.0), 1):
-            add_cyl_mm(f"1F_BackGarden_EcoFarm_TomatoStake_{_ti}", _tx, -3230.0, 14.0, z_1f + 0.36, z_1f + 1.46, gmat, col_1f, segs=8)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_TomatoVineLo_{_ti}", _tx, -3230.0, z_1f + 0.68, 210.0, 185.0, 0.24, leaf_d if _ti % 2 else leaf_l)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_TomatoVineHi_{_ti}", _tx + 35.0, -3210.0, z_1f + 1.05, 175.0, 165.0, 0.21, leaf_l if _ti % 2 else leaf_d)
-            for _fi, (_dx, _dy, _dz) in enumerate(((-95, -145, 0.72), (85, -150, 0.96), (0, +140, 0.84)), 1):
-                _add_yard_mound(f"1F_BackGarden_EcoFarm_Tomato_{_ti}_{_fi}", _tx + _dx, -3230.0 + _dy, z_1f + _dz, 38.0, 38.0, 0.036, tomato_red)
+        add_box_mm("1F_BackGarden_EcoFarm_TomatoTieBar", -8852.0, -8832.0, -2960.0, -1720.0, z_1f + 1.22, z_1f + 1.245, gmat, col_1f)
+        for _ti, _ty in enumerate((-2820.0, -2340.0, -1860.0), 1):
+            add_cyl_mm(f"1F_BackGarden_EcoFarm_TomatoStake_{_ti}", -8842.0, _ty, 14.0, z_1f + 0.36, z_1f + 1.46, gmat, col_1f, segs=8)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_TomatoVineLo_{_ti}", -8842.0, _ty, z_1f + 0.68, 195.0, 200.0, 0.24, leaf_d if _ti % 2 else leaf_l)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_TomatoVineHi_{_ti}", -8820.0, _ty + 30.0, z_1f + 1.05, 165.0, 175.0, 0.21, leaf_l if _ti % 2 else leaf_d)
+            for _fi, (_dx, _dy, _dz) in enumerate(((125, -80, 0.74), (135, +90, 0.96), (-115, 0, 0.84)), 1):
+                _add_yard_mound(f"1F_BackGarden_EcoFarm_Tomato_{_ti}_{_fi}", -8842.0 + _dx, _ty + _dy, z_1f + _dz, 38.0, 38.0, 0.036, tomato_red)
         # Pea Climbing Trellis Frame, Vines, White Blossoms & Lime-Green Pea Pods (豌豆)
-        for _pi, _px in enumerate((-11660.0, -10900.0, -10140.0, -9380.0), 1):
-            add_box_mm(f"1F_BackGarden_EcoFarm_PeaPost_{_pi}", _px - 18.0, _px + 18.0, -4005.0, -3975.0, z_1f + 0.36, z_1f + 1.56, dmat, col_1f)
+        for _pi, _py in enumerate((-4680.0, -4030.0, -3380.0), 1):
+            add_box_mm(f"1F_BackGarden_EcoFarm_PeaPost_{_pi}", -8858.0, -8826.0, _py - 18.0, _py + 18.0, z_1f + 0.36, z_1f + 1.56, dmat, col_1f)
         for _ri, _rz in enumerate((0.68, 1.08, 1.48), 1):
-            add_box_mm(f"1F_BackGarden_EcoFarm_PeaRail_{_ri}", -11660.0, -9380.0, -4000.0, -3980.0, z_1f + _rz, z_1f + _rz + 0.022, gmat, col_1f)
-        for _pi, _px in enumerate((-11440.0, -11120.0, -10680.0, -10360.0, -9920.0, -9600.0), 1):
-            add_cyl_mm(f"1F_BackGarden_EcoFarm_PeaCane_{_pi}", _px, -3990.0, 10.0, z_1f + 0.36, z_1f + 1.54, gmat, col_1f, segs=8)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaVine_{_pi}", _px, -3990.0, z_1f + 0.92, 190.0, 160.0, 0.38, leaf_l if _pi % 2 else leaf_d)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaPodA_{_pi}", _px - 55.0, -3845.0, z_1f + 0.84 + 0.12 * (_pi % 3), 24.0, 18.0, 0.055, pea_green)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaPodB_{_pi}", _px + 55.0, -4135.0, z_1f + 0.96 - 0.10 * (_pi % 2), 24.0, 18.0, 0.055, pea_green)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaFlower_{_pi}", _px + 15.0, -3850.0, z_1f + 1.24, 34.0, 34.0, 0.028, flw_wh)
+            add_box_mm(f"1F_BackGarden_EcoFarm_PeaRail_{_ri}", -8852.0, -8832.0, -4680.0, -3380.0, z_1f + _rz, z_1f + _rz + 0.022, gmat, col_1f)
+        for _pi, _py in enumerate((-4520.0, -4200.0, -3860.0, -3540.0), 1):
+            add_cyl_mm(f"1F_BackGarden_EcoFarm_PeaCane_{_pi}", -8842.0, _py, 10.0, z_1f + 0.36, z_1f + 1.54, gmat, col_1f, segs=8)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaVine_{_pi}", -8842.0, _py, z_1f + 0.92, 170.0, 185.0, 0.38, leaf_l if _pi % 2 else leaf_d)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaPodA_{_pi}", -8705.0, _py - 45.0, z_1f + 0.84 + 0.12 * (_pi % 3), 24.0, 18.0, 0.055, pea_green)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaPodB_{_pi}", -8975.0, _py + 45.0, z_1f + 0.96 - 0.10 * (_pi % 2), 24.0, 18.0, 0.055, pea_green)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaFlower_{_pi}", -8710.0, _py + 15.0, z_1f + 1.24, 34.0, 34.0, 0.028, flw_wh)
         # Back Garden Solid High Perimeter Walls (1.55m masonry wall + stone coping; single open passage on North/left-hand side when facing Kitchen)
         _bwall_segs = [
-            ("W",  -12600.0, -12420.0, -5070.0,  -980.0),
-            ("NW", -12420.0,  -9050.0, -1160.0,  -980.0),
-            ("NE",  -7650.0,  -7155.0, -1160.0,  -980.0),
-            ("S",  -12420.0,  -7155.0, -5070.0, -4890.0),
+            ("W",  -9405.0, -9225.0, -5070.0,  -980.0),
+            ("NW", -9225.0, -8780.0, -1160.0,  -980.0),
+            ("NE", -7620.0, -7155.0, -1160.0,  -980.0),
+            ("S",  -9225.0, -7155.0, -5070.0, -4890.0),
         ]
         for _bw_id, _wx0, _wx1, _wy0, _wy1 in _bwall_segs:
             add_box_mm(f"1F_BackGarden_Wall_{_bw_id}", _wx0, _wx1, _wy0, _wy1, z_1f - 0.15, z_1f + 1.50, wmat, col_1f)
             add_box_mm(f"1F_BackGarden_WallCap_{_bw_id}", _wx0 - 15.0, _wx1 + 15.0, _wy0 - 15.0, _wy1 + 15.0, z_1f + 1.50, z_1f + 1.55, smat, col_1f)
-        # Single Open Passageway (通道口, X=-8950..-7750, Y=-1160..-980) on Left-Hand side when facing Kitchen Wall
-        add_box_mm("1F_BackGarden_PassagePillar_W", -9050.0, -8850.0, -1180.0, -960.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
-        add_box_mm("1F_BackGarden_PassagePillar_E", -7850.0, -7650.0, -1180.0, -960.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
-        # Continuous Back Garden Perimeter Planters (S + unbroken W + NW walls clear of North passage)
-        for _bp_id, _px0, _px1, _py0, _py1 in [
-            ("S",  -12420.0,  -7950.0, -4890.0, -4420.0),
-            ("WS", -12420.0, -11950.0, -4420.0, -1450.0),
-            ("N",  -12420.0,  -9050.0, -1450.0, -1160.0),
-        ]:
-            add_box_mm(f"1F_BackGarden_Planter_{_bp_id}",     _px0,        _px1,        _py0,        _py1,        z_1f - 0.03, z_1f + 0.34, wmat, col_1f)
-            add_box_mm(f"1F_BackGarden_PlanterSoil_{_bp_id}", _px0 + 45.0, _px1 - 45.0, _py0 + 45.0, _py1 - 45.0, z_1f + 0.34, z_1f + 0.37, soil_mat, col_1f)
-        _add_yard_tree("1F_BackGarden_Tree_SW", -12180.0, -4640.0, 2.05, leaf_red)
-        for _bi, _bx in enumerate((-11400.0, -10400.0, -9400.0, -8350.0), 1):
-            add_cyl_mm(f"1F_BackGarden_BambooS_Stem_{_bi}", _bx, -4655.0, 22.0, z_1f + 0.36, z_1f + 1.85, gmat, col_1f, segs=10)
-            _add_yard_mound(f"1F_BackGarden_ShrubS_{_bi}", _bx, -4655.0, z_1f + 0.58, 250.0, 210.0, 0.24, leaf_l if _bi % 2 else leaf_d)
-            _add_yard_mound(f"1F_BackGarden_FlowerS_{_bi}", _bx + 280.0, -4600.0, z_1f + 0.48, 120.0, 120.0, 0.11, flw_pk if _bi % 2 else flw_wh)
-        for _bi, _by in enumerate((-4050.0, -3400.0, -2750.0, -2100.0), 1):
-            _add_yard_mound(f"1F_BackGarden_ShrubWS_{_bi}", -12185.0, _by, z_1f + 0.56, 200.0, 230.0, 0.22, leaf_d if _bi % 2 else leaf_l)
-            _add_yard_mound(f"1F_BackGarden_FlowerWS_{_bi}", -12110.0, _by + 160.0, z_1f + 0.48, 95.0, 95.0, 0.09, flw_wh if _bi % 2 else flw_pk)
-        for _bi, _bx in enumerate((-11950.0, -11050.0, -10150.0, -9350.0), 1):
-            add_cyl_mm(f"1F_BackGarden_BambooN_Stem_{_bi}", _bx, -1305.0, 20.0, z_1f + 0.36, z_1f + 1.75, gmat, col_1f, segs=10)
-            _add_yard_mound(f"1F_BackGarden_ShrubN_{_bi}", _bx, -1305.0, z_1f + 0.54, 240.0, 140.0, 0.20, leaf_l if _bi % 2 else leaf_d)
-            _add_yard_mound(f"1F_BackGarden_FlowerN_{_bi}", _bx + 220.0, -1320.0, z_1f + 0.46, 95.0, 95.0, 0.09, flw_pk)
-        for _li, (_lx, _ly) in enumerate(((-9000.0, -1420.0), (-7700.0, -1420.0), (-9080.0, -2950.0), (-9080.0, -4200.0)), 1):
+        # Single Open Passageway (通道口, X=-8680..-7720, Y=-1160..-980) on Left-Hand side when facing Kitchen Wall
+        add_box_mm("1F_BackGarden_PassagePillar_W", -8780.0, -8640.0, -1180.0, -960.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
+        add_box_mm("1F_BackGarden_PassagePillar_E", -7760.0, -7620.0, -1180.0, -960.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
+        for _li, (_lx, _ly) in enumerate(((-8420.0, -1350.0), (-8420.0, -2950.0)), 1):
             add_box_mm(f"1F_BackGarden_BollardPost_{_li}", _lx - 45.0, _lx + 45.0, _ly - 45.0, _ly + 45.0, z_1f - 0.02, z_1f + 0.54, fmat, col_1f)
             add_box_mm(f"1F_BackGarden_BollardGlow_{_li}", _lx - 38.0, _lx + 38.0, _ly - 38.0, _ly + 38.0, z_1f + 0.54, z_1f + 0.62, lmat, col_1f)
 
         # ---------------------------------------------------------------------
-        # B. East Front Small Garden (X=+6742..+12300, Y=-5760..+1765; strictly flush with N/S house bay)
-        #    Sunken Pond X=6535..8650 (Y=-4600..-1700); Sunken Flower Garden pushed +150cm East -> X=6565..10150 (Y=-1700..+1120)
+        # B. East Front Small Garden (CAD-calibrated 3.80m: X=+6742..+10542, Y=-5760..+1765; strictly flush with N/S house bay)
+        #    Sunken Pond X=6535..8650 (Y=-5580..-1700); Sunken Flower Pit X=6565..9500 (Y=-1700..+1480 flush to Wall_N with NO side planter)
         # ---------------------------------------------------------------------
-        # Small Transparent Structural Glass Bridge passing straight through the DEAD CENTER of the Sunken Flower Pit (Y=-790..+210, center Y=-290mm)
+        # Transparent Structural Glass Bridge passing straight through the DEAD CENTER of the Sunken Flower Pit (Y=-790..+210, center Y=-290mm)
         bridge_glass = make_mat("Glass_Bridge_Deck", (0.76, 0.92, 0.96, 0.34), metallic=0.05, roughness=0.06, transmission=0.0, alpha=0.34)
-        add_box_mm("1F_FrontGarden_GlassBridge_Pane",   6742.0, 10150.0, -755.0, +175.0, z_1f - 0.036, z_1f - 0.002, bridge_glass, col_1f)
-        add_box_mm("1F_FrontGarden_GlassBridge_EdgeS",  6742.0, 10150.0, -790.0, -755.0, z_1f - 0.085, z_1f - 0.002, smat, col_1f)
-        add_box_mm("1F_FrontGarden_GlassBridge_EdgeN",  6742.0, 10150.0, +175.0, +210.0, z_1f - 0.085, z_1f - 0.002, smat, col_1f)
-        add_box_mm("1F_FrontGarden_GlassBridge_Rib_1",  7870.0,  7895.0, -755.0, +175.0, z_1f - 0.075, z_1f - 0.036, smat, col_1f)
-        add_box_mm("1F_FrontGarden_GlassBridge_Rib_2",  9010.0,  9035.0, -755.0, +175.0, z_1f - 0.075, z_1f - 0.036, smat, col_1f)
-        add_box_mm("1F_FrontGarden_BridgeGlassS",       6742.0, 10150.0, -782.0, -762.0, z_1f - 0.002, z_1f + 0.198, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_BridgeGlassN",       6742.0, 10150.0, +182.0, +202.0, z_1f - 0.002, z_1f + 0.198, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_GlassBridge_Pane",   6742.0, 9500.0, -755.0, +175.0, z_1f - 0.036, z_1f - 0.002, bridge_glass, col_1f)
+        add_box_mm("1F_FrontGarden_GlassBridge_EdgeS",  6742.0, 9500.0, -790.0, -755.0, z_1f - 0.085, z_1f - 0.002, smat, col_1f)
+        add_box_mm("1F_FrontGarden_GlassBridge_EdgeN",  6742.0, 9500.0, +175.0, +210.0, z_1f - 0.085, z_1f - 0.002, smat, col_1f)
+        add_box_mm("1F_FrontGarden_GlassBridge_Rib_1",  7660.0, 7685.0, -755.0, +175.0, z_1f - 0.075, z_1f - 0.036, smat, col_1f)
+        add_box_mm("1F_FrontGarden_GlassBridge_Rib_2",  8580.0, 8605.0, -755.0, +175.0, z_1f - 0.075, z_1f - 0.036, smat, col_1f)
+        add_box_mm("1F_FrontGarden_BridgeGlassS",       6742.0, 9500.0, -782.0, -762.0, z_1f - 0.002, z_1f + 0.198, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_BridgeGlassN",       6742.0, 9500.0, +182.0, +202.0, z_1f - 0.002, z_1f + 0.198, glmat, col_1f)
 
-        # Travertine Coping & 20cm (200mm) Low Frameless Clear Glass Curb around Open Sunken Fish Pond (reaching straight to South Wall_S -5580) + Flower Pit
-        add_box_mm("1F_FrontGarden_PitCoping_PondE",     8530.0,  8790.0, -5580.0, -1670.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
-        add_box_mm("1F_FrontGarden_PitCoping_FlowerS",   8790.0, 10290.0, -1840.0, -1670.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
-        add_box_mm("1F_FrontGarden_PitCoping_FlowerES", 10030.0, 10290.0, -1670.0,  -790.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
-        add_box_mm("1F_FrontGarden_PitCoping_FlowerEN", 10030.0, 10290.0,  +210.0, +1080.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
-        add_box_mm("1F_FrontGarden_PitCoping_FlowerN",   6742.0, 10290.0, +1080.0, +1185.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_PondE",      8645.0,  8665.0, -5580.0, -1705.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_FlowerS",    8665.0, 10165.0, -1715.0, -1695.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_FlowerES",  10145.0, 10165.0, -1695.0,  -790.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_FlowerEN",  10145.0, 10165.0,  +210.0, +1110.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_FlowerN",    6742.0, 10165.0, +1100.0, +1120.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
+        # Travertine Coping & 20cm (200mm) Low Frameless Clear Glass Curb around Open Sunken Fish Pond + Flower Pit
+        # Notice North Flower Pit comes directly up to Wall_N (+1585) with ZERO side planter along the sliding-door wall!
+        add_box_mm("1F_FrontGarden_PitCoping_PondE",     8530.0, 8750.0, -5580.0, -1670.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
+        add_box_mm("1F_FrontGarden_PitCoping_FlowerS",   8750.0, 9620.0, -1840.0, -1670.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
+        add_box_mm("1F_FrontGarden_PitCoping_FlowerES",  9380.0, 9620.0, -1670.0,  -790.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
+        add_box_mm("1F_FrontGarden_PitCoping_FlowerEN",  9380.0, 9620.0,  +210.0, +1460.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
+        add_box_mm("1F_FrontGarden_PitCoping_FlowerN",   6742.0, 9620.0, +1460.0, +1585.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_PondE",      8630.0, 8650.0, -5580.0, -1705.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_FlowerS",    8650.0, 9515.0, -1715.0, -1695.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_FlowerES",   9495.0, 9515.0, -1695.0,  -790.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_FlowerEN",   9495.0, 9515.0,  +210.0, +1480.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_FlowerN",    6742.0, 9515.0, +1470.0, +1490.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
 
-        # East Entry Walkway & 3 Stone Stepping Stones connecting Centered Glass Bridge (Y=-790..+210) to East Garden Gate (Y=-15..+985)
-        add_box_mm("1F_FrontGarden_PathBase_W", 10150.0, 11050.0, -790.0, +210.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
-        add_box_mm("1F_FrontGarden_PathBase_E", 11050.0, 12120.0, -280.0, +985.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
-        for _pi, (_px, _py) in enumerate(((10330.0, -290.0), (10920.0, +130.0), (11510.0, +485.0)), 1):
-            add_box_mm(f"1F_FrontGarden_SteppingStone_{_pi}", _px, _px + 460.0, _py - 410.0, _py + 410.0, z_1f - 0.028, z_1f - 0.006, cmat, col_1f, r_corner=16.0)
+        # East Entry Walkway & 2 Stone Stepping Slabs connecting Centered Glass Bridge (Y=-790..+210) to shifted East Gate (Y=-415..+585)
+        add_box_mm("1F_FrontGarden_PathBase_W",  9500.0,  9920.0, -790.0, +210.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
+        add_box_mm("1F_FrontGarden_PathBase_E",  9920.0, 10362.0, -480.0, +585.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
+        for _pi, (_px0, _px1, _py) in enumerate(((9560.0, 9900.0, -240.0), (9960.0, 10320.0, +85.0)), 1):
+            add_box_mm(f"1F_FrontGarden_SteppingStone_{_pi}", _px0, _px1, _py - 390.0, _py + 390.0, z_1f - 0.028, z_1f - 0.006, cmat, col_1f, r_corner=16.0)
 
-        # Non-overlapping Lawns strictly inside the perimeter planter ring (NO lawn or planter South of fish pond)
-        add_box_mm("1F_FrontGarden_Lawn_MidE",     10290.0, 11600.0, -2100.0,  -790.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
-        add_box_mm("1F_FrontGarden_Lawn_MidSE",    11050.0, 11600.0,  -790.0,  -280.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
-        add_box_mm("1F_FrontGarden_Lawn_GateNW",   10290.0, 11050.0,  +210.0, +1185.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
-        add_box_mm("1F_FrontGarden_Lawn_GateN",    11050.0, 12120.0,  +985.0, +1185.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
-        add_box_mm("1F_FrontGarden_Lawn_MidStrip",  8790.0, 10290.0, -2100.0, -1840.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
-        add_box_mm("1F_FrontGarden_Lawn_SEStrip",   8790.0,  9100.0, -5060.0, -2100.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        # Non-overlapping Lawns inside shrunk East Front Garden (NO planter on North wall; Lawn_GateN reaches Wall_N +1585)
+        add_box_mm("1F_FrontGarden_Lawn_MidE",     9620.0, 10080.0, -2050.0,  -790.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_FrontGarden_Lawn_MidSE",    9920.0, 10080.0,  -790.0,  -480.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_FrontGarden_Lawn_GateNW",   9620.0,  9920.0,  +210.0,  +585.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_FrontGarden_Lawn_GateN",    9620.0, 10362.0,  +585.0, +1585.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_FrontGarden_Lawn_MidStrip", 8750.0,  9620.0, -2050.0, -1840.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_FrontGarden_Lawn_SEStrip",  8750.0,  8820.0, -5060.0, -2050.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
 
-        # SE Outdoor Walnut Lounge Deck overlooking the Sunken Pond & Sunken Garden (inside S/ES planters: X=9100..11560, Y=-5020..-2100)
-        add_box_mm("1F_FrontGarden_WoodDeck",        9100.0, 11560.0, -5020.0, -2100.0, z_1f - 0.15,  z_1f - 0.008, dmat, col_1f)
-        add_box_mm("1F_FrontGarden_GardenTableTop",  9950.0, 10950.0, -4100.0, -3300.0, z_1f + 0.68,  z_1f + 0.72,  smat, col_1f, r_corner=24.0)
-        add_box_mm("1F_FrontGarden_GardenTableLeg1",10080.0, 10150.0, -4000.0, -3400.0, z_1f - 0.008, z_1f + 0.68,  fmat, col_1f)
-        add_box_mm("1F_FrontGarden_GardenTableLeg2",10750.0, 10820.0, -4000.0, -3400.0, z_1f - 0.008, z_1f + 0.68,  fmat, col_1f)
-        add_box_mm("1F_FrontGarden_Bench_W",         9400.0,  9800.0, -4100.0, -3300.0, z_1f + 0.38,  z_1f + 0.43,  dmat, col_1f, r_corner=12.0)
-        add_box_mm("1F_FrontGarden_Bench_W_Leg",     9480.0,  9720.0, -4020.0, -3380.0, z_1f - 0.008, z_1f + 0.38,  fmat, col_1f)
-        add_box_mm("1F_FrontGarden_Bench_E",        11100.0, 11500.0, -4100.0, -3300.0, z_1f + 0.38,  z_1f + 0.43,  dmat, col_1f, r_corner=12.0)
-        add_box_mm("1F_FrontGarden_Bench_E_Leg",    11180.0, 11420.0, -4020.0, -3380.0, z_1f - 0.008, z_1f + 0.38,  fmat, col_1f)
+        # SE Outdoor Walnut Lounge Deck overlooking the Sunken Pond & Sunken Garden (inside S/ES planters: X=8820..10080, Y=-5020..-2050)
+        add_box_mm("1F_FrontGarden_WoodDeck",         8820.0, 10080.0, -5020.0, -2050.0, z_1f - 0.15,  z_1f - 0.008, dmat, col_1f)
+        add_box_mm("1F_FrontGarden_GardenTableTop",   9180.0,  9740.0, -3920.0, -3180.0, z_1f + 0.68,  z_1f + 0.72,  smat, col_1f, r_corner=24.0)
+        add_box_mm("1F_FrontGarden_GardenTableLeg1",  9260.0,  9660.0, -3820.0, -3760.0, z_1f - 0.008, z_1f + 0.68,  fmat, col_1f)
+        add_box_mm("1F_FrontGarden_GardenTableLeg2",  9260.0,  9660.0, -3340.0, -3280.0, z_1f - 0.008, z_1f + 0.68,  fmat, col_1f)
+        add_box_mm("1F_FrontGarden_Bench_S",          9200.0,  9720.0, -4400.0, -4040.0, z_1f + 0.38,  z_1f + 0.43,  dmat, col_1f, r_corner=12.0)
+        add_box_mm("1F_FrontGarden_Bench_S_Leg",      9260.0,  9660.0, -4320.0, -4120.0, z_1f - 0.008, z_1f + 0.38,  fmat, col_1f)
+        add_box_mm("1F_FrontGarden_Bench_N",          9200.0,  9720.0, -3060.0, -2700.0, z_1f + 0.38,  z_1f + 0.43,  dmat, col_1f, r_corner=12.0)
+        add_box_mm("1F_FrontGarden_Bench_N_Leg",      9260.0,  9660.0, -2980.0, -2780.0, z_1f - 0.008, z_1f + 0.38,  fmat, col_1f)
 
         # Solid High Perimeter Masonry Walls (1.55m wall + stone coping; NO iron fence/railings around courtyard)
-        # Note: EN has exact 40cm (400mm) clear short high wall between GatePillar_N (+1185) and North wall inner face (+1585).
+        # Gate shifted +40cm toward center/left (-Y): Gate opening Y=-415..+585, EN short wall = 80cm (+785..+1585)
         _cwall_segs = [
-            ("EN", 12120.0, 12300.0,  1185.0,  1765.0),
-            ("ES", 12120.0, 12300.0, -5760.0,  -215.0),
-            ("N",   6742.0, 12120.0,  1585.0,  1765.0),
-            ("S",   6742.0, 12120.0, -5760.0, -5580.0),
+            ("EN", 10362.0, 10542.0,   785.0,  1765.0),
+            ("ES", 10362.0, 10542.0, -5760.0,  -615.0),
+            ("N",   6742.0, 10362.0,  1585.0,  1765.0),
+            ("S",   6742.0, 10362.0, -5760.0, -5580.0),
         ]
         for _cw_id, _wx0, _wx1, _wy0, _wy1 in _cwall_segs:
             add_box_mm(f"1F_FrontGarden_Wall_{_cw_id}", _wx0, _wx1, _wy0, _wy1, z_1f - 0.15, z_1f + 1.50, wmat, col_1f)
             add_box_mm(f"1F_FrontGarden_WallCap_{_cw_id}", _wx0 - 15.0, _wx1 + 15.0, _wy0 - 15.0, _wy1 + 15.0, z_1f + 1.50, z_1f + 1.55, smat, col_1f)
 
-        # Double East Garden Entry Gate at X=12120..12300, Y=-15..+985 (40cm short EN wall to right fence +1185..+1585)
-        add_box_mm("1F_FrontGarden_GatePillar_S", 12060.0, 12360.0, -215.0,  -15.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
-        add_box_mm("1F_FrontGarden_GatePillar_N", 12060.0, 12360.0,  985.0, 1185.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
-        add_box_mm("1F_FrontGarden_Gate_Door_S",  12190.0, 12230.0,  -10.0,  480.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
-        add_box_mm("1F_FrontGarden_Gate_Door_N",  12190.0, 12230.0,  490.0,  980.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
-        add_box_mm("1F_FrontGarden_Gate_Handle_S",12170.0, 12250.0,  440.0,  470.0, z_1f + 0.92, z_1f + 1.12, MATS["Gold_Brass"], col_1f)
-        add_box_mm("1F_FrontGarden_Gate_Handle_N",12170.0, 12250.0,  500.0,  530.0, z_1f + 0.92, z_1f + 1.12, MATS["Gold_Brass"], col_1f)
+        # Double East Garden Entry Gate at X=10362..10542, Y=-415..+585 (moved 40cm toward center/left away from right fence)
+        add_box_mm("1F_FrontGarden_GatePillar_S", 10302.0, 10602.0, -615.0, -415.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
+        add_box_mm("1F_FrontGarden_GatePillar_N", 10302.0, 10602.0,  585.0,  785.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
+        add_box_mm("1F_FrontGarden_Gate_Door_S",  10432.0, 10472.0, -410.0,   80.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
+        add_box_mm("1F_FrontGarden_Gate_Door_N",  10432.0, 10472.0,   90.0,  580.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
+        add_box_mm("1F_FrontGarden_Gate_Handle_S",10412.0, 10492.0,   40.0,   70.0, z_1f + 0.92, z_1f + 1.12, MATS["Gold_Brass"], col_1f)
+        add_box_mm("1F_FrontGarden_Gate_Handle_N",10412.0, 10492.0,  100.0,  130.0, z_1f + 0.92, z_1f + 1.12, MATS["Gold_Brass"], col_1f)
 
-        # Continuous Perimeter Flower/Tree Planter Ring (N + ES + S East-of-pond only; Fish Pond touches Wall_S directly on X=6742..8790)
+        # Interior Perimeter Planters ONLY along outer front ES & East-of-pond South wall (NO Planter along sliding-door North wall; NO planter along pond South wall)
         for _fp_id, _px0, _px1, _py0, _py1 in [
-            ("N",   6760.0, 12120.0,  1185.0,  1585.0),
-            ("ES", 11600.0, 12120.0, -5060.0,  -215.0),
-            ("S",   8790.0, 12120.0, -5580.0, -5060.0),
+            ("ES", 10080.0, 10362.0, -5060.0,  -615.0),
+            ("S",   8750.0, 10362.0, -5580.0, -5060.0),
         ]:
             add_box_mm(f"1F_FrontGarden_Planter_{_fp_id}",     _px0,        _px1,        _py0,        _py1,        z_1f - 0.03, z_1f + 0.34, wmat, col_1f)
             add_box_mm(f"1F_FrontGarden_PlanterSoil_{_fp_id}", _px0 + 45.0, _px1 - 45.0, _py0 + 45.0, _py1 - 45.0, z_1f + 0.34, z_1f + 0.37, soil_mat, col_1f)
 
-        # 2 Sculpted Ornamental Courtyard Trees around East/South Planter Ring (clear of fish pond side)
-        _add_yard_tree("1F_FrontGarden_Tree_SE",    11860.0, -5320.0, 2.35, leaf_red)
-        _add_yard_tree("1F_FrontGarden_Tree_GateS", 11860.0,  -850.0, 2.15, leaf_l)
+        # Sculpted Ornamental Courtyard Trees around ES/S corner (clear of pond side and North wall)
+        _add_yard_tree("1F_FrontGarden_Tree_SE",    10180.0, -5320.0, 2.35, leaf_red)
+        _add_yard_tree("1F_FrontGarden_Tree_GateS", 10200.0, -1080.0, 2.10, leaf_l)
 
-        # Organic Bamboo, Flowering Shrubs & Blossoms lining North, East-South & East-of-pond South Planters
-        for _bi, _bx in enumerate((7400.0, 8600.0, 9800.0, 11000.0), 1):
-            add_cyl_mm(f"1F_FrontGarden_BambooN_Stem_{_bi}", _bx, 1390.0, 22.0, z_1f + 0.36, z_1f + 1.95, gmat, col_1f, segs=10)
-            _add_yard_mound(f"1F_FrontGarden_ShrubN_{_bi}",   _bx, 1385.0, z_1f + 0.56, 260.0, 165.0, 0.22, leaf_l if _bi % 2 else leaf_d)
-            _add_yard_mound(f"1F_FrontGarden_FlowerN_{_bi}",  _bx + 420.0, 1360.0, z_1f + 0.48, 115.0, 105.0, 0.10, flw_pk if _bi % 2 else flw_wh)
-        for _bi, _by in enumerate((-4550.0, -3750.0, -2950.0, -2050.0, -1350.0, -380.0), 1):
-            _add_yard_mound(f"1F_FrontGarden_ShrubES_{_bi}",  11860.0, _by, z_1f + 0.60, 220.0, 260.0, 0.24, leaf_d if _bi % 2 else leaf_l)
-            _add_yard_mound(f"1F_FrontGarden_FlowerES_{_bi}", 11800.0, _by + 280.0, z_1f + 0.50, 120.0, 120.0, 0.11, flw_wh if _bi % 2 else flw_pk)
-        for _bi, _bx in enumerate((9120.0, 9780.0, 10440.0, 11100.0), 1):
-            add_cyl_mm(f"1F_FrontGarden_BambooS_Stem_{_bi}", _bx, -5320.0, 24.0, z_1f + 0.36, z_1f + 1.95, gmat, col_1f, segs=10)
-            _add_yard_mound(f"1F_FrontGarden_ShrubS_{_bi}",   _bx, -5320.0, z_1f + 0.58, 280.0, 220.0, 0.25, leaf_l if _bi % 2 else leaf_d)
-            _add_yard_mound(f"1F_FrontGarden_FlowerS_{_bi}",  _bx + 320.0, -5260.0, z_1f + 0.49, 130.0, 125.0, 0.12, flw_pk if _bi % 2 else flw_wh)
-        for _li, (_lx, _ly) in enumerate(((10340.0, -840.0), (10340.0, 260.0), (11850.0, -80.0), (11850.0, 1060.0)), 1):
+        # Shrubs & Flowers lining ES & East-of-pond South Planters
+        for _bi, _by in enumerate((-4550.0, -3750.0, -2950.0, -2050.0, -1250.0), 1):
+            _add_yard_mound(f"1F_FrontGarden_ShrubES_{_bi}",  10220.0, _by, z_1f + 0.58, 150.0, 240.0, 0.22, leaf_d if _bi % 2 else leaf_l)
+            _add_yard_mound(f"1F_FrontGarden_FlowerES_{_bi}", 10180.0, _by + 240.0, z_1f + 0.49, 105.0, 110.0, 0.10, flw_wh if _bi % 2 else flw_pk)
+        for _bi, _bx in enumerate((9020.0, 9480.0, 9940.0), 1):
+            add_cyl_mm(f"1F_FrontGarden_BambooS_Stem_{_bi}", _bx, -5320.0, 22.0, z_1f + 0.36, z_1f + 1.90, gmat, col_1f, segs=10)
+            _add_yard_mound(f"1F_FrontGarden_ShrubS_{_bi}",   _bx, -5320.0, z_1f + 0.56, 240.0, 200.0, 0.23, leaf_l if _bi % 2 else leaf_d)
+            _add_yard_mound(f"1F_FrontGarden_FlowerS_{_bi}",  _bx + 210.0, -5260.0, z_1f + 0.48, 120.0, 115.0, 0.11, flw_pk if _bi % 2 else flw_wh)
+        for _li, (_lx, _ly) in enumerate(((9660.0, -960.0), (9660.0, +420.0), (10160.0, -540.0), (10160.0, +820.0)), 1):
             add_box_mm(f"1F_FrontGarden_BollardPost_{_li}", _lx - 45.0, _lx + 45.0, _ly - 45.0, _ly + 45.0, z_1f - 0.02, z_1f + 0.54, fmat, col_1f)
             add_box_mm(f"1F_FrontGarden_BollardGlow_{_li}", _lx - 38.0, _lx + 38.0, _ly - 38.0, _ly + 38.0, z_1f + 0.54, z_1f + 0.62, lmat, col_1f)
 
-        # Exterior Roadside Planters OUTSIDE East Perimeter Wall (约100cm纵深: X=+12300..+13300) for trees, flowers & grass
-        add_box_mm("1F_FrontGarden_OuterEntryPad", 12300.0, 13300.0, -215.0, 1185.0, z_1f - 0.15, z_1f - 0.012, smat, col_1f)
-        for _op_id, _oy0, _oy1 in (("S", -5760.0, -215.0), ("N", 1185.0, 1765.0)):
-            add_box_mm(f"1F_FrontGarden_OuterPlanter_{_op_id}",     12300.0, 13300.0, _oy0,        _oy1,        z_1f - 0.15, z_1f + 0.34, wmat, col_1f)
-            add_box_mm(f"1F_FrontGarden_OuterPlanterCap_{_op_id}",  12300.0, 13320.0, _oy0 - 10.0, _oy1 + 10.0, z_1f + 0.34, z_1f + 0.37, smat, col_1f)
-            add_box_mm(f"1F_FrontGarden_OuterPlanterSoil_{_op_id}", 12350.0, 13250.0, _oy0 + 50.0, _oy1 - 50.0, z_1f + 0.35, z_1f + 0.39, soil_mat, col_1f)
-        _add_yard_tree("1F_FrontGarden_OuterTree_S1", 12800.0, -5050.0, 2.75, leaf_l)
-        _add_yard_tree("1F_FrontGarden_OuterTree_S2", 12800.0, -2850.0, 2.95, leaf_d)
-        _add_yard_tree("1F_FrontGarden_OuterTree_S3", 12800.0,  -920.0, 2.60, leaf_red)
-        _add_yard_tree("1F_FrontGarden_OuterTree_N1", 12800.0,  1475.0, 2.45, leaf_l)
-        for _oi, _oy in enumerate((-5450.0, -4450.0, -3650.0, -2200.0, -1500.0, -520.0), 1):
-            _add_yard_mound(f"1F_FrontGarden_OuterShrubS_{_oi}",  12800.0, _oy, z_1f + 0.60, 320.0, 290.0, 0.26, leaf_l if _oi % 2 else leaf_d)
-            _add_yard_mound(f"1F_FrontGarden_OuterFlowerS_{_oi}", 12960.0, _oy + 240.0, z_1f + 0.50, 150.0, 145.0, 0.13, flw_pk if _oi % 2 else flw_wh)
-        _add_yard_mound("1F_FrontGarden_OuterShrubN_1",  12620.0, 1475.0, z_1f + 0.58, 220.0, 210.0, 0.22, leaf_d)
-        _add_yard_mound("1F_FrontGarden_OuterFlowerN_1", 13040.0, 1475.0, z_1f + 0.50, 140.0, 140.0, 0.12, flw_pk)
+        # Exterior Roadside Planters OUTSIDE East Perimeter Wall (约100cm纵深: X=+10542..+11542) for trees, flowers & grass
+        add_box_mm("1F_FrontGarden_OuterEntryPad", 10542.0, 11542.0, -615.0, 785.0, z_1f - 0.15, z_1f - 0.012, smat, col_1f)
+        for _op_id, _oy0, _oy1 in (("S", -5760.0, -615.0), ("N", 785.0, 1765.0)):
+            add_box_mm(f"1F_FrontGarden_OuterPlanter_{_op_id}",     10542.0, 11542.0, _oy0,        _oy1,        z_1f - 0.15, z_1f + 0.34, wmat, col_1f)
+            add_box_mm(f"1F_FrontGarden_OuterPlanterCap_{_op_id}",  10542.0, 11562.0, _oy0 - 10.0, _oy1 + 10.0, z_1f + 0.34, z_1f + 0.37, smat, col_1f)
+            add_box_mm(f"1F_FrontGarden_OuterPlanterSoil_{_op_id}", 10592.0, 11492.0, _oy0 + 50.0, _oy1 - 50.0, z_1f + 0.35, z_1f + 0.39, soil_mat, col_1f)
+        _add_yard_tree("1F_FrontGarden_OuterTree_S1", 11042.0, -5050.0, 2.75, leaf_l)
+        _add_yard_tree("1F_FrontGarden_OuterTree_S2", 11042.0, -2950.0, 2.95, leaf_d)
+        _add_yard_tree("1F_FrontGarden_OuterTree_S3", 11042.0, -1120.0, 2.60, leaf_red)
+        _add_yard_tree("1F_FrontGarden_OuterTree_N1", 11042.0,  1275.0, 2.45, leaf_l)
+        for _oi, _oy in enumerate((-5450.0, -4450.0, -3650.0, -2250.0, -1620.0, -820.0), 1):
+            _add_yard_mound(f"1F_FrontGarden_OuterShrubS_{_oi}",  11042.0, _oy, z_1f + 0.60, 320.0, 290.0, 0.26, leaf_l if _oi % 2 else leaf_d)
+            _add_yard_mound(f"1F_FrontGarden_OuterFlowerS_{_oi}", 11202.0, _oy + 210.0, z_1f + 0.50, 150.0, 145.0, 0.13, flw_pk if _oi % 2 else flw_wh)
+        for _oi, _oy in enumerate((980.0, 1540.0), 1):
+            _add_yard_mound(f"1F_FrontGarden_OuterShrubN_{_oi}",  10862.0, _oy, z_1f + 0.58, 220.0, 190.0, 0.22, leaf_d if _oi % 2 else leaf_l)
+            _add_yard_mound(f"1F_FrontGarden_OuterFlowerN_{_oi}", 11262.0, _oy - 60.0, z_1f + 0.50, 140.0, 140.0, 0.12, flw_pk)
     _build_1f_courtyard()
 
     # 1F -> 2F Spiral Stair: Steps 16..30 spiral COUNTER-CLOCKWISE from +25° (ENE on 1F) to +265° (S landing on 2F)
