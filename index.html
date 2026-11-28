@@ -1010,6 +1010,7 @@
       '2F_WIC_DispS_Bulkhead',
       '2F_WIC_DispN_Bulkhead',
       '2F_ChildTatami_Soffit',
+      '2F_ChildWall_Soffit',
       '2F_ChildWIC_Soffit_',
       '2F_SW_Laundry_Soffit',
       '2F_SW_Utility_Soffit',
@@ -1082,7 +1083,7 @@
     let shadowsEnabled = !IS_MOBILE;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let autoRotateEnabled = !prefersReducedMotion;
-    const VIEWER_BUILD = '20261127_opt21';
+    const VIEWER_BUILD = '20261127_opt22';
     let rafId = 0;
     let inAnimate = false;
     let dirtyFrames = 14;
@@ -1490,7 +1491,7 @@
       ['2F', `${MODELS_BASE}/2F.glb`],
     ];
     const loader = new GLTFLoader();
-    const ASSET_VERSION = '20261127_opt21';
+    const ASSET_VERSION = '20261127_opt22';
     const MAX_TEX_ANISO = IS_MOBILE ? 2 : 4;
     let loadedCount = 0;
     const FLOOR_BYTES_EST = { '1F': 7007312, 'B1': 905056, 'B2': 2607684, '2F': 5157676 };

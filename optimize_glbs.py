@@ -50,6 +50,7 @@ CEILING_PREFIXES = (
     "2F_WIC_DispS_Bulkhead",
     "2F_WIC_DispN_Bulkhead",
     "2F_ChildTatami_Soffit",
+    "2F_ChildWall_Soffit",
     "2F_ChildWIC_Soffit_",
     "2F_SW_Laundry_Soffit",
     "2F_SW_Utility_Soffit",

@@ -6682,6 +6682,86 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         bx, by, bz = b['pos']
         add_flying_bird(f"1F_Living_Bird_{b_idx+1}", bx, by, z_1f + bz, b['yaw'], b['pitch'], b['roll'], span_mm=b['span'], flap_mode=b['mode'], col=col_1f)
 
+    # 1F Front-Door Exterior Private Courtyard (Building 56 Unit 103, calibrated to Zone 4 Master CAD 置信四区地下室桩图)
+    # Front yard outside 1F_Main_Entry_Door: X=-12600..-7155 (5.45m), Y=-8200..+1765 (9.97m); S side garden wraps Kitchen/Toilet/Living
+    def _build_1f_courtyard():
+        gmat, smat, wmat = MATS["Plant_Bamboo_Green"], MATS["Travertine_Stone"], MATS["Wall_Panel_Cream"]
+        fmat, dmat, lmat = MATS["Stair_Bronze_Iron"], MATS["Cabinet_Walnut"], MATS["Warm_LED_Glow"]
+        cmat = MATS["Marble_Fishbelly"]
+        # Non-overlapping lawn beds & exterior terrace slabs
+        add_box_mm("1F_Courtyard_Lawn_FN", -12420.0, -7155.0, -1100.0, 1585.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_Courtyard_Lawn_FPathS", -9000.0, -7155.0, -4600.0, -3200.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_Courtyard_Lawn_FM", -12420.0, -9000.0, -4600.0, -2900.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_Courtyard_Lawn_SideW", -7155.0, -1488.0, -8020.0, -5070.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_Courtyard_Lawn_SideM", -1488.0, 743.0, -8020.0, -5520.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_Courtyard_Lawn_SideE", 743.0, 6440.0, -8020.0, -5760.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_Courtyard_Lawn_SECorner", -12420.0, -7155.0, -8020.0, -7600.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_Courtyard_Lawn_SWGap", -9400.0, -7155.0, -7600.0, -4600.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_Courtyard_Lawn_WGap", -12420.0, -12100.0, -7600.0, -4600.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        # Raised stone entry porch outside 1F_Main_Entry_Door (-9000..-7155, -3200..-1100) + entry path to West gate
+        add_box_mm("1F_Courtyard_EntryPorch", -9000.0, -7155.0, -3200.0, -1100.0, z_1f - 0.15, z_1f - 0.012, cmat, col_1f)
+        add_box_mm("1F_Courtyard_PathBase", -12510.0, -9000.0, -2900.0, -1300.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
+        for _pi, _px in enumerate((-12350.0, -11650.0, -10950.0, -10250.0, -9550.0), 1):
+            add_box_mm(f"1F_Courtyard_SteppingStone_{_pi}", _px, _px + 560.0, -2750.0, -1450.0, z_1f - 0.028, z_1f - 0.008, cmat, col_1f, r_corner=16.0)
+        # Outdoor wooden lounge deck terrace (SW courtyard: -12100..-9400, -7600..-4600) + table & 2 slatted benches
+        add_box_mm("1F_Courtyard_WoodDeck", -12100.0, -9400.0, -7600.0, -4600.0, z_1f - 0.15, z_1f - 0.008, dmat, col_1f)
+        add_box_mm("1F_Courtyard_GardenTableTop", -11250.0, -10250.0, -6500.0, -5700.0, z_1f + 0.68, z_1f + 0.72, smat, col_1f, r_corner=24.0)
+        add_box_mm("1F_Courtyard_GardenTableLeg1", -11120.0, -11050.0, -6400.0, -5800.0, z_1f - 0.008, z_1f + 0.68, fmat, col_1f)
+        add_box_mm("1F_Courtyard_GardenTableLeg2", -10450.0, -10380.0, -6400.0, -5800.0, z_1f - 0.008, z_1f + 0.68, fmat, col_1f)
+        add_box_mm("1F_Courtyard_Bench_W", -11800.0, -11400.0, -6500.0, -5700.0, z_1f + 0.38, z_1f + 0.43, dmat, col_1f, r_corner=12.0)
+        add_box_mm("1F_Courtyard_Bench_W_Leg", -11720.0, -11480.0, -6420.0, -5780.0, z_1f - 0.008, z_1f + 0.38, fmat, col_1f)
+        add_box_mm("1F_Courtyard_Bench_E", -10100.0, -9700.0, -6500.0, -5700.0, z_1f + 0.38, z_1f + 0.43, dmat, col_1f, r_corner=12.0)
+        add_box_mm("1F_Courtyard_Bench_E_Leg", -10020.0, -9780.0, -6420.0, -5780.0, z_1f - 0.008, z_1f + 0.38, fmat, col_1f)
+        # Perimeter dwarf walls (180mm thick) + coping + 5 horizontal bronze privacy louver slats (0.80..1.42m)
+        _cwall_segs = [
+            ("WN", -12600.0, -12420.0, -1300.0, 1765.0),
+            ("WS", -12600.0, -12420.0, -8200.0, -2900.0),
+            ("N",  -12420.0, -5794.0,   1585.0,  1765.0),
+            ("S",  -12420.0,  6620.0,  -8200.0, -8020.0),
+            ("E",    6440.0,  6620.0,  -8020.0, -5760.0),
+        ]
+        for _cw_id, _wx0, _wx1, _wy0, _wy1 in _cwall_segs:
+            add_box_mm(f"1F_Courtyard_Wall_{_cw_id}", _wx0, _wx1, _wy0, _wy1, z_1f - 0.15, z_1f + 0.68, wmat, col_1f)
+            add_box_mm(f"1F_Courtyard_WallCap_{_cw_id}", _wx0 - 15.0, _wx1 + 15.0, _wy0 - 15.0, _wy1 + 15.0, z_1f + 0.68, z_1f + 0.72, smat, col_1f)
+            # Horizontal bronze fence rails above masonry coping
+            for _ri, _rz in enumerate((0.84, 0.98, 1.12, 1.26, 1.40), 1):
+                if abs(_wx1 - _wx0) < 250.0:
+                    _rx0, _rx1, _ry0, _ry1 = _wx0 + 70.0, _wx1 - 70.0, _wy0, _wy1
+                else:
+                    _rx0, _rx1, _ry0, _ry1 = _wx0, _wx1, _wy0 + 70.0, _wy1 - 70.0
+                add_box_mm(f"1F_Courtyard_FenceRail_{_cw_id}_{_ri}", _rx0, _rx1, _ry0, _ry1, z_1f + _rz, z_1f + _rz + 0.026, fmat, col_1f)
+            # Slim fence posts every ~2m
+            if abs(_wx1 - _wx0) < 250.0:
+                _n_p = max(2, int((_wy1 - _wy0) / 2000.0) + 1)
+                for _pi in range(_n_p):
+                    _py = _wy0 + 30.0 + (_wy1 - _wy0 - 60.0) * _pi / max(1, _n_p - 1)
+                    add_box_mm(f"1F_Courtyard_Post_{_cw_id}_{_pi+1}", _wx0 + 60.0, _wx1 - 60.0, _py - 25.0, _py + 25.0, z_1f + 0.72, z_1f + 1.44, fmat, col_1f)
+            else:
+                _n_p = max(2, int((_wx1 - _wx0) / 2000.0) + 1)
+                for _pi in range(_n_p):
+                    _px = _wx0 + 30.0 + (_wx1 - _wx0 - 60.0) * _pi / max(1, _n_p - 1)
+                    add_box_mm(f"1F_Courtyard_Post_{_cw_id}_{_pi+1}", _px - 25.0, _px + 25.0, _wy0 + 60.0, _wy1 - 60.0, z_1f + 0.72, z_1f + 1.44, fmat, col_1f)
+        # Double courtyard entry gate at X=-12600, Y=-2900..-1300
+        add_box_mm("1F_Courtyard_GatePillar_S", -12660.0, -12360.0, -3050.0, -2750.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
+        add_box_mm("1F_Courtyard_GatePillar_N", -12660.0, -12360.0, -1450.0, -1150.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
+        add_box_mm("1F_Courtyard_Gate_Door_S", -12530.0, -12490.0, -2745.0, -2105.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
+        add_box_mm("1F_Courtyard_Gate_Door_N", -12530.0, -12490.0, -2095.0, -1455.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
+        add_box_mm("1F_Courtyard_Gate_Handle_S", -12550.0, -12470.0, -2160.0, -2130.0, z_1f + 0.92, z_1f + 1.12, MATS["Gold_Brass"], col_1f)
+        add_box_mm("1F_Courtyard_Gate_Handle_N", -12550.0, -12470.0, -2070.0, -2040.0, z_1f + 0.92, z_1f + 1.12, MATS["Gold_Brass"], col_1f)
+        # Perimeter planters, stylized bamboo greenery & 4 warm LED garden bollards
+        add_box_mm("1F_Courtyard_Planter_N", -12400.0, -7200.0, 950.0, 1570.0, z_1f - 0.03, z_1f + 0.36, wmat, col_1f)
+        add_box_mm("1F_Courtyard_Planter_S", -12400.0, 4800.0, -8005.0, -7450.0, z_1f - 0.03, z_1f + 0.36, wmat, col_1f)
+        for _bi, _bx in enumerate((-11600.0, -10400.0, -9200.0, -8000.0), 1):
+            add_cyl_mm(f"1F_Courtyard_BambooN_Stem_{_bi}", _bx, 1260.0, 38.0, z_1f + 0.36, z_1f + 2.10, gmat, col_1f, segs=12)
+            add_box_mm(f"1F_Courtyard_BambooN_Canopy_{_bi}", _bx - 260.0, _bx + 260.0, 1020.0, 1500.0, z_1f + 1.45, z_1f + 2.35, gmat, col_1f, r_corner=80.0)
+        for _bi, _bx in enumerate((-11400.0, -8600.0, -4800.0, -1200.0, 2400.0), 1):
+            add_cyl_mm(f"1F_Courtyard_BambooS_Stem_{_bi}", _bx, -7720.0, 38.0, z_1f + 0.36, z_1f + 2.05, gmat, col_1f, segs=12)
+            add_box_mm(f"1F_Courtyard_BambooS_Canopy_{_bi}", _bx - 260.0, _bx + 260.0, -7960.0, -7480.0, z_1f + 1.40, z_1f + 2.25, gmat, col_1f, r_corner=80.0)
+        for _li, (_lx, _ly) in enumerate(((-12150.0, -2950.0), (-12150.0, -1250.0), (-9200.0, -3050.0), (-9200.0, -1150.0)), 1):
+            add_box_mm(f"1F_Courtyard_BollardPost_{_li}", _lx - 45.0, _lx + 45.0, _ly - 45.0, _ly + 45.0, z_1f - 0.02, z_1f + 0.54, fmat, col_1f)
+            add_box_mm(f"1F_Courtyard_BollardGlow_{_li}", _lx - 38.0, _lx + 38.0, _ly - 38.0, _ly + 38.0, z_1f + 0.54, z_1f + 0.62, lmat, col_1f)
+    _build_1f_courtyard()
+
     # 1F -> 2F Spiral Stair: Steps 16..30 spiral COUNTER-CLOCKWISE from +25° (ENE on 1F) to +265° (S landing on 2F)
     build_spiral_stair_flight("1F_To_2F_Spiral", 0.0, 0.0, 470.0, 1430.0, 25.0, 265.0, z_1f, 3.30, 15, col_1f)
     # 1F CAD linework removed per user requirement: 没有黑线。全部都是浅青色水晶石
@@ -6710,13 +6790,13 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     add_box_mm("2F_Slab_Crossing_S", -1550, 1640, -2680, -1620, z_2f - 0.15, z_2f, MATS["Slab_Wood"], col_2f)
     add_box_mm("2F_Slab_Crossing_E", -125, 648, -1618, -480, z_2f - 0.15, z_2f, MATS["Slab_Wood"], col_2f)
     add_box_mm("2F_Stair_Glass_Rail", -1480, -400, -1650, -1600, zf_2f, z_2f + 1.05, MATS["Window_Glass"], col_2f)
-    add_box_mm("2F_Stair_Glass_Rail_E", 0, 640, -500, -460, zf_2f, z_2f + 1.05, MATS["Window_Glass"], col_2f)
+    add_box_mm("2F_Stair_Glass_Rail_E", 450, 648, -500, -460, zf_2f, z_2f + 1.05, MATS["Window_Glass"], col_2f)
 
     c2f_cutouts = [
-        (-9010, -8910, -1500,   760), # Washing W win
-        (-9010, -6920, -1530, -1440), # Washing S win
-        (-6960, -6870, -4570, -3100), # Balcony W win
-        (-6940, -5450, -4600, -4510), # Balcony S win
+        (-9090, -8890, -1580,   940), # NW Tatami W full-height floor-to-ceiling glass
+        (-9090, -6850, -1590, -1395), # NW Tatami S full-height floor-to-ceiling glass
+        (-7020, -6820, -4660, -2300), # SW Laundry W full-height glass + balcony door
+        (-7010, -5340, -4660, -4465), # SW Laundry S full-height glass
         (-3615, -3360, -5280, -4630), # MasterBath win
         ( 6495,  6755, -5280, -2140), # MasterBed win (aligned flush to 1F East wall 6502..6742)
         ( 6495,  6755, -1340,  1130), # ParentRoom win (aligned flush to 1F East wall 6502..6742)
@@ -6730,17 +6810,141 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     ]
     build_manifold_walls(msp, "2F_Plan", p_2f["xr"], p_2f["yr"], *p_2f["orig"], z_2f + 0.002, h_2f, c2f_cutouts, col_2f)
 
-    build_window("2F_Win_Washing_W",  -8999, -8920, -1500,   760, z_2f + 0.002, h_2f, 0.19, 2.38, col_2f)
-    build_window("2F_Win_Washing_S",  -8999, -6929, -1520, -1450, z_2f + 0.002, h_2f, 0.19, 2.38, col_2f)
-    build_window("2F_Win_Balcony_W",  -6949, -6880, -4570, -3100, z_2f + 0.002, h_2f, 0.19, 2.38, col_2f)
-    build_window("2F_Win_Balcony_S",  -6929, -5459, -4590, -4520, z_2f + 0.002, h_2f, 0.19, 2.38, col_2f)
+    # Full floor-to-ceiling exterior curtain glass (h1_sill=0.00, h2_win=2.500) for NW Tatami & SW Laundry
+    build_window("2F_Win_Washing_W",  -9000, -8920, -1480,   935, z_2f + 0.002, h_2f, 0.00, 2.500, col_2f)
+    build_window("2F_Win_Washing_S",  -8960, -6870, -1525, -1445, z_2f + 0.002, h_2f, 0.00, 2.500, col_2f)
+    add_box_mm("2F_Win_Washing_CornerPost", -9005, -8920, -1530, -1445, z_2f + 0.002, z_2f + 2.500, MATS["Window_Frame"], col_2f)
+    build_window("2F_Win_Balcony_W",  -6955, -6880, -4550, -3450, z_2f + 0.002, h_2f, 0.00, 2.500, col_2f)
+    build_window("2F_Win_Balcony_WN", -6955, -6880, -2620, -2305, z_2f + 0.002, h_2f, 0.00, 2.500, col_2f)
+    build_window("2F_Win_Balcony_S",  -6920, -5345, -4595, -4515, z_2f + 0.002, h_2f, 0.00, 2.500, col_2f)
+    add_box_mm("2F_Win_Balcony_CornerPost", -6960, -6880, -4600, -4515, z_2f + 0.002, z_2f + 2.500, MATS["Window_Frame"], col_2f)
     build_window("2F_Win_MasterBath", -3609, -3369, -5280, -4630, z_2f + 0.002, h_2f, 0.86, 1.75, col_2f)
     build_window("2F_Win_MasterBed",   6502,  6742, -5280, -2140, z_2f + 0.002, h_2f, 0.30, 2.05, col_2f)
     build_window("2F_Win_ParentRoom",  6502,  6742, -1340,  1130, z_2f + 0.002, h_2f, 0.20, 2.20, col_2f)
 
+    # Operable out-swinging glass door (2F_Door_SW_Balcony, X=-6955..-6880, Y=-3450..-2620, swung 32 deg out toward -X steel balcony)
+    def _build_sw_balcony_door():
+        dx0, dx1, dy0, dy1 = -6955.0, -6880.0, -3450.0, -2620.0
+        zd0, zd1 = z_2f + 0.002, z_2f + 2.500
+        fmat, gmat, hmat = MATS["Window_Frame"], MATS["Window_Glass"], MATS["B2_Chrome_Silver"]
+        add_box_mm("2F_Door_SW_Balcony_Header", dx0, dx1, dy0, dy1, zd1, z_2f + h_2f, MATS["Wall_Struct"], col_2f)
+        add_box_mm("2F_Door_SW_Balcony_TopFrame", dx0, dx1, dy0, dy1, zd1 - 0.042, zd1, fmat, col_2f)
+        add_box_mm("2F_Door_SW_Balcony_Thresh", dx0, dx1, dy0, dy1, zd0, zd0 + 0.022, fmat, col_2f)
+        add_box_mm("2F_Door_SW_Balcony_JambS", dx0, dx1, dy0, dy0 + 38.0, zd0 + 0.022, zd1 - 0.042, fmat, col_2f)
+        add_box_mm("2F_Door_SW_Balcony_JambN", dx0, dx1, dy1 - 38.0, dy1, zd0 + 0.022, zd1 - 0.042, fmat, col_2f)
+        hx, hy = -6940.0, dy0 + 38.0
+        ang = math.radians(32.0)  # +Y local -> rotated toward -X (out onto steel balcony) & +Y
+        ca, sa = math.cos(ang), math.sin(ang)
+        def _rot_xy(lx, ly):
+            return (hx - lx * ca - ly * sa, hy - lx * sa + ly * ca)
+        def _add_rot_box(bname, lx0, lx1, ly0, ly1, zb0, zb1, bmat):
+            pts = [_rot_xy(lx0, ly0), _rot_xy(lx1, ly0), _rot_xy(lx1, ly1), _rot_xy(lx0, ly1)]
+            return add_prism(bname, pts, zb0, zb1, bmat, col_2f)
+        lw = (dy1 - 38.0) - (dy0 + 38.0) - 8.0
+        lz0, lz1 = zd0 + 0.028, zd1 - 0.048
+        st = 52.0
+        _add_rot_box("2F_Door_SW_Balcony_Leaf_StileS", -20.0, 20.0, 0.0, st, lz0, lz1, fmat)
+        _add_rot_box("2F_Door_SW_Balcony_Leaf_StileN", -20.0, 20.0, lw - st, lw, lz0, lz1, fmat)
+        _add_rot_box("2F_Door_SW_Balcony_Leaf_RailB", -20.0, 20.0, st, lw - st, lz0, lz0 + 0.075, fmat)
+        _add_rot_box("2F_Door_SW_Balcony_Leaf_RailT", -20.0, 20.0, st, lw - st, lz1 - 0.055, lz1, fmat)
+        _add_rot_box("2F_Door_SW_Balcony_Leaf_Glass", -6.0, 6.0, st, lw - st, lz0 + 0.075, lz1 - 0.055, gmat)
+        _add_rot_box("2F_Door_SW_Balcony_Leaf_HandleIn", -38.0, -20.0, lw - 80.0, lw - 24.0, z_2f + 0.96, z_2f + 1.18, hmat)
+        _add_rot_box("2F_Door_SW_Balcony_Leaf_HandleOut", 20.0, 38.0, lw - 80.0, lw - 24.0, z_2f + 0.96, z_2f + 1.18, hmat)
+        for _hi, _hz in enumerate((zd0 + 0.35, zd0 + 1.25, zd1 - 0.35), 1):
+            add_cyl_mm(f"2F_Door_SW_Balcony_Hinge_{_hi}", hx, hy, 9.0, _hz - 0.045, _hz + 0.045, hmat, col_2f, segs=12)
+    _build_sw_balcony_door()
+
+    # Exterior Steel-Frame Drying Balcony (2F_SteelBalcony_*, X=-8980..-6990, Y=-4580..-2320, max Z=z_2f+2.480)
+    def _build_sw_steel_balcony():
+        smat, dmat, gmat = MATS["Stair_Bronze_Iron"], MATS["Cabinet_Walnut"], MATS["Window_Glass"]
+        rmat = MATS["B2_Chrome_Silver"]
+        x0, x1, y0, y1 = -8980.0, -6990.0, -4580.0, -2320.0
+        # Steel deck perimeter girders + transverse joists + cantilevered wall-anchor gussets
+        add_box_mm("2F_SteelBalcony_GirderW", x0, x0 + 90.0, y0, y1, z_2f - 0.140, z_2f - 0.022, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_GirderE", x1 - 90.0, x1, y0, y1, z_2f - 0.140, z_2f - 0.022, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_GirderS", x0 + 90.0, x1 - 90.0, y0, y0 + 90.0, z_2f - 0.140, z_2f - 0.022, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_GirderN", x0 + 90.0, x1 - 90.0, y1 - 90.0, y1, z_2f - 0.140, z_2f - 0.022, smat, col_2f)
+        for _ji, _jy in enumerate((-4120.0, -3670.0, -3220.0, -2770.0), 1):
+            add_box_mm(f"2F_SteelBalcony_Joist_{_ji}", x0 + 90.0, x1 - 90.0, _jy - 35.0, _jy + 35.0, z_2f - 0.125, z_2f - 0.022, smat, col_2f)
+        for _bi, _by in enumerate((-4480.0, -3450.0, -2420.0), 1):
+            add_box_mm(f"2F_SteelBalcony_BracketTop_{_bi}", -7980.0, x1, _by - 35.0, _by + 35.0, z_2f - 0.240, z_2f - 0.140, smat, col_2f)
+            add_box_mm(f"2F_SteelBalcony_BracketWall_{_bi}", -7100.0, x1, _by - 35.0, _by + 35.0, z_2f - 0.560, z_2f - 0.240, smat, col_2f)
+            add_box_mm(f"2F_SteelBalcony_BracketDiag_{_bi}", -7780.0, -7100.0, _by - 28.0, _by + 28.0, z_2f - 0.420, z_2f - 0.240, smat, col_2f)
+        # Slatted hardwood outdoor decking (12 slats along Y)
+        n_slats = 12
+        pitch_x = (x1 - 20.0 - (x0 + 40.0)) / n_slats
+        for _si in range(n_slats):
+            sx0 = x0 + 40.0 + _si * pitch_x + 8.0
+            sx1 = x0 + 40.0 + (_si + 1) * pitch_x - 8.0
+            add_box_mm(f"2F_SteelBalcony_Deck_{_si+1}", sx0, sx1, y0 + 40.0, y1 - 40.0, z_2f - 0.022, z_2f - 0.002, dmat, col_2f)
+        # 4 slim corner steel columns + pergola top beams (z<=2.480)
+        for _ci, (_cx, _cy) in enumerate(((x0 + 35.0, y0 + 35.0), (x0 + 35.0, y1 - 35.0), (x1 - 35.0, y0 + 35.0), (x1 - 35.0, y1 - 35.0)), 1):
+            add_box_mm(f"2F_SteelBalcony_Col_{_ci}", _cx - 35.0, _cx + 35.0, _cy - 35.0, _cy + 35.0, z_2f - 0.140, z_2f + 2.480, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_TopBeamW", x0, x0 + 70.0, y0, y1, z_2f + 2.415, z_2f + 2.480, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_TopBeamE", x1 - 70.0, x1, y0, y1, z_2f + 2.415, z_2f + 2.480, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_TopBeamS", x0 + 70.0, x1 - 70.0, y0, y0 + 70.0, z_2f + 2.415, z_2f + 2.480, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_TopBeamN", x0 + 70.0, x1 - 70.0, y1 - 70.0, y1, z_2f + 2.415, z_2f + 2.480, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_TopCrossS", x0 + 70.0, x1 - 70.0, -4280.0, -4220.0, z_2f + 2.415, z_2f + 2.470, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_TopCrossN", x0 + 70.0, x1 - 70.0, -2680.0, -2620.0, z_2f + 2.415, z_2f + 2.470, smat, col_2f)
+        # Clear glass + slim steel guardrail on W/S/N edges (Z=0.00..1.10m)
+        add_box_mm("2F_SteelBalcony_RailTopW", x0 + 15.0, x0 + 55.0, y0 + 70.0, y1 - 70.0, z_2f + 1.050, z_2f + 1.095, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_RailBotW", x0 + 20.0, x0 + 50.0, y0 + 70.0, y1 - 70.0, z_2f + 0.030, z_2f + 0.065, smat, col_2f)
+        add_box_mm("2F_SteelBalcony_RailGlassW", x0 + 29.0, x0 + 41.0, y0 + 70.0, y1 - 70.0, z_2f + 0.065, z_2f + 1.050, gmat, col_2f)
+        add_box_mm("2F_SteelBalcony_MidPostW", x0 + 18.0, x0 + 52.0, -3470.0, -3430.0, z_2f - 0.002, z_2f + 1.050, smat, col_2f)
+        for _rtag, _ry in (("S", y0 + 35.0), ("N", y1 - 35.0)):
+            add_box_mm(f"2F_SteelBalcony_RailTop{_rtag}", x0 + 70.0, x1 - 70.0, _ry - 20.0, _ry + 20.0, z_2f + 1.050, z_2f + 1.095, smat, col_2f)
+            add_box_mm(f"2F_SteelBalcony_RailBot{_rtag}", x0 + 70.0, x1 - 70.0, _ry - 15.0, _ry + 15.0, z_2f + 0.030, z_2f + 0.065, smat, col_2f)
+            add_box_mm(f"2F_SteelBalcony_RailGlass{_rtag}", x0 + 70.0, x1 - 70.0, _ry - 6.0, _ry + 6.0, z_2f + 0.065, z_2f + 1.050, gmat, col_2f)
+            add_box_mm(f"2F_SteelBalcony_MidPost{_rtag}", -8005.0, -7965.0, _ry - 18.0, _ry + 18.0, z_2f - 0.002, z_2f + 1.050, smat, col_2f)
+        # Dual suspended chrome drying rods + stylized hanging garments
+        for _ri, _rx in enumerate((-8320.0, -7680.0), 1):
+            add_box_mm(f"2F_SteelBalcony_DryDropS_{_ri}", _rx - 9.0, _rx + 9.0, -4260.0, -4242.0, z_2f + 2.165, z_2f + 2.415, rmat, col_2f)
+            add_box_mm(f"2F_SteelBalcony_DryDropN_{_ri}", _rx - 9.0, _rx + 9.0, -2660.0, -2642.0, z_2f + 2.165, z_2f + 2.415, rmat, col_2f)
+            add_box_mm(f"2F_SteelBalcony_DryRod_{_ri}", _rx - 14.0, _rx + 14.0, -4320.0, -2580.0, z_2f + 2.150, z_2f + 2.178, rmat, col_2f)
+        _dry_items = [
+            (-8320.0, -4020.0, -3520.0, 1.48, MATS["Bed_Linen"]),
+            (-8320.0, -3380.0, -2880.0, 1.56, MATS["Bed_Throw"]),
+            (-7680.0, -4060.0, -3600.0, 1.42, MATS["OLO_Cab_White"]),
+            (-7680.0, -3420.0, -2940.0, 1.62, MATS["Sofa_Sage_Velvet"]),
+        ]
+        for _li, (_lx, _ly0, _ly1, _lz0, _lmat) in enumerate(_dry_items, 1):
+            add_box_mm(f"2F_SteelBalcony_LaundryHang_{_li}", _lx - 32.0, _lx + 32.0, _ly0, _ly1, z_2f + _lz0, z_2f + 2.120, _lmat, col_2f, r_corner=10.0)
+    _build_sw_steel_balcony()
+
     build_door("2F_Door_ChildRoom",  -1629, -1489, -2523, -1723, z_2f + 0.002, h_2f, 2.20, col_2f)
     build_door("2F_Door_ChildBath",  -3260, -2550, -1650, -1560, z_2f + 0.002, h_2f, 2.20, col_2f, is_toilet_glass=True)
-    build_door("2F_Door_ChildWIC",   -4775, -4155, -2709, -2609, z_2f + 0.002, h_2f, 2.20, col_2f)
+    # Child Bedroom South Wall: Paneled Wall + Flush Invisible Door (隐形门) to Child WIC
+    add_box_mm("2F_Door_ChildWIC_Header", -4775, -4155, -2709, -2609, z_2f + 2.500, z_2f + h_2f, MATS["Wall_New"], col_2f)
+    add_box_mm("2F_ChildWall_Panel_L", -5916, -4778, -2608, -2592, zf_2f, z_2f + 2.500, MATS["Wall_Panel_Cream"], col_2f)
+    add_box_mm("2F_ChildWall_Panel_R", -4152, -3468, -2608, -2592, zf_2f, z_2f + 2.500, MATS["Wall_Panel_Cream"], col_2f)
+    for _gi, _gx in enumerate((-5348.0, -4777.0, -4153.0, -3810.0), 1):
+        add_box_mm(f"2F_ChildWall_Groove_{_gi}", _gx - 1.5, _gx + 1.5, -2608.0, -2590.0, zf_2f, z_2f + 2.500, MATS["Dark_Bronze_Recess"], col_2f)
+    add_box_mm("2F_ChildWall_Soffit", -5916, -3468, -2608, -2592, z_2f + 2.500, z_2f + h_2f, MATS["Wall_New"], col_2f)
+    add_box_mm("2F_Door_ChildWIC_RevealT", -4775, -4155, -2634, -2591, z_2f + 2.496, z_2f + 2.500, MATS["Dark_Bronze_Recess"], col_2f)
+    add_box_mm("2F_Door_ChildWIC_RevealL", -4775, -4772, -2634, -2591, zf_2f + 0.004, z_2f + 2.496, MATS["Dark_Bronze_Recess"], col_2f)
+    add_box_mm("2F_Door_ChildWIC_RevealR", -4158, -4155, -2634, -2591, zf_2f + 0.004, z_2f + 2.496, MATS["Dark_Bronze_Recess"], col_2f)
+    add_box_mm("2F_Door_ChildWIC_Leaf", -4772, -4158, -2632, -2592, zf_2f + 0.004, z_2f + 2.496, MATS["Wall_Panel_Cream"], col_2f)
+    add_box_mm("2F_Door_ChildWIC_FlushPullN", -4212, -4196, -2593, -2589, z_2f + 0.960, z_2f + 1.180, MATS["Gold_Brass"], col_2f)
+    add_box_mm("2F_Door_ChildWIC_FlushPullS", -4212, -4196, -2635, -2631, z_2f + 0.960, z_2f + 1.180, MATS["Gold_Brass"], col_2f)
+
+    # Interior Clear Glass Laundry Entry Door (2F_Door_SW_LaundryEntry, X=-6848..-5916, Y=-2708..-2608)
+    add_box_mm("2F_Door_SW_LaundryEntry_Header", -6848, -5916, -2708, -2608, z_2f + 2.500, z_2f + h_2f, MATS["Wall_New"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_TopFrame", -6848, -5916, -2700, -2616, z_2f + 2.465, z_2f + 2.500, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_JambL", -6848, -6818, -2700, -2616, z_2f + 0.005, z_2f + 2.465, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_JambR", -5946, -5916, -2700, -2616, z_2f + 0.005, z_2f + 2.465, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_Mullion", -6045, -6018, -2700, -2616, z_2f + 0.005, z_2f + 2.465, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_SidelightGlass", -6018, -5946, -2664, -2652, z_2f + 0.015, z_2f + 2.465, MATS["Window_Glass"], col_2f)
+    _le_x0, _le_x1, _le_y0, _le_y1 = -6816.0, -6047.0, -2676.0, -2640.0
+    _le_z0, _le_z1 = z_2f + 0.012, z_2f + 2.462
+    add_box_mm("2F_Door_SW_LaundryEntry_Leaf_StileL", _le_x0, _le_x0 + 24.0, _le_y0, _le_y1, _le_z0, _le_z1, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_Leaf_StileR", _le_x1 - 24.0, _le_x1, _le_y0, _le_y1, _le_z0, _le_z1, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_Leaf_BotRail", _le_x0 + 24.0, _le_x1 - 24.0, _le_y0, _le_y1, _le_z0, _le_z0 + 0.024, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_Leaf_TopRail", _le_x0 + 24.0, _le_x1 - 24.0, _le_y0, _le_y1, _le_z1 - 0.024, _le_z1, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_Leaf_Glass", _le_x0 + 24.0, _le_x1 - 24.0, -2664.0, -2652.0, _le_z0 + 0.024, _le_z1 - 0.024, MATS["Window_Glass"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_Leaf_PullN", _le_x1 - 76.0, _le_x1 - 60.0, _le_y1 + 12.0, _le_y1 + 26.0, z_2f + 0.900, z_2f + 1.320, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_Leaf_PullS", _le_x1 - 76.0, _le_x1 - 60.0, _le_y0 - 26.0, _le_y0 - 12.0, z_2f + 0.900, z_2f + 1.320, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_Leaf_BrassN", _le_x1 - 72.0, _le_x1 - 64.0, _le_y1 + 24.0, _le_y1 + 28.0, z_2f + 0.940, z_2f + 1.280, MATS["Gold_Brass"], col_2f)
+    add_box_mm("2F_Door_SW_LaundryEntry_Leaf_BrassS", _le_x1 - 72.0, _le_x1 - 64.0, _le_y0 - 28.0, _le_y0 - 24.0, z_2f + 0.940, z_2f + 1.280, MATS["Gold_Brass"], col_2f)
     build_door("2F_Door_MasterBed",   1574,  1714, -2700, -1895, z_2f + 0.002, h_2f, 2.20, col_2f)
     build_door("2F_Door_ParentRoom",  1361,  1501, -1410,  -580, z_2f + 0.002, h_2f, 2.20, col_2f)
     build_door("2F_Door_ParentBath",  1646,  2446,  -490,  -360, z_2f + 0.002, h_2f, 2.20, col_2f, is_toilet_glass=True)
@@ -6846,8 +7050,8 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     add_box_mm("2F_ChildTatami_HatchSeam_X", -7894.0, -7888.0, -1410.0, 355.0, z_2f + 0.436, z_2f + 0.442, MATS["Cabinet_Charcoal"], col_2f)
     for _hy_i, _hy in enumerate((-823.0, -232.0), 1):
         add_box_mm(f"2F_ChildTatami_HatchSeam_Y{_hy_i}", -8905.0, -6878.0, _hy - 3.0, _hy + 3.0, z_2f + 0.436, z_2f + 0.442, MATS["Cabinet_Charcoal"], col_2f)
-    add_box_mm("2F_ChildTatami_RimTrim_W", -8910.0, -8875.0, -1415.0, 360.0, z_2f + 0.440, z_2f + 0.550, MATS["Cabinet_Walnut"], col_2f)
-    add_box_mm("2F_ChildTatami_RimTrim_S", -8875.0, -6875.0, -1415.0, -1380.0, z_2f + 0.440, z_2f + 0.550, MATS["Cabinet_Walnut"], col_2f)
+    add_box_mm("2F_ChildTatami_RimTrim_W", -8910.0, -8875.0, -1415.0, 360.0, z_2f + 0.440, z_2f + 0.460, MATS["Cabinet_Walnut"], col_2f)
+    add_box_mm("2F_ChildTatami_RimTrim_S", -8875.0, -6875.0, -1415.0, -1380.0, z_2f + 0.440, z_2f + 0.460, MATS["Cabinet_Walnut"], col_2f)
     # Woven tatami mattress + 2 backrest cushions + low square tea table + 2 floor cushions
     add_box_mm("2F_ChildTatami_Mat", -8865.0, -6905.0, -1370.0, 340.0, z_2f + 0.440, z_2f + 0.485, MATS["Bed_Linen"], col_2f, r_corner=24.0)
     add_box_mm("2F_ChildTatami_BackCushion_L", -8560.0, -7940.0, 210.0, 345.0, z_2f + 0.485, z_2f + 0.785, MATS["Bed_Throw"], col_2f, r_corner=35.0)
@@ -6987,56 +7191,56 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     add_box_mm("2F_SW_Laundry_UpperPull_2", -6045.0, -6034.0, -2985.0, -2975.0, z_2f + 1.770, z_2f + 2.020, MATS["Stair_Bronze_Iron"], col_2f)
     add_box_mm("2F_SW_Laundry_Soffit", -6034.0, -5455.0, -3318.0, -2712.0, z_2f + 2.500, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
 
-    # Utility Sink + Base Cabinet + Wall Storage Cabinet (X=-5920..-5318, Y=-4380..-3320, flush to recessed East wall -5314)
-    add_box_mm("2F_SW_Utility_ToeKick", -5875.0, -5318.0, -4380.0, -3320.0, zf_2f, z_2f + 0.075, MATS["OLO_ToeKick_Black"], col_2f)
-    add_box_mm("2F_SW_Utility_BaseCab", -5898.0, -5318.0, -4380.0, -3320.0, z_2f + 0.075, z_2f + 0.850, MATS["Cabinet_Cream"], col_2f)
-    add_box_mm("2F_SW_Utility_BaseDoor_1", -5920.0, -5898.0, -4376.0, -3852.0, z_2f + 0.078, z_2f + 0.846, MATS["OLO_Cab_White"], col_2f)
-    add_box_mm("2F_SW_Utility_BaseDoor_2", -5920.0, -5898.0, -3848.0, -3324.0, z_2f + 0.078, z_2f + 0.846, MATS["OLO_Cab_White"], col_2f)
-    add_box_mm("2F_SW_Utility_BasePull_1", -5931.0, -5920.0, -3895.0, -3885.0, z_2f + 0.620, z_2f + 0.800, MATS["Stair_Bronze_Iron"], col_2f)
-    add_box_mm("2F_SW_Utility_BasePull_2", -5931.0, -5920.0, -3815.0, -3805.0, z_2f + 0.620, z_2f + 0.800, MATS["Stair_Bronze_Iron"], col_2f)
-    # Non-overlapping split Quartz countertop (Z=0.850..0.880) around true recessed basin cutout (X=-5830..-5430, Y=-3960..-3460)
-    add_box_mm("2F_SW_Utility_CounterTop_S", -5920.0, -5318.0, -4380.0, -3960.0, z_2f + 0.850, z_2f + 0.880, MATS["Sanitary_White"], col_2f)
-    add_box_mm("2F_SW_Utility_CounterTop_N", -5920.0, -5318.0, -3460.0, -3320.0, z_2f + 0.850, z_2f + 0.880, MATS["Sanitary_White"], col_2f)
-    add_box_mm("2F_SW_Utility_CounterTop_W", -5920.0, -5830.0, -3960.0, -3460.0, z_2f + 0.850, z_2f + 0.880, MATS["Sanitary_White"], col_2f)
-    add_box_mm("2F_SW_Utility_CounterTop_E", -5430.0, -5318.0, -3960.0, -3460.0, z_2f + 0.850, z_2f + 0.880, MATS["Sanitary_White"], col_2f)
-    # Recessed Ceramic Sink Bowl + Chrome Drain + Brass Laundry Faucet + Backsplash
-    add_box_mm("2F_SW_Utility_BasinBot", -5830.0, -5430.0, -3960.0, -3460.0, z_2f + 0.720, z_2f + 0.735, MATS["Sanitary_White"], col_2f)
-    add_box_mm("2F_SW_Utility_BasinWallW", -5830.0, -5815.0, -3960.0, -3460.0, z_2f + 0.735, z_2f + 0.878, MATS["Sanitary_White"], col_2f)
-    add_box_mm("2F_SW_Utility_BasinWallE", -5445.0, -5430.0, -3960.0, -3460.0, z_2f + 0.735, z_2f + 0.878, MATS["Sanitary_White"], col_2f)
-    add_box_mm("2F_SW_Utility_BasinWallS", -5815.0, -5445.0, -3960.0, -3945.0, z_2f + 0.735, z_2f + 0.878, MATS["Sanitary_White"], col_2f)
-    add_box_mm("2F_SW_Utility_BasinWallN", -5815.0, -5445.0, -3475.0, -3460.0, z_2f + 0.735, z_2f + 0.878, MATS["Sanitary_White"], col_2f)
-    add_cyl_mm("2F_SW_Utility_Drain", -5630.0, -3710.0, 26.0, z_2f + 0.734, z_2f + 0.742, MATS["B2_Chrome_Silver"], col_2f, segs=24)
-    add_cyl_mm("2F_SW_Utility_Faucet", -5385.0, -3710.0, 14.0, z_2f + 0.880, z_2f + 1.180, MATS["Gold_Brass"], col_2f, segs=20)
-    add_box_mm("2F_SW_Utility_FaucetSpout", -5520.0, -5385.0, -3720.0, -3700.0, z_2f + 1.165, z_2f + 1.185, MATS["Gold_Brass"], col_2f)
-    add_cyl_mm("2F_SW_Utility_FaucetNozzle", -5515.0, -3710.0, 11.0, z_2f + 1.140, z_2f + 1.170, MATS["Gold_Brass"], col_2f, segs=16)
-    add_box_mm("2F_SW_Utility_FaucetLever", -5400.0, -5370.0, -3692.0, -3660.0, z_2f + 0.960, z_2f + 0.978, MATS["Gold_Brass"], col_2f)
-    add_box_mm("2F_SW_Utility_Backsplash", -5330.0, -5318.0, -4380.0, -3320.0, z_2f + 0.880, z_2f + 1.500, MATS["Wall_Panel_Cream"], col_2f)
-    # Upper Utility Wall Cabinet: open walnut detergent shelf (1.500..1.760) + 2-door cabinet (1.760..2.500) + soffit
-    add_box_mm("2F_SW_Utility_ShelfBack", -5334.0, -5318.0, -4380.0, -3320.0, z_2f + 1.500, z_2f + 1.760, MATS["Cabinet_Walnut"], col_2f)
-    add_box_mm("2F_SW_Utility_ShelfBot", -5680.0, -5334.0, -4380.0, -3320.0, z_2f + 1.500, z_2f + 1.520, MATS["Cabinet_Walnut"], col_2f)
-    add_box_mm("2F_SW_Utility_ShelfSideS", -5680.0, -5334.0, -4380.0, -4362.0, z_2f + 1.520, z_2f + 1.760, MATS["Cabinet_Walnut"], col_2f)
-    add_box_mm("2F_SW_Utility_ShelfSideN", -5680.0, -5334.0, -3338.0, -3320.0, z_2f + 1.520, z_2f + 1.760, MATS["Cabinet_Walnut"], col_2f)
-    add_box_mm("2F_SW_Utility_ShelfLED", -5365.0, -5345.0, -4355.0, -3345.0, z_2f + 1.492, z_2f + 1.500, MATS["Warm_LED_Glow"], col_2f)
-    add_cyl_mm("2F_SW_Utility_Bottle_1", -5500.0, -4080.0, 38.0, z_2f + 1.520, z_2f + 1.710, MATS["Sanitary_White"], col_2f, segs=20)
-    add_cyl_mm("2F_SW_Utility_Bottle_2", -5500.0, -3960.0, 34.0, z_2f + 1.520, z_2f + 1.690, MATS["Bed_Throw"], col_2f, segs=20)
-    add_box_mm("2F_SW_Utility_WallCab", -5660.0, -5318.0, -4380.0, -3320.0, z_2f + 1.760, z_2f + 2.500, MATS["Cabinet_Cream"], col_2f)
-    add_box_mm("2F_SW_Utility_WallDoor_1", -5682.0, -5660.0, -4376.0, -3852.0, z_2f + 1.764, z_2f + 2.496, MATS["OLO_Cab_White"], col_2f)
-    add_box_mm("2F_SW_Utility_WallDoor_2", -5682.0, -5660.0, -3848.0, -3324.0, z_2f + 1.764, z_2f + 2.496, MATS["OLO_Cab_White"], col_2f)
-    add_box_mm("2F_SW_Utility_WallPull_1", -5693.0, -5682.0, -3895.0, -3885.0, z_2f + 1.785, z_2f + 2.020, MATS["Stair_Bronze_Iron"], col_2f)
-    add_box_mm("2F_SW_Utility_WallPull_2", -5693.0, -5682.0, -3815.0, -3805.0, z_2f + 1.785, z_2f + 2.020, MATS["Stair_Bronze_Iron"], col_2f)
-    add_box_mm("2F_SW_Utility_Soffit", -5682.0, -5318.0, -4380.0, -3320.0, z_2f + 2.500, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
+    # East Wall (靠衣柜墙一侧, X=-5905..-5318, Y=-4475..-3320): Full-Height 2.50m Utility/Mop Storage Cabinet (杂物柜, NO SINK)
+    add_box_mm("2F_SW_Utility_ToeKick", -5865.0, -5318.0, -4475.0, -3320.0, zf_2f, z_2f + 0.075, MATS["OLO_ToeKick_Black"], col_2f)
+    add_box_mm("2F_SW_Utility_BaseCab", -5883.0, -5318.0, -4475.0, -3320.0, z_2f + 0.075, z_2f + 0.850, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_SW_Utility_BaseDoor_1", -5905.0, -5883.0, -4471.0, -3900.0, z_2f + 0.078, z_2f + 0.846, MATS["OLO_Cab_White"], col_2f)
+    add_box_mm("2F_SW_Utility_BaseDoor_2", -5905.0, -5883.0, -3896.0, -3324.0, z_2f + 0.078, z_2f + 0.846, MATS["OLO_Cab_White"], col_2f)
+    add_box_mm("2F_SW_Utility_BasePull_1", -5916.0, -5905.0, -3945.0, -3935.0, z_2f + 0.620, z_2f + 0.800, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_SW_Utility_BasePull_2", -5916.0, -5905.0, -3865.0, -3855.0, z_2f + 0.620, z_2f + 0.800, MATS["Stair_Bronze_Iron"], col_2f)
+    # Mid-height Walnut Open Utility Counter/Niche (0.850..1.480) + detergent bottles + laundry basket
+    add_box_mm("2F_SW_Utility_NicheDeck", -5905.0, -5318.0, -4475.0, -3320.0, z_2f + 0.850, z_2f + 0.880, MATS["Cabinet_Walnut"], col_2f)
+    add_box_mm("2F_SW_Utility_NicheBack", -5334.0, -5318.0, -4475.0, -3320.0, z_2f + 0.880, z_2f + 1.480, MATS["Cabinet_Walnut"], col_2f)
+    add_box_mm("2F_SW_Utility_NicheSideS", -5905.0, -5334.0, -4475.0, -4457.0, z_2f + 0.880, z_2f + 1.480, MATS["Cabinet_Walnut"], col_2f)
+    add_box_mm("2F_SW_Utility_NicheSideN", -5905.0, -5334.0, -3338.0, -3320.0, z_2f + 0.880, z_2f + 1.480, MATS["Cabinet_Walnut"], col_2f)
+    add_box_mm("2F_SW_Utility_NicheLED", -5370.0, -5348.0, -4445.0, -3350.0, z_2f + 1.472, z_2f + 1.480, MATS["Warm_LED_Glow"], col_2f)
+    add_cyl_mm("2F_SW_Utility_Bottle_1", -5540.0, -4120.0, 40.0, z_2f + 0.880, z_2f + 1.110, MATS["Sanitary_White"], col_2f, segs=20)
+    add_cyl_mm("2F_SW_Utility_Bottle_2", -5540.0, -3990.0, 35.0, z_2f + 0.880, z_2f + 1.070, MATS["Bed_Throw"], col_2f, segs=20)
+    add_box_mm("2F_SW_Utility_Basket", -5760.0, -5420.0, -3760.0, -3420.0, z_2f + 0.880, z_2f + 1.120, MATS["Bed_Linen"], col_2f, r_corner=16.0)
+    # Upper Enclosed Storage Cabinet (1.480..2.500) + Soffit (2.500..2.830)
+    add_box_mm("2F_SW_Utility_WallCab", -5883.0, -5318.0, -4475.0, -3320.0, z_2f + 1.480, z_2f + 2.500, MATS["Cabinet_Cream"], col_2f)
+    add_box_mm("2F_SW_Utility_WallDoor_1", -5905.0, -5883.0, -4471.0, -3900.0, z_2f + 1.484, z_2f + 2.496, MATS["OLO_Cab_White"], col_2f)
+    add_box_mm("2F_SW_Utility_WallDoor_2", -5905.0, -5883.0, -3896.0, -3324.0, z_2f + 1.484, z_2f + 2.496, MATS["OLO_Cab_White"], col_2f)
+    add_box_mm("2F_SW_Utility_WallPull_1", -5916.0, -5905.0, -3945.0, -3935.0, z_2f + 1.540, z_2f + 1.880, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_SW_Utility_WallPull_2", -5916.0, -5905.0, -3865.0, -3855.0, z_2f + 1.540, z_2f + 1.880, MATS["Stair_Bronze_Iron"], col_2f)
+    add_box_mm("2F_SW_Utility_Soffit", -5905.0, -5318.0, -4475.0, -3320.0, z_2f + 2.500, z_2f + h_2f, MATS["Pure_White_Ceiling"], col_2f)
 
-    # South Window Low Utility Cabinet (#47, L-cornered flush & non-overlapping beside Utility_BaseCab)
-    add_box_mm("2F_SW_WinCab_ToeKick", -6825.0, -5925.0, -4475.0, -3985.0, zf_2f, z_2f + 0.075, MATS["OLO_ToeKick_Black"], col_2f)
-    add_box_mm("2F_SW_WinCab_Body", -6825.0, -5925.0, -4475.0, -3962.0, z_2f + 0.075, z_2f + 0.820, MATS["Cabinet_Cream"], col_2f)
-    add_box_mm("2F_SW_WinCab_Top", -6825.0, -5925.0, -4475.0, -3935.0, z_2f + 0.820, z_2f + 0.850, MATS["Cabinet_Walnut"], col_2f)
-    _wc_dw = (-5925.0 - (-6825.0)) / 3.0
+    # South Exterior Floor-to-Ceiling Glass Side (朝外玻璃那一侧, X=-6835..-5925, Y=-4480..-3910): Laundry Sink Vanity (洗手池)
+    add_box_mm("2F_SW_WinCab_ToeKick", -6835.0, -5925.0, -4480.0, -3960.0, zf_2f, z_2f + 0.075, MATS["OLO_ToeKick_Black"], col_2f)
+    add_box_mm("2F_SW_WinCab_Body", -6835.0, -5925.0, -4480.0, -3932.0, z_2f + 0.075, z_2f + 0.850, MATS["Cabinet_Cream"], col_2f)
+    _wc_dw = (-5925.0 - (-6835.0)) / 3.0
     for _wi in range(3):
-        _wx0 = -6825.0 + _wi * _wc_dw + 1.5
-        _wx1 = -6825.0 + (_wi + 1) * _wc_dw - 1.5
+        _wx0 = -6835.0 + _wi * _wc_dw + 1.5
+        _wx1 = -6835.0 + (_wi + 1) * _wc_dw - 1.5
         _wxm = 0.5 * (_wx0 + _wx1)
-        add_box_mm(f"2F_SW_WinCab_Door_{_wi+1}", _wx0, _wx1, -3962.0, -3940.0, z_2f + 0.078, z_2f + 0.818, MATS["OLO_Cab_White"], col_2f)
-        add_box_mm(f"2F_SW_WinCab_Pull_{_wi+1}", _wxm - 60.0, _wxm + 60.0, -3940.0, -3929.0, z_2f + 0.775, z_2f + 0.790, MATS["Stair_Bronze_Iron"], col_2f)
+        add_box_mm(f"2F_SW_WinCab_Door_{_wi+1}", _wx0, _wx1, -3932.0, -3910.0, z_2f + 0.078, z_2f + 0.846, MATS["OLO_Cab_White"], col_2f)
+        add_box_mm(f"2F_SW_WinCab_Pull_{_wi+1}", _wxm - 60.0, _wxm + 60.0, -3910.0, -3899.0, z_2f + 0.785, z_2f + 0.800, MATS["Stair_Bronze_Iron"], col_2f)
+    # 4 non-overlapping Quartz countertop strips (Z=0.850..0.880) around true recessed ceramic basin (X=-6610..-6150, Y=-4390..-3995)
+    add_box_mm("2F_SW_WinCab_Top_W", -6835.0, -6610.0, -4480.0, -3910.0, z_2f + 0.850, z_2f + 0.880, MATS["Sanitary_White"], col_2f)
+    add_box_mm("2F_SW_WinCab_Top_E", -6150.0, -5925.0, -4480.0, -3910.0, z_2f + 0.850, z_2f + 0.880, MATS["Sanitary_White"], col_2f)
+    add_box_mm("2F_SW_WinCab_Top_S", -6610.0, -6150.0, -4480.0, -4390.0, z_2f + 0.850, z_2f + 0.880, MATS["Sanitary_White"], col_2f)
+    add_box_mm("2F_SW_WinCab_Top_N", -6610.0, -6150.0, -3995.0, -3910.0, z_2f + 0.850, z_2f + 0.880, MATS["Sanitary_White"], col_2f)
+    # Recessed Ceramic Sink Bowl + Chrome Drain + Outward-Facing Brass Faucet (South glass side)
+    add_box_mm("2F_SW_WinCab_BasinBot", -6610.0, -6150.0, -4390.0, -3995.0, z_2f + 0.720, z_2f + 0.735, MATS["Sanitary_White"], col_2f)
+    add_box_mm("2F_SW_WinCab_BasinWallW", -6610.0, -6595.0, -4390.0, -3995.0, z_2f + 0.735, z_2f + 0.878, MATS["Sanitary_White"], col_2f)
+    add_box_mm("2F_SW_WinCab_BasinWallE", -6165.0, -6150.0, -4390.0, -3995.0, z_2f + 0.735, z_2f + 0.878, MATS["Sanitary_White"], col_2f)
+    add_box_mm("2F_SW_WinCab_BasinWallS", -6595.0, -6165.0, -4390.0, -4375.0, z_2f + 0.735, z_2f + 0.878, MATS["Sanitary_White"], col_2f)
+    add_box_mm("2F_SW_WinCab_BasinWallN", -6595.0, -6165.0, -4010.0, -3995.0, z_2f + 0.735, z_2f + 0.878, MATS["Sanitary_White"], col_2f)
+    add_cyl_mm("2F_SW_WinCab_Drain", -6380.0, -4190.0, 26.0, z_2f + 0.734, z_2f + 0.742, MATS["B2_Chrome_Silver"], col_2f, segs=24)
+    add_cyl_mm("2F_SW_WinCab_Faucet", -6380.0, -4435.0, 14.0, z_2f + 0.880, z_2f + 1.180, MATS["Gold_Brass"], col_2f, segs=20)
+    add_box_mm("2F_SW_WinCab_FaucetSpout", -6390.0, -6370.0, -4435.0, -4300.0, z_2f + 1.165, z_2f + 1.185, MATS["Gold_Brass"], col_2f)
+    add_cyl_mm("2F_SW_WinCab_FaucetNozzle", -6380.0, -4305.0, 11.0, z_2f + 1.140, z_2f + 1.170, MATS["Gold_Brass"], col_2f, segs=16)
+    add_box_mm("2F_SW_WinCab_FaucetLever", -6352.0, -6320.0, -4450.0, -4420.0, z_2f + 0.960, z_2f + 0.978, MATS["Gold_Brass"], col_2f)
 
     # Updated Master Bathroom (7.24 m², wet/dry partition)
     pts_tub = []
@@ -8044,7 +8248,8 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
     add_box_mm("2F_NorthBed_HeadCove_Outer", 3229.0, 6495.0, -1100.0, 1420.0, z_2f + 2.500, z_2f + 2.830, MATS["Pure_White_Ceiling"], col_2f)
     add_box_mm("2F_NorthBed_HeadCove_LED", 3565.0, 6165.0, -820.0, 1140.0, z_2f + 2.485, z_2f + 2.500, MATS["Warm_LED_Glow"], col_2f)
 
-    add_cad_linework_curve(msp, "2F", p_2f["xr"], p_2f["yr"], *p_2f["orig"], z_2f + 0.008, col_2f)
+    # 2F CAD linework removed to eliminate floating rods/lines across open 1F->2F stairwell
+    # add_cad_linework_curve(msp, "2F", p_2f["xr"], p_2f["yr"], *p_2f["orig"], z_2f + 0.008, col_2f)
 
     # Apply floor offsets if requested
     for k, (dx, dy, dz) in floor_offsets_xy.items():
