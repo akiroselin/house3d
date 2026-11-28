@@ -6804,7 +6804,7 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         add_box_mm("1F_BackGarden_Deck",       -11700.0, -9300.0, -4320.0, -3250.0, z_1f - 0.03, z_1f - 0.008, dmat, col_1f)
         add_box_mm("1F_BackGarden_BenchTop",   -11050.0, -9950.0, -4020.0, -3560.0, z_1f + 0.38, z_1f + 0.43,  dmat, col_1f, r_corner=12.0)
         add_box_mm("1F_BackGarden_BenchLeg",   -10970.0,-10030.0, -3940.0, -3640.0, z_1f - 0.008, z_1f + 0.38, fmat, col_1f)
-        # Back Garden Perimeter Walls (West boundary + North/South returns meeting West wall corners cleanly)
+        # Back Garden Solid High Perimeter Walls (1.55m masonry wall + stone coping; no iron railings)
         _bwall_segs = [
             ("WN", -12600.0, -12420.0, -1550.0,  -980.0),
             ("WS", -12600.0, -12420.0, -5070.0, -2850.0),
@@ -6812,14 +6812,8 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             ("S",  -12420.0,  -7155.0, -5070.0, -4890.0),
         ]
         for _bw_id, _wx0, _wx1, _wy0, _wy1 in _bwall_segs:
-            add_box_mm(f"1F_BackGarden_Wall_{_bw_id}", _wx0, _wx1, _wy0, _wy1, z_1f - 0.15, z_1f + 0.68, wmat, col_1f)
-            add_box_mm(f"1F_BackGarden_WallCap_{_bw_id}", _wx0 - 15.0, _wx1 + 15.0, _wy0 - 15.0, _wy1 + 15.0, z_1f + 0.68, z_1f + 0.72, smat, col_1f)
-            for _ri, _rz in enumerate((0.84, 0.98, 1.12, 1.26, 1.40), 1):
-                if abs(_wx1 - _wx0) < 250.0:
-                    _rx0, _rx1, _ry0, _ry1 = _wx0 + 70.0, _wx1 - 70.0, _wy0, _wy1
-                else:
-                    _rx0, _rx1, _ry0, _ry1 = _wx0, _wx1, _wy0 + 70.0, _wy1 - 70.0
-                add_box_mm(f"1F_BackGarden_FenceRail_{_bw_id}_{_ri}", _rx0, _rx1, _ry0, _ry1, z_1f + _rz, z_1f + _rz + 0.026, fmat, col_1f)
+            add_box_mm(f"1F_BackGarden_Wall_{_bw_id}", _wx0, _wx1, _wy0, _wy1, z_1f - 0.15, z_1f + 1.50, wmat, col_1f)
+            add_box_mm(f"1F_BackGarden_WallCap_{_bw_id}", _wx0 - 15.0, _wx1 + 15.0, _wy0 - 15.0, _wy1 + 15.0, z_1f + 1.50, z_1f + 1.55, smat, col_1f)
         # West Double Garden Gate at X=-12600..-12420, Y=-2850..-1550
         add_box_mm("1F_BackGarden_GatePillar_S", -12660.0, -12360.0, -2950.0, -2750.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
         add_box_mm("1F_BackGarden_GatePillar_N", -12660.0, -12360.0, -1650.0, -1450.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
@@ -6853,24 +6847,19 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         # B. East Front Small Garden (X=+6742..+12300, Y=-5760..+1765; strictly flush with N/S house bay)
         #    Sunken Pond X=6535..8650 (Y=-4600..-1700); Sunken Flower Garden pushed +150cm East -> X=6565..10150 (Y=-1700..+1120)
         # ---------------------------------------------------------------------
-        # Cantilevered Marble Entry Bridge across extended Flower Pit (X=6742..10150, Y=+120..+1180) + Glass Balustrade
+        # Cantilevered Marble Entry Bridge across extended Flower Pit (X=6742..10150, Y=+120..+1180) + Frameless Clear Glass Guardrail (no iron frame)
         add_box_mm("1F_FrontGarden_EntryBridge",   6742.0, 10150.0,  120.0, 1180.0, z_1f - 0.10, z_1f - 0.002, cmat, col_1f)
-        add_box_mm("1F_FrontGarden_BridgeGlassS",  6742.0, 10150.0,  105.0,  125.0, z_1f,        z_1f + 0.96,  glmat, col_1f)
-        add_box_mm("1F_FrontGarden_BridgeRailS",   6742.0, 10150.0,  100.0,  130.0, z_1f + 0.96, z_1f + 0.99,  fmat, col_1f)
+        add_box_mm("1F_FrontGarden_BridgeGlassS",  6742.0, 10150.0,  105.0,  125.0, z_1f,        z_1f + 0.98,  glmat, col_1f)
 
-        # Travertine Coping & Clear Glass Balustrade around L-shaped Open Sunken Pond + Extended Sunken Flower Pit
+        # Travertine Coping & Pure Frameless Clear Glass Balustrade around L-shaped Open Sunken Pond + Extended Sunken Flower Pit (no iron frame)
         add_box_mm("1F_FrontGarden_PitCoping_PondS",   6742.0,  8790.0, -4780.0, -4520.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
         add_box_mm("1F_FrontGarden_PitCoping_PondE",   8530.0,  8790.0, -4520.0, -1670.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
         add_box_mm("1F_FrontGarden_PitCoping_FlowerS", 8790.0, 10290.0, -1840.0, -1670.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
         add_box_mm("1F_FrontGarden_PitCoping_FlowerE",10030.0, 10290.0, -1670.0,   120.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_PondS",    6742.0,  8665.0, -4615.0, -4595.0, z_1f + 0.03, z_1f + 0.96, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_PondE",    8645.0,  8665.0, -4595.0, -1705.0, z_1f + 0.03, z_1f + 0.96, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_FlowerS",  8665.0, 10165.0, -1715.0, -1695.0, z_1f + 0.03, z_1f + 0.96, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_FlowerE", 10145.0, 10165.0, -1695.0,   120.0, z_1f + 0.03, z_1f + 0.96, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitRail_PondS",     6742.0,  8670.0, -4620.0, -4590.0, z_1f + 0.96, z_1f + 0.99, fmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitRail_PondE",     8640.0,  8670.0, -4590.0, -1700.0, z_1f + 0.96, z_1f + 0.99, fmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitRail_FlowerS",   8670.0, 10170.0, -1720.0, -1690.0, z_1f + 0.96, z_1f + 0.99, fmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitRail_FlowerE",  10140.0, 10170.0, -1690.0,   120.0, z_1f + 0.96, z_1f + 0.99, fmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_PondS",    6742.0,  8665.0, -4615.0, -4595.0, z_1f + 0.03, z_1f + 0.98, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_PondE",    8645.0,  8665.0, -4595.0, -1705.0, z_1f + 0.03, z_1f + 0.98, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_FlowerS",  8665.0, 10165.0, -1715.0, -1695.0, z_1f + 0.03, z_1f + 0.98, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_FlowerE", 10145.0, 10165.0, -1695.0,   120.0, z_1f + 0.03, z_1f + 0.98, glmat, col_1f)
 
         # East Entry Walkway & 3 Stone Stepping Stones from Extended Entry Bridge (X=10150) to East Garden Gate (X=12120, centered at Y=-15..+985)
         add_box_mm("1F_FrontGarden_PathBase", 10150.0, 12120.0, -15.0, 985.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
@@ -6895,8 +6884,8 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         add_box_mm("1F_FrontGarden_Bench_E",        11100.0, 11500.0, -4100.0, -3300.0, z_1f + 0.38,  z_1f + 0.43,  dmat, col_1f, r_corner=12.0)
         add_box_mm("1F_FrontGarden_Bench_E_Leg",    11180.0, 11420.0, -4020.0, -3380.0, z_1f - 0.008, z_1f + 0.38,  fmat, col_1f)
 
-        # Perimeter Dwarf Walls (180mm) + Travertine Coping + 5 Horizontal Bronze Louvers (0.84..1.40m)
-        # Note: EN has exact 40cm (400mm) clear short wall between GatePillar_N (+1185) and North fence inner face (+1585).
+        # Solid High Perimeter Masonry Walls (1.55m wall + stone coping; NO iron fence/railings around courtyard)
+        # Note: EN has exact 40cm (400mm) clear short high wall between GatePillar_N (+1185) and North wall inner face (+1585).
         _cwall_segs = [
             ("EN", 12120.0, 12300.0,  1185.0,  1765.0),
             ("ES", 12120.0, 12300.0, -5760.0,  -215.0),
@@ -6904,24 +6893,8 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             ("S",   6742.0, 12120.0, -5760.0, -5580.0),
         ]
         for _cw_id, _wx0, _wx1, _wy0, _wy1 in _cwall_segs:
-            add_box_mm(f"1F_FrontGarden_Wall_{_cw_id}", _wx0, _wx1, _wy0, _wy1, z_1f - 0.15, z_1f + 0.68, wmat, col_1f)
-            add_box_mm(f"1F_FrontGarden_WallCap_{_cw_id}", _wx0 - 15.0, _wx1 + 15.0, _wy0 - 15.0, _wy1 + 15.0, z_1f + 0.68, z_1f + 0.72, smat, col_1f)
-            for _ri, _rz in enumerate((0.84, 0.98, 1.12, 1.26, 1.40), 1):
-                if abs(_wx1 - _wx0) < 250.0:
-                    _rx0, _rx1, _ry0, _ry1 = _wx0 + 70.0, _wx1 - 70.0, _wy0, _wy1
-                else:
-                    _rx0, _rx1, _ry0, _ry1 = _wx0, _wx1, _wy0 + 70.0, _wy1 - 70.0
-                add_box_mm(f"1F_FrontGarden_FenceRail_{_cw_id}_{_ri}", _rx0, _rx1, _ry0, _ry1, z_1f + _rz, z_1f + _rz + 0.026, fmat, col_1f)
-            if abs(_wx1 - _wx0) < 250.0:
-                _n_p = max(2, int((_wy1 - _wy0) / 2000.0) + 1)
-                for _pi in range(_n_p):
-                    _py = _wy0 + 30.0 + (_wy1 - _wy0 - 60.0) * _pi / max(1, _n_p - 1)
-                    add_box_mm(f"1F_FrontGarden_Post_{_cw_id}_{_pi+1}", _wx0 + 60.0, _wx1 - 60.0, _py - 25.0, _py + 25.0, z_1f + 0.72, z_1f + 1.44, fmat, col_1f)
-            else:
-                _n_p = max(2, int((_wx1 - _wx0) / 2000.0) + 1)
-                for _pi in range(_n_p):
-                    _px = _wx0 + 30.0 + (_wx1 - _wx0 - 60.0) * _pi / max(1, _n_p - 1)
-                    add_box_mm(f"1F_FrontGarden_Post_{_cw_id}_{_pi+1}", _px - 25.0, _px + 25.0, _wy0 + 60.0, _wy1 - 60.0, z_1f + 0.72, z_1f + 1.44, fmat, col_1f)
+            add_box_mm(f"1F_FrontGarden_Wall_{_cw_id}", _wx0, _wx1, _wy0, _wy1, z_1f - 0.15, z_1f + 1.50, wmat, col_1f)
+            add_box_mm(f"1F_FrontGarden_WallCap_{_cw_id}", _wx0 - 15.0, _wx1 + 15.0, _wy0 - 15.0, _wy1 + 15.0, z_1f + 1.50, z_1f + 1.55, smat, col_1f)
 
         # Double East Garden Entry Gate at X=12120..12300, Y=-15..+985 (40cm short EN wall to right fence +1185..+1585)
         add_box_mm("1F_FrontGarden_GatePillar_S", 12060.0, 12360.0, -215.0,  -15.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
@@ -7077,29 +7050,14 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             sx0 = x0 + 40.0 + _si * pitch_x + 8.0
             sx1 = x0 + 40.0 + (_si + 1) * pitch_x - 8.0
             add_box_mm(f"2F_SteelBalcony_Deck_{_si+1}", sx0, sx1, y0 + 40.0, y1 - 40.0, z_2f - 0.022, z_2f - 0.002, dmat, col_2f)
-        # 4 slim corner steel columns + pergola top beams (z<=2.480)
-        for _ci, (_cx, _cy) in enumerate(((x0 + 35.0, y0 + 35.0), (x0 + 35.0, y1 - 35.0), (x1 - 35.0, y0 + 35.0), (x1 - 35.0, y1 - 35.0)), 1):
-            add_box_mm(f"2F_SteelBalcony_Col_{_ci}", _cx - 35.0, _cx + 35.0, _cy - 35.0, _cy + 35.0, z_2f - 0.140, z_2f + 2.480, smat, col_2f)
-        add_box_mm("2F_SteelBalcony_TopBeamW", x0, x0 + 70.0, y0, y1, z_2f + 2.415, z_2f + 2.480, smat, col_2f)
-        add_box_mm("2F_SteelBalcony_TopBeamE", x1 - 70.0, x1, y0, y1, z_2f + 2.415, z_2f + 2.480, smat, col_2f)
-        add_box_mm("2F_SteelBalcony_TopBeamS", x0 + 70.0, x1 - 70.0, y0, y0 + 70.0, z_2f + 2.415, z_2f + 2.480, smat, col_2f)
-        add_box_mm("2F_SteelBalcony_TopBeamN", x0 + 70.0, x1 - 70.0, y1 - 70.0, y1, z_2f + 2.415, z_2f + 2.480, smat, col_2f)
-        add_box_mm("2F_SteelBalcony_TopCrossS", x0 + 70.0, x1 - 70.0, -4280.0, -4220.0, z_2f + 2.415, z_2f + 2.470, smat, col_2f)
-        add_box_mm("2F_SteelBalcony_TopCrossN", x0 + 70.0, x1 - 70.0, -2680.0, -2620.0, z_2f + 2.415, z_2f + 2.470, smat, col_2f)
-        # Clear glass + slim steel guardrail on W/S/N edges (Z=0.00..1.10m)
-        add_box_mm("2F_SteelBalcony_RailTopW", x0 + 15.0, x0 + 55.0, y0 + 70.0, y1 - 70.0, z_2f + 1.050, z_2f + 1.095, smat, col_2f)
-        add_box_mm("2F_SteelBalcony_RailBotW", x0 + 20.0, x0 + 50.0, y0 + 70.0, y1 - 70.0, z_2f + 0.030, z_2f + 0.065, smat, col_2f)
-        add_box_mm("2F_SteelBalcony_RailGlassW", x0 + 29.0, x0 + 41.0, y0 + 70.0, y1 - 70.0, z_2f + 0.065, z_2f + 1.050, gmat, col_2f)
-        add_box_mm("2F_SteelBalcony_MidPostW", x0 + 18.0, x0 + 52.0, -3470.0, -3430.0, z_2f - 0.002, z_2f + 1.050, smat, col_2f)
+        # Open cantilevered drying balcony with PURE frameless clear glass balustrade (NO iron columns, overhead box cage, or railing metal frames)
+        add_box_mm("2F_SteelBalcony_RailGlassW", x0 + 29.0, x0 + 41.0, y0 + 29.0, y1 - 29.0, z_2f - 0.002, z_2f + 1.080, gmat, col_2f)
         for _rtag, _ry in (("S", y0 + 35.0), ("N", y1 - 35.0)):
-            add_box_mm(f"2F_SteelBalcony_RailTop{_rtag}", x0 + 70.0, x1 - 70.0, _ry - 20.0, _ry + 20.0, z_2f + 1.050, z_2f + 1.095, smat, col_2f)
-            add_box_mm(f"2F_SteelBalcony_RailBot{_rtag}", x0 + 70.0, x1 - 70.0, _ry - 15.0, _ry + 15.0, z_2f + 0.030, z_2f + 0.065, smat, col_2f)
-            add_box_mm(f"2F_SteelBalcony_RailGlass{_rtag}", x0 + 70.0, x1 - 70.0, _ry - 6.0, _ry + 6.0, z_2f + 0.065, z_2f + 1.050, gmat, col_2f)
-            add_box_mm(f"2F_SteelBalcony_MidPost{_rtag}", -8005.0, -7965.0, _ry - 18.0, _ry + 18.0, z_2f - 0.002, z_2f + 1.050, smat, col_2f)
-        # Dual suspended chrome drying rods + stylized hanging garments
+            add_box_mm(f"2F_SteelBalcony_RailGlass{_rtag}", x0 + 41.0, x1 - 40.0, _ry - 6.0, _ry + 6.0, z_2f - 0.002, z_2f + 1.080, gmat, col_2f)
+        # Dual wall-mounted cantilevered drying arms anchored ONLY to East Laundry wall (-6990) + drying rods & garments
+        for _wy_arm in (-4260.0, -2640.0):
+            add_box_mm(f"2F_SteelBalcony_WallArm_{int(abs(_wy_arm))}", -8340.0, x1, _wy_arm - 12.0, _wy_arm + 12.0, z_2f + 2.178, z_2f + 2.210, rmat, col_2f)
         for _ri, _rx in enumerate((-8320.0, -7680.0), 1):
-            add_box_mm(f"2F_SteelBalcony_DryDropS_{_ri}", _rx - 9.0, _rx + 9.0, -4260.0, -4242.0, z_2f + 2.165, z_2f + 2.415, rmat, col_2f)
-            add_box_mm(f"2F_SteelBalcony_DryDropN_{_ri}", _rx - 9.0, _rx + 9.0, -2660.0, -2642.0, z_2f + 2.165, z_2f + 2.415, rmat, col_2f)
             add_box_mm(f"2F_SteelBalcony_DryRod_{_ri}", _rx - 14.0, _rx + 14.0, -4320.0, -2580.0, z_2f + 2.150, z_2f + 2.178, rmat, col_2f)
         _dry_items = [
             (-8320.0, -4020.0, -3520.0, 1.48, MATS["Bed_Linen"]),
