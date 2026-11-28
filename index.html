@@ -737,6 +737,7 @@
           <label class="check-item"><input type="checkbox" data-floor="B2" checked /> B2 地下室</label>
           <label class="check-item check-full"><input type="checkbox" id="hide-ceilings" checked /> 隐藏吊顶</label>
           <label class="check-item check-full" style="border-top:none;padding-top:0;"><input type="checkbox" id="hide-walls" checked /> 隐藏四周墙壁</label>
+          <label class="check-item check-full" style="border-top:none;padding-top:0;"><input type="checkbox" id="toggle-garden" checked /> 显示花园</label>
           <label class="check-item check-full" style="border-top:none;padding-top:0;"><input type="checkbox" id="toggle-autorotate" checked /> 自动慢速旋转</label>
           <label class="check-item check-full" style="border-top:none;padding-top:0;"><input type="checkbox" id="toggle-shadows" /> 桌面静态阴影</label>
         </div>
@@ -748,8 +749,12 @@
     </div>
   </div>
 
-  <!-- Top-Right Minimal Action (Start Collaboration only) -->
+  <!-- Top-Right Minimal Action (Garden toggle + Start Collaboration) -->
   <div id="minimal-actions">
+    <button type="button" class="hud-pill-btn" id="btn-toggle-garden" aria-pressed="true" title="显示或隐藏前院/后院/下沉花园">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22v-8"/><path d="M12 14c-4.5 0-7-3-7-7 4 0 7 2.5 7 7Z"/><path d="M12 14c4.5 0 7-3 7-7-4 0-7 2.5-7 7Z"/></svg>
+      <span id="btn-toggle-garden-txt">隐藏花园</span>
+    </button>
     <button type="button" class="hud-pill-btn cta-gold-btn" id="btn-enter-collab" aria-pressed="false">
       <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span id="btn-enter-collab-txt">开始协作</span>
@@ -1083,7 +1088,7 @@
     let shadowsEnabled = !IS_MOBILE;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let autoRotateEnabled = !prefersReducedMotion;
-    const VIEWER_BUILD = '20261128_opt56';
+    const VIEWER_BUILD = '20261128_opt57';
     let rafId = 0;
     let inAnimate = false;
     let dirtyFrames = 14;
@@ -1263,6 +1268,9 @@
     let hideCeilings = true;
     const wallNodes = [];
     let hideWalls = true;
+    const GARDEN_PREFIXES = ['1F_FrontGarden_', '1F_BackGarden_', 'B1_Garden_', 'B2_FishPond_'];
+    const gardenNodes = [];
+    let showGarden = true;
 
     function syncBodyState() {
       document.body.dataset.viewerBuild = VIEWER_BUILD;
@@ -1270,6 +1278,7 @@
       document.body.dataset.modelsLoaded = String(modelsLoaded);
       document.body.dataset.hideWalls = String(hideWalls);
       document.body.dataset.hideCeilings = String(hideCeilings);
+      document.body.dataset.showGarden = String(showGarden);
       document.body.dataset.autoRotate = String(autoRotateEnabled);
       document.body.dataset.rightOrbitCount = String(rightOrbitCount);
       document.body.dataset.shadowsEnabled = String(shadowsEnabled);
@@ -1329,6 +1338,18 @@
     }
     function applyWallVisibility() {
       for (const o of wallNodes) o.visible = !hideWalls;
+      syncBodyState();
+      refreshShadows();
+      markDirty(4);
+    }
+    function applyGardenVisibility() {
+      for (const o of gardenNodes) o.visible = showGarden;
+      const cb = document.getElementById('toggle-garden');
+      if (cb) cb.checked = showGarden;
+      const btn = document.getElementById('btn-toggle-garden');
+      const txt = document.getElementById('btn-toggle-garden-txt');
+      if (btn) btn.setAttribute('aria-pressed', String(showGarden));
+      if (txt) txt.textContent = showGarden ? '隐藏花园' : '显示花园';
       syncBodyState();
       refreshShadows();
       markDirty(4);
@@ -1408,6 +1429,15 @@
     document.querySelectorAll('input[data-floor]').forEach((cb) => cb.addEventListener('change', applyFloorCheckboxes));
     document.getElementById('hide-ceilings').addEventListener('change', (e) => { hideCeilings = e.target.checked; applyCeilingVisibility(); });
     document.getElementById('hide-walls').addEventListener('change', (e) => { hideWalls = e.target.checked; applyWallVisibility(); });
+    const gardenCb = document.getElementById('toggle-garden');
+    if (gardenCb) {
+      gardenCb.checked = showGarden;
+      gardenCb.addEventListener('change', (e) => { showGarden = e.target.checked; applyGardenVisibility(); });
+    }
+    const gardenBtn = document.getElementById('btn-toggle-garden');
+    if (gardenBtn) {
+      gardenBtn.addEventListener('click', () => { showGarden = !showGarden; applyGardenVisibility(); });
+    }
     const autoRotCb = document.getElementById('toggle-autorotate');
     if (autoRotCb) {
       autoRotCb.checked = autoRotateEnabled;
@@ -1491,7 +1521,7 @@
       ['2F', `${MODELS_BASE}/2F.glb`],
     ];
     const loader = new GLTFLoader();
-    const ASSET_VERSION = '20261128_opt56';
+    const ASSET_VERSION = '20261128_opt57';
     const MAX_TEX_ANISO = IS_MOBILE ? 2 : 4;
     let loadedCount = 0;
     const FLOOR_BYTES_EST = { '1F': 7007312, 'B1': 905056, 'B2': 2607684, '2F': 5157676 };
@@ -1602,6 +1632,10 @@
                 if (isPerimeterWall(child)) {
                   wallNodes.push(child);
                   child.visible = !hideWalls;
+                }
+                if (GARDEN_PREFIXES.some((pfx) => child.name.startsWith(pfx))) {
+                  gardenNodes.push(child);
+                  child.visible = showGarden;
                 }
               }
             });
