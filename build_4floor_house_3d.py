@@ -6872,13 +6872,15 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         add_box_mm("1F_FrontGarden_PitRail_FlowerS",   8670.0, 10170.0, -1720.0, -1690.0, z_1f + 0.96, z_1f + 0.99, fmat, col_1f)
         add_box_mm("1F_FrontGarden_PitRail_FlowerE",  10140.0, 10170.0, -1690.0,   120.0, z_1f + 0.96, z_1f + 0.99, fmat, col_1f)
 
-        # East Entry Walkway & 3 Stone Stepping Stones from Extended Entry Bridge (X=10150) to East Garden Gate (X=12120)
-        add_box_mm("1F_FrontGarden_PathBase", 10150.0, 12120.0, 120.0, 1180.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
+        # East Entry Walkway & 3 Stone Stepping Stones from Extended Entry Bridge (X=10150) to East Garden Gate (X=12120, centered at Y=-15..+985)
+        add_box_mm("1F_FrontGarden_PathBase", 10150.0, 12120.0, -15.0, 985.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
         for _pi, _px in enumerate((10310.0, 10910.0, 11510.0), 1):
-            add_box_mm(f"1F_FrontGarden_SteppingStone_{_pi}", _px, _px + 460.0, 210.0, 1090.0, z_1f - 0.028, z_1f - 0.006, cmat, col_1f, r_corner=16.0)
+            add_box_mm(f"1F_FrontGarden_SteppingStone_{_pi}", _px, _px + 460.0, 75.0, 895.0, z_1f - 0.028, z_1f - 0.006, cmat, col_1f, r_corner=16.0)
 
         # Non-overlapping Lawns strictly inside the perimeter planter ring (clearing extended L-pit void)
-        add_box_mm("1F_FrontGarden_Lawn_MidE",     10290.0, 11600.0, -2100.0,   120.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_FrontGarden_Lawn_MidE",     10290.0, 11600.0, -2100.0,   -15.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_FrontGarden_Lawn_GateSE",   11600.0, 12120.0,  -215.0,   -15.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+        add_box_mm("1F_FrontGarden_Lawn_GateN",    10150.0, 12120.0,   985.0,  1185.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
         add_box_mm("1F_FrontGarden_Lawn_MidStrip",  8790.0, 10290.0, -2100.0, -1840.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
         add_box_mm("1F_FrontGarden_Lawn_PitS",      6742.0,  8790.0, -5060.0, -4780.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
         add_box_mm("1F_FrontGarden_Lawn_SEStrip",   8790.0,  9100.0, -5060.0, -2100.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
@@ -6894,9 +6896,10 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         add_box_mm("1F_FrontGarden_Bench_E_Leg",    11180.0, 11420.0, -4020.0, -3380.0, z_1f - 0.008, z_1f + 0.38,  fmat, col_1f)
 
         # Perimeter Dwarf Walls (180mm) + Travertine Coping + 5 Horizontal Bronze Louvers (0.84..1.40m)
+        # Note: EN has exact 40cm (400mm) clear short wall between GatePillar_N (+1185) and North fence inner face (+1585).
         _cwall_segs = [
-            ("EN", 12120.0, 12300.0,  1200.0,  1765.0),
-            ("ES", 12120.0, 12300.0, -5760.0,   100.0),
+            ("EN", 12120.0, 12300.0,  1185.0,  1765.0),
+            ("ES", 12120.0, 12300.0, -5760.0,  -215.0),
             ("N",   6742.0, 12120.0,  1585.0,  1765.0),
             ("S",   6742.0, 12120.0, -5760.0, -5580.0),
         ]
@@ -6920,19 +6923,18 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
                     _px = _wx0 + 30.0 + (_wx1 - _wx0 - 60.0) * _pi / max(1, _n_p - 1)
                     add_box_mm(f"1F_FrontGarden_Post_{_cw_id}_{_pi+1}", _px - 25.0, _px + 25.0, _wy0 + 60.0, _wy1 - 60.0, z_1f + 0.72, z_1f + 1.44, fmat, col_1f)
 
-        # Double East Garden Entry Gate at X=12120..12300, Y=+100..+1200
-        add_box_mm("1F_FrontGarden_GatePillar_S", 12060.0, 12360.0,  -50.0,  150.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
-        add_box_mm("1F_FrontGarden_GatePillar_N", 12060.0, 12360.0, 1150.0, 1350.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
-        add_box_mm("1F_FrontGarden_Gate_Door_S",  12190.0, 12230.0,  155.0,  645.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
-        add_box_mm("1F_FrontGarden_Gate_Door_N",  12190.0, 12230.0,  655.0, 1145.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
-        add_box_mm("1F_FrontGarden_Gate_Handle_S",12170.0, 12250.0,  605.0,  635.0, z_1f + 0.92, z_1f + 1.12, MATS["Gold_Brass"], col_1f)
-        add_box_mm("1F_FrontGarden_Gate_Handle_N",12170.0, 12250.0,  665.0,  695.0, z_1f + 0.92, z_1f + 1.12, MATS["Gold_Brass"], col_1f)
+        # Double East Garden Entry Gate at X=12120..12300, Y=-15..+985 (40cm short EN wall to right fence +1185..+1585)
+        add_box_mm("1F_FrontGarden_GatePillar_S", 12060.0, 12360.0, -215.0,  -15.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
+        add_box_mm("1F_FrontGarden_GatePillar_N", 12060.0, 12360.0,  985.0, 1185.0, z_1f - 0.15, z_1f + 1.65, smat, col_1f)
+        add_box_mm("1F_FrontGarden_Gate_Door_S",  12190.0, 12230.0,  -10.0,  480.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
+        add_box_mm("1F_FrontGarden_Gate_Door_N",  12190.0, 12230.0,  490.0,  980.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
+        add_box_mm("1F_FrontGarden_Gate_Handle_S",12170.0, 12250.0,  440.0,  470.0, z_1f + 0.92, z_1f + 1.12, MATS["Gold_Brass"], col_1f)
+        add_box_mm("1F_FrontGarden_Gate_Handle_N",12170.0, 12250.0,  500.0,  530.0, z_1f + 0.92, z_1f + 1.12, MATS["Gold_Brass"], col_1f)
 
-        # Continuous Perimeter Flower/Tree Planter Ring (一圈可以种花草树木的花坛: N + EN + ES + S walls, clear of East Gate)
+        # Continuous Perimeter Flower/Tree Planter Ring (一圈可以种花草树木的花坛: N + ES + S walls, clear of East Gate)
         for _fp_id, _px0, _px1, _py0, _py1 in [
-            ("N",   6760.0, 12060.0,  1190.0,  1585.0),
-            ("EN", 11660.0, 12120.0,  1350.0,  1585.0),
-            ("ES", 11600.0, 12120.0, -5060.0,   -50.0),
+            ("N",   6760.0, 12120.0,  1185.0,  1585.0),
+            ("ES", 11600.0, 12120.0, -5060.0,  -215.0),
             ("S",   6760.0, 12120.0, -5580.0, -5060.0),
         ]:
             add_box_mm(f"1F_FrontGarden_Planter_{_fp_id}",     _px0,        _px1,        _py0,        _py1,        z_1f - 0.03, z_1f + 0.34, wmat, col_1f)
@@ -6955,7 +6957,7 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             add_cyl_mm(f"1F_FrontGarden_BambooS_Stem_{_bi}", _bx, -5320.0, 24.0, z_1f + 0.36, z_1f + 1.95, gmat, col_1f, segs=10)
             _add_yard_mound(f"1F_FrontGarden_ShrubS_{_bi}",   _bx, -5320.0, z_1f + 0.58, 280.0, 220.0, 0.25, leaf_l if _bi % 2 else leaf_d)
             _add_yard_mound(f"1F_FrontGarden_FlowerS_{_bi}",  _bx + 360.0, -5260.0, z_1f + 0.49, 130.0, 125.0, 0.12, flw_pk if _bi % 2 else flw_wh)
-        for _li, (_lx, _ly) in enumerate(((10320.0, 80.0), (10320.0, 1210.0), (11850.0, 80.0), (11850.0, 1210.0)), 1):
+        for _li, (_lx, _ly) in enumerate(((10320.0, -80.0), (10320.0, 1060.0), (11850.0, -80.0), (11850.0, 1060.0)), 1):
             add_box_mm(f"1F_FrontGarden_BollardPost_{_li}", _lx - 45.0, _lx + 45.0, _ly - 45.0, _ly + 45.0, z_1f - 0.02, z_1f + 0.54, fmat, col_1f)
             add_box_mm(f"1F_FrontGarden_BollardGlow_{_li}", _lx - 38.0, _lx + 38.0, _ly - 38.0, _ly + 38.0, z_1f + 0.54, z_1f + 0.62, lmat, col_1f)
     _build_1f_courtyard()
