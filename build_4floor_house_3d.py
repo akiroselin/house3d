@@ -6764,8 +6764,11 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         leaf_l   = make_mat("Courtyard_Leaf_Light",     (0.24, 0.56, 0.24, 1.0), roughness=0.58)
         leaf_d   = make_mat("Courtyard_Leaf_Deep",      (0.14, 0.38, 0.18, 1.0), roughness=0.62)
         leaf_red = make_mat("Courtyard_Maple_Foliage",  (0.76, 0.28, 0.16, 1.0), roughness=0.54)
-        flw_pk   = make_mat("Courtyard_Flower_Blush",   (0.96, 0.68, 0.72, 1.0), roughness=0.44)
-        flw_wh   = make_mat("Courtyard_Flower_White",   (0.98, 0.96, 0.90, 1.0), roughness=0.40)
+        flw_pk     = make_mat("Courtyard_Flower_Blush",   (0.96, 0.68, 0.72, 1.0), roughness=0.44)
+        flw_wh     = make_mat("Courtyard_Flower_White",   (0.98, 0.96, 0.90, 1.0), roughness=0.40)
+        water_mat  = make_mat("Laundry_Trough_Water",     (0.28, 0.80, 0.92, 0.45), roughness=0.08, alpha=0.45)
+        tomato_red = make_mat("EcoFarm_Tomato_Red",       (0.90, 0.14, 0.10, 1.0), roughness=0.32)
+        pea_green  = make_mat("EcoFarm_Pea_Pod",          (0.46, 0.80, 0.22, 1.0), roughness=0.38)
 
         def _add_yard_mound(mname, mx, my, mz, rx_mm, ry_mm, rz_m, mat):
             me = bpy.data.meshes.new(mname)
@@ -6792,20 +6795,62 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             _add_yard_mound(f"{tname}_CanopyC", tx + 150, ty - 130, z_1f + top_z - 0.50, 290.0, 320.0, 0.26, leaf_l)
 
         # ---------------------------------------------------------------------
-        # A. West Back Garden outside 1F_Main_Entry_Door (-12600..-7155, Y=-5070..-980; perimeter planter ring, no N/S side wings)
+        # A. West Back Garden outside 1F_Main_Entry_Door (-12600..-7155, Y=-5070..-980)
+        #    - Kitchen-side Wall (-7850..-7155, Y=-4820..-3120): Big Stone Laundry Trough (Deep Water Basin + Sloped Washboard)
+        #    - Outer West Yard (-11950..-8950, Y=-4420..-2850): Raised-Bed Eco-Farm growing Tomatoes & Trellis Peas
         # ---------------------------------------------------------------------
-        add_box_mm("1F_BackGarden_Porch",       -8950.0, -7155.0, -3050.0, -1350.0, z_1f - 0.15, z_1f - 0.012, cmat, col_1f)
-        add_box_mm("1F_BackGarden_PathBase",   -12420.0, -8950.0, -2850.0, -1550.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
+        add_box_mm("1F_BackGarden_Porch",        -8950.0, -7155.0, -3050.0, -1350.0, z_1f - 0.15, z_1f - 0.012, cmat, col_1f)
+        add_box_mm("1F_BackGarden_LaundryApron", -8950.0, -7155.0, -4890.0, -3050.0, z_1f - 0.15, z_1f - 0.015, smat, col_1f)
+        add_box_mm("1F_BackGarden_EcoFarm_Walk",-11950.0, -8950.0, -4420.0, -2850.0, z_1f - 0.15, z_1f - 0.025, smat, col_1f)
+        add_box_mm("1F_BackGarden_PathBase",    -12420.0, -8950.0, -2850.0, -1550.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
         for _pi, _px in enumerate((-12220.0, -11500.0, -10780.0, -10060.0, -9340.0), 1):
             add_box_mm(f"1F_BackGarden_StepStone_{_pi}", _px, _px + 520.0, -2720.0, -1680.0, z_1f - 0.028, z_1f - 0.008, cmat, col_1f, r_corner=16.0)
-        # Non-overlapping Back Garden Lawns inside the perimeter planter ring
-        add_box_mm("1F_BackGarden_Lawn_S",     -11950.0, -8950.0, -4420.0, -2850.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
-        add_box_mm("1F_BackGarden_Lawn_SE",     -8950.0, -7155.0, -4420.0, -3050.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
-        add_box_mm("1F_BackGarden_Lawn_WS",    -11950.0, -8950.0, -1550.0, -1450.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
-        # Small Walnut Bench Terrace outside Kitchen West Window
-        add_box_mm("1F_BackGarden_Deck",       -11700.0, -9300.0, -4320.0, -3250.0, z_1f - 0.03, z_1f - 0.008, dmat, col_1f)
-        add_box_mm("1F_BackGarden_BenchTop",   -11050.0, -9950.0, -4020.0, -3560.0, z_1f + 0.38, z_1f + 0.43,  dmat, col_1f, r_corner=12.0)
-        add_box_mm("1F_BackGarden_BenchLeg",   -10970.0,-10030.0, -3940.0, -3640.0, z_1f - 0.008, z_1f + 0.38, fmat, col_1f)
+        add_box_mm("1F_BackGarden_Lawn_WS",     -11950.0, -8950.0, -1550.0, -1450.0, z_1f - 0.15, z_1f - 0.030, gmat, col_1f)
+
+        # Big Stone Utility Laundry Trough along Kitchen West Wall (-7850..-7155, Y=-4820..-3120; sill is 1.102m)
+        add_box_mm("1F_BackGarden_LaundryToe",    -7780.0, -7155.0, -4780.0, -3160.0, z_1f - 0.015, z_1f + 0.055, fmat, col_1f)
+        add_box_mm("1F_BackGarden_LaundryBase",   -7820.0, -7155.0, -4800.0, -3140.0, z_1f + 0.055, z_1f + 0.785, smat, col_1f)
+        add_box_mm("1F_BackGarden_LaundryRimE",   -7245.0, -7155.0, -4820.0, -3120.0, z_1f + 0.785, z_1f + 0.845, cmat, col_1f)
+        add_box_mm("1F_BackGarden_LaundryRimW",   -7850.0, -7760.0, -4820.0, -3120.0, z_1f + 0.785, z_1f + 0.845, cmat, col_1f)
+        add_box_mm("1F_BackGarden_LaundryRimS",   -7760.0, -7245.0, -4820.0, -4730.0, z_1f + 0.785, z_1f + 0.845, cmat, col_1f)
+        add_box_mm("1F_BackGarden_LaundryRimMid", -7760.0, -7245.0, -4015.0, -3945.0, z_1f + 0.785, z_1f + 0.845, cmat, col_1f)
+        add_box_mm("1F_BackGarden_LaundryRimN",   -7760.0, -7245.0, -3210.0, -3120.0, z_1f + 0.785, z_1f + 0.845, cmat, col_1f)
+        # Water Basin (水池, South bay -4730..-4015) + Chrome Goose-neck Faucet
+        add_box_mm("1F_BackGarden_WashBasinFloor",-7760.0, -7245.0, -4730.0, -4015.0, z_1f + 0.580, z_1f + 0.620, smat, col_1f)
+        add_box_mm("1F_BackGarden_WashBasinWater",-7760.0, -7245.0, -4730.0, -4015.0, z_1f + 0.745, z_1f + 0.780, water_mat, col_1f)
+        add_cyl_mm("1F_BackGarden_WashFaucetPost",-7200.0, -4370.0, 16.0, z_1f + 0.845, z_1f + 1.120, MATS["B2_Chrome_Silver"], col_1f, segs=12)
+        add_box_mm("1F_BackGarden_WashFaucetArm", -7420.0, -7190.0, -4385.0, -4355.0, z_1f + 1.095, z_1f + 1.125, MATS["B2_Chrome_Silver"], col_1f)
+        # Sloped Ribbed Washboard (搓衣服的斜纹搓衣板, North bay -3945..-3210)
+        add_box_mm("1F_BackGarden_WashBoardBed",  -7760.0, -7245.0, -3945.0, -3210.0, z_1f + 0.620, z_1f + 0.665, smat, col_1f)
+        for _wri in range(9):
+            _wx0 = -7735.0 + _wri * 52.0
+            _wz1 = z_1f + 0.680 + _wri * 0.019
+            add_box_mm(f"1F_BackGarden_WashRib_{_wri+1}", _wx0, _wx0 + 36.0, -3925.0, -3230.0, z_1f + 0.660, _wz1, cmat, col_1f, r_corner=4.0)
+        add_cyl_mm("1F_BackGarden_LaundryBasket", -8280.0, -3380.0, 195.0, z_1f - 0.015, z_1f + 0.390, dmat, col_1f, segs=16)
+
+        # Raised-Bed Eco-Farm (生态农场: Tomato Row North + Pea Trellis Row South, X=-11780..-9280)
+        for _fid, _fy0, _fy1 in (("TomatoBed", -3480.0, -2980.0), ("PeaBed", -4260.0, -3720.0)):
+            add_box_mm(f"1F_BackGarden_EcoFarm_{_fid}_Box",  -11780.0, -9280.0, _fy0,        _fy1,        z_1f - 0.025, z_1f + 0.33, dmat, col_1f)
+            add_box_mm(f"1F_BackGarden_EcoFarm_{_fid}_Soil", -11730.0, -9330.0, _fy0 + 45.0, _fy1 - 45.0, z_1f + 0.320, z_1f + 0.36, soil_mat, col_1f)
+        # Tomato Stakes, Bushy Foliage & Ripening Red Tomatoes (番茄)
+        add_box_mm("1F_BackGarden_EcoFarm_TomatoTieBar", -11650.0, -9410.0, -3240.0, -3220.0, z_1f + 1.22, z_1f + 1.245, gmat, col_1f)
+        for _ti, _tx in enumerate((-11520.0, -11020.0, -10520.0, -10020.0, -9520.0), 1):
+            add_cyl_mm(f"1F_BackGarden_EcoFarm_TomatoStake_{_ti}", _tx, -3230.0, 14.0, z_1f + 0.36, z_1f + 1.46, gmat, col_1f, segs=8)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_TomatoVineLo_{_ti}", _tx, -3230.0, z_1f + 0.68, 210.0, 185.0, 0.24, leaf_d if _ti % 2 else leaf_l)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_TomatoVineHi_{_ti}", _tx + 35.0, -3210.0, z_1f + 1.05, 175.0, 165.0, 0.21, leaf_l if _ti % 2 else leaf_d)
+            for _fi, (_dx, _dy, _dz) in enumerate(((-95, -145, 0.72), (85, -150, 0.96), (0, +140, 0.84)), 1):
+                _add_yard_mound(f"1F_BackGarden_EcoFarm_Tomato_{_ti}_{_fi}", _tx + _dx, -3230.0 + _dy, z_1f + _dz, 38.0, 38.0, 0.036, tomato_red)
+        # Pea Climbing Trellis Frame, Vines, White Blossoms & Lime-Green Pea Pods (豌豆)
+        for _pi, _px in enumerate((-11660.0, -10900.0, -10140.0, -9380.0), 1):
+            add_box_mm(f"1F_BackGarden_EcoFarm_PeaPost_{_pi}", _px - 18.0, _px + 18.0, -4005.0, -3975.0, z_1f + 0.36, z_1f + 1.56, dmat, col_1f)
+        for _ri, _rz in enumerate((0.68, 1.08, 1.48), 1):
+            add_box_mm(f"1F_BackGarden_EcoFarm_PeaRail_{_ri}", -11660.0, -9380.0, -4000.0, -3980.0, z_1f + _rz, z_1f + _rz + 0.022, gmat, col_1f)
+        for _pi, _px in enumerate((-11440.0, -11120.0, -10680.0, -10360.0, -9920.0, -9600.0), 1):
+            add_cyl_mm(f"1F_BackGarden_EcoFarm_PeaCane_{_pi}", _px, -3990.0, 10.0, z_1f + 0.36, z_1f + 1.54, gmat, col_1f, segs=8)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaVine_{_pi}", _px, -3990.0, z_1f + 0.92, 190.0, 160.0, 0.38, leaf_l if _pi % 2 else leaf_d)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaPodA_{_pi}", _px - 55.0, -3845.0, z_1f + 0.84 + 0.12 * (_pi % 3), 24.0, 18.0, 0.055, pea_green)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaPodB_{_pi}", _px + 55.0, -4135.0, z_1f + 0.96 - 0.10 * (_pi % 2), 24.0, 18.0, 0.055, pea_green)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaFlower_{_pi}", _px + 15.0, -3850.0, z_1f + 1.24, 34.0, 34.0, 0.028, flw_wh)
         # Back Garden Solid High Perimeter Walls (1.55m masonry wall + stone coping; no iron railings)
         _bwall_segs = [
             ("WN", -12600.0, -12420.0, -1550.0,  -980.0),
@@ -6823,14 +6868,14 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         add_box_mm("1F_BackGarden_Gate_Door_N",  -12530.0, -12490.0, -2195.0, -1655.0, z_1f + 0.04, z_1f + 1.45, fmat, col_1f)
         # Continuous Back Garden Perimeter Planters (S + WS + N walls) with rich soil & flowers/trees
         for _bp_id, _px0, _px1, _py0, _py1 in [
-            ("S",  -12420.0,  -7200.0, -4890.0, -4420.0),
+            ("S",  -12420.0,  -7950.0, -4890.0, -4420.0),
             ("WS", -12420.0, -11950.0, -4420.0, -2950.0),
             ("N",  -12420.0,  -7200.0, -1450.0, -1160.0),
         ]:
             add_box_mm(f"1F_BackGarden_Planter_{_bp_id}",     _px0,        _px1,        _py0,        _py1,        z_1f - 0.03, z_1f + 0.34, wmat, col_1f)
             add_box_mm(f"1F_BackGarden_PlanterSoil_{_bp_id}", _px0 + 45.0, _px1 - 45.0, _py0 + 45.0, _py1 - 45.0, z_1f + 0.34, z_1f + 0.37, soil_mat, col_1f)
         _add_yard_tree("1F_BackGarden_Tree_SW", -12180.0, -4640.0, 2.05, leaf_red)
-        for _bi, _bx in enumerate((-11400.0, -10200.0, -9000.0, -7800.0), 1):
+        for _bi, _bx in enumerate((-11400.0, -10400.0, -9400.0, -8350.0), 1):
             add_cyl_mm(f"1F_BackGarden_BambooS_Stem_{_bi}", _bx, -4655.0, 22.0, z_1f + 0.36, z_1f + 1.85, gmat, col_1f, segs=10)
             _add_yard_mound(f"1F_BackGarden_ShrubS_{_bi}", _bx, -4655.0, z_1f + 0.58, 250.0, 210.0, 0.24, leaf_l if _bi % 2 else leaf_d)
             _add_yard_mound(f"1F_BackGarden_FlowerS_{_bi}", _bx + 280.0, -4600.0, z_1f + 0.48, 120.0, 120.0, 0.11, flw_pk if _bi % 2 else flw_wh)
