@@ -6847,19 +6847,19 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         # B. East Front Small Garden (X=+6742..+12300, Y=-5760..+1765; strictly flush with N/S house bay)
         #    Sunken Pond X=6535..8650 (Y=-4600..-1700); Sunken Flower Garden pushed +150cm East -> X=6565..10150 (Y=-1700..+1120)
         # ---------------------------------------------------------------------
-        # Cantilevered Marble Entry Bridge across extended Flower Pit (X=6742..10150, Y=+120..+1180) + Frameless Clear Glass Guardrail (no iron frame)
+        # Cantilevered Marble Entry Bridge across extended Flower Pit (X=6742..10150, Y=+120..+1180) + 20cm Low Frameless Glass Curb
         add_box_mm("1F_FrontGarden_EntryBridge",   6742.0, 10150.0,  120.0, 1180.0, z_1f - 0.10, z_1f - 0.002, cmat, col_1f)
-        add_box_mm("1F_FrontGarden_BridgeGlassS",  6742.0, 10150.0,  105.0,  125.0, z_1f,        z_1f + 0.98,  glmat, col_1f)
+        add_box_mm("1F_FrontGarden_BridgeGlassS",  6742.0, 10150.0,  105.0,  125.0, z_1f - 0.002, z_1f + 0.198, glmat, col_1f)
 
-        # Travertine Coping & Pure Frameless Clear Glass Balustrade around L-shaped Open Sunken Pond + Extended Sunken Flower Pit (no iron frame)
+        # Travertine Coping & 20cm (200mm) Low Frameless Clear Glass Curb around Open Sunken Fish Pond + Extended Sunken Flower Pit
         add_box_mm("1F_FrontGarden_PitCoping_PondS",   6742.0,  8790.0, -4780.0, -4520.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
         add_box_mm("1F_FrontGarden_PitCoping_PondE",   8530.0,  8790.0, -4520.0, -1670.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
         add_box_mm("1F_FrontGarden_PitCoping_FlowerS", 8790.0, 10290.0, -1840.0, -1670.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
         add_box_mm("1F_FrontGarden_PitCoping_FlowerE",10030.0, 10290.0, -1670.0,   120.0, z_1f - 0.02, z_1f + 0.03, smat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_PondS",    6742.0,  8665.0, -4615.0, -4595.0, z_1f + 0.03, z_1f + 0.98, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_PondE",    8645.0,  8665.0, -4595.0, -1705.0, z_1f + 0.03, z_1f + 0.98, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_FlowerS",  8665.0, 10165.0, -1715.0, -1695.0, z_1f + 0.03, z_1f + 0.98, glmat, col_1f)
-        add_box_mm("1F_FrontGarden_PitGlass_FlowerE", 10145.0, 10165.0, -1695.0,   120.0, z_1f + 0.03, z_1f + 0.98, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_PondS",    6742.0,  8665.0, -4615.0, -4595.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_PondE",    8645.0,  8665.0, -4595.0, -1705.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_FlowerS",  8665.0, 10165.0, -1715.0, -1695.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
+        add_box_mm("1F_FrontGarden_PitGlass_FlowerE", 10145.0, 10165.0, -1695.0,   120.0, z_1f + 0.03, z_1f + 0.23, glmat, col_1f)
 
         # East Entry Walkway & 3 Stone Stepping Stones from Extended Entry Bridge (X=10150) to East Garden Gate (X=12120, centered at Y=-15..+985)
         add_box_mm("1F_FrontGarden_PathBase", 10150.0, 12120.0, -15.0, 985.0, z_1f - 0.15, z_1f - 0.028, smat, col_1f)
