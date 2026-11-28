@@ -6843,29 +6843,81 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             add_box_mm(f"1F_BackGarden_WashRib_{_wri+1}", _wx0, _wx0 + 36.0, -3925.0, -3230.0, z_1f + 0.660, _wz1, cmat, col_1f, r_corner=4.0)
         add_cyl_mm("1F_BackGarden_LaundryBasket", -8140.0, -3380.0, 185.0, z_1f - 0.015, z_1f + 0.380, dmat, col_1f, segs=16)
 
-        # Compact Raised-Bed Eco-Farm along West Wall (-9165..-8520): Tomato Bed North (-3100..-1580) & Pea Trellis Bed South (-4820..-3240)
-        for _fid, _fy0, _fy1 in (("TomatoBed", -3100.0, -1580.0), ("PeaBed", -4820.0, -3240.0)):
+        # Compact Raised-Bed Eco-Farm along West Wall (-9165..-8520): Tomato Bed North (-2760..-1580) & Pea Trellis Bed Mid (-4060..-2880)
+        for _fid, _fy0, _fy1 in (("TomatoBed", -2760.0, -1580.0), ("PeaBed", -4060.0, -2880.0)):
             add_box_mm(f"1F_BackGarden_EcoFarm_{_fid}_Box",  -9165.0, -8520.0, _fy0,        _fy1,        z_1f - 0.025, z_1f + 0.33, dmat, col_1f)
             add_box_mm(f"1F_BackGarden_EcoFarm_{_fid}_Soil", -9120.0, -8565.0, _fy0 + 45.0, _fy1 - 45.0, z_1f + 0.320, z_1f + 0.36, soil_mat, col_1f)
         # Tomato Stakes, Bushy Foliage & Ripening Red Tomatoes (番茄)
-        add_box_mm("1F_BackGarden_EcoFarm_TomatoTieBar", -8852.0, -8832.0, -2960.0, -1720.0, z_1f + 1.22, z_1f + 1.245, gmat, col_1f)
-        for _ti, _ty in enumerate((-2820.0, -2340.0, -1860.0), 1):
+        add_box_mm("1F_BackGarden_EcoFarm_TomatoTieBar", -8852.0, -8832.0, -2640.0, -1700.0, z_1f + 1.22, z_1f + 1.245, gmat, col_1f)
+        for _ti, _ty in enumerate((-2540.0, -2170.0, -1800.0), 1):
             add_cyl_mm(f"1F_BackGarden_EcoFarm_TomatoStake_{_ti}", -8842.0, _ty, 14.0, z_1f + 0.36, z_1f + 1.46, gmat, col_1f, segs=8)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_TomatoVineLo_{_ti}", -8842.0, _ty, z_1f + 0.68, 195.0, 200.0, 0.24, leaf_d if _ti % 2 else leaf_l)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_TomatoVineHi_{_ti}", -8820.0, _ty + 30.0, z_1f + 1.05, 165.0, 175.0, 0.21, leaf_l if _ti % 2 else leaf_d)
-            for _fi, (_dx, _dy, _dz) in enumerate(((125, -80, 0.74), (135, +90, 0.96), (-115, 0, 0.84)), 1):
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_TomatoVineLo_{_ti}", -8842.0, _ty, z_1f + 0.68, 185.0, 180.0, 0.23, leaf_d if _ti % 2 else leaf_l)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_TomatoVineHi_{_ti}", -8820.0, _ty + 25.0, z_1f + 1.04, 155.0, 160.0, 0.20, leaf_l if _ti % 2 else leaf_d)
+            for _fi, (_dx, _dy, _dz) in enumerate(((120, -70, 0.74), (130, +80, 0.96), (-110, 0, 0.84)), 1):
                 _add_yard_mound(f"1F_BackGarden_EcoFarm_Tomato_{_ti}_{_fi}", -8842.0 + _dx, _ty + _dy, z_1f + _dz, 38.0, 38.0, 0.036, tomato_red)
         # Pea Climbing Trellis Frame, Vines, White Blossoms & Lime-Green Pea Pods (豌豆)
-        for _pi, _py in enumerate((-4680.0, -4030.0, -3380.0), 1):
+        for _pi, _py in enumerate((-3940.0, -3470.0, -3000.0), 1):
             add_box_mm(f"1F_BackGarden_EcoFarm_PeaPost_{_pi}", -8858.0, -8826.0, _py - 18.0, _py + 18.0, z_1f + 0.36, z_1f + 1.56, dmat, col_1f)
         for _ri, _rz in enumerate((0.68, 1.08, 1.48), 1):
-            add_box_mm(f"1F_BackGarden_EcoFarm_PeaRail_{_ri}", -8852.0, -8832.0, -4680.0, -3380.0, z_1f + _rz, z_1f + _rz + 0.022, gmat, col_1f)
-        for _pi, _py in enumerate((-4520.0, -4200.0, -3860.0, -3540.0), 1):
+            add_box_mm(f"1F_BackGarden_EcoFarm_PeaRail_{_ri}", -8852.0, -8832.0, -3940.0, -3000.0, z_1f + _rz, z_1f + _rz + 0.022, gmat, col_1f)
+        for _pi, _py in enumerate((-3800.0, -3560.0, -3320.0, -3080.0), 1):
             add_cyl_mm(f"1F_BackGarden_EcoFarm_PeaCane_{_pi}", -8842.0, _py, 10.0, z_1f + 0.36, z_1f + 1.54, gmat, col_1f, segs=8)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaVine_{_pi}", -8842.0, _py, z_1f + 0.92, 170.0, 185.0, 0.38, leaf_l if _pi % 2 else leaf_d)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaPodA_{_pi}", -8705.0, _py - 45.0, z_1f + 0.84 + 0.12 * (_pi % 3), 24.0, 18.0, 0.055, pea_green)
-            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaPodB_{_pi}", -8975.0, _py + 45.0, z_1f + 0.96 - 0.10 * (_pi % 2), 24.0, 18.0, 0.055, pea_green)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaVine_{_pi}", -8842.0, _py, z_1f + 0.92, 165.0, 175.0, 0.36, leaf_l if _pi % 2 else leaf_d)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaPodA_{_pi}", -8705.0, _py - 40.0, z_1f + 0.84 + 0.12 * (_pi % 3), 24.0, 18.0, 0.055, pea_green)
+            _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaPodB_{_pi}", -8975.0, _py + 40.0, z_1f + 0.96 - 0.10 * (_pi % 2), 24.0, 18.0, 0.055, pea_green)
             _add_yard_mound(f"1F_BackGarden_EcoFarm_PeaFlower_{_pi}", -8710.0, _py + 15.0, z_1f + 1.24, 34.0, 34.0, 0.028, flw_wh)
+
+        # Cute Cozy Doghouse (可爱狗窝) in SW sheltered corner (-9180..-8540, Y=-4840..-4180, facing East toward Laundry Trough)
+        dog_roof_mat = make_mat("DogHouse_Roof_Terracotta", (0.82, 0.42, 0.32, 1.0), roughness=0.58)
+        dog_trim_mat = make_mat("DogHouse_Trim_Oak",       (0.74, 0.56, 0.38, 1.0), roughness=0.52)
+        dog_pad_mat  = make_mat("DogHouse_Cushion_Plush",  (0.95, 0.86, 0.72, 1.0), roughness=0.82)
+        dog_bowl_mat = make_mat("DogHouse_Bowl_SkyBlue",   (0.36, 0.72, 0.88, 1.0), roughness=0.22)
+        add_box_mm("1F_BackGarden_DogHouse_Stoop",    -9200.0, -8360.0, -4860.0, -4160.0, z_1f - 0.025, z_1f + 0.035, cmat, col_1f, r_corner=16.0)
+        add_box_mm("1F_BackGarden_DogHouse_WallBack", -9180.0, -9140.0, -4820.0, -4200.0, z_1f + 0.035, z_1f + 0.520, wmat, col_1f)
+        add_box_mm("1F_BackGarden_DogHouse_WallS",    -9180.0, -8560.0, -4820.0, -4780.0, z_1f + 0.035, z_1f + 0.520, wmat, col_1f)
+        add_box_mm("1F_BackGarden_DogHouse_WallN",    -9180.0, -8560.0, -4240.0, -4200.0, z_1f + 0.035, z_1f + 0.520, wmat, col_1f)
+        add_box_mm("1F_BackGarden_DogHouse_FrontL",   -8600.0, -8560.0, -4820.0, -4640.0, z_1f + 0.035, z_1f + 0.520, wmat, col_1f)
+        add_box_mm("1F_BackGarden_DogHouse_FrontR",   -8600.0, -8560.0, -4380.0, -4200.0, z_1f + 0.035, z_1f + 0.520, wmat, col_1f)
+        add_box_mm("1F_BackGarden_DogHouse_FrontHdr", -8600.0, -8560.0, -4640.0, -4380.0, z_1f + 0.390, z_1f + 0.520, wmat, col_1f)
+        add_box_mm("1F_BackGarden_DogHouse_DoorTrimS",-8560.0, -8538.0, -4655.0, -4625.0, z_1f + 0.035, z_1f + 0.415, dog_trim_mat, col_1f)
+        add_box_mm("1F_BackGarden_DogHouse_DoorTrimN",-8560.0, -8538.0, -4395.0, -4365.0, z_1f + 0.035, z_1f + 0.415, dog_trim_mat, col_1f)
+        add_box_mm("1F_BackGarden_DogHouse_DoorTrimT",-8560.0, -8538.0, -4655.0, -4365.0, z_1f + 0.388, z_1f + 0.422, dog_trim_mat, col_1f)
+        add_box_mm("1F_BackGarden_DogHouse_Cushion",  -9120.0, -8620.0, -4760.0, -4260.0, z_1f + 0.036, z_1f + 0.110, dog_pad_mat, col_1f, r_corner=24.0)
+        # Cute pitched gable + overhanging shingled roof (two sloped prisms meeting at ridge X=-9220..-8500, Y=-4510)
+        add_prism("1F_BackGarden_DogHouse_GableW", [(-9.180, -4.820), (-9.180, -4.200)], z_1f + 0.520, z_1f + 0.760, wmat, col_1f) if False else None
+        for _gside, _gx0, _gx1 in (("Back", -9180.0, -9140.0), ("Front", -8600.0, -8560.0)):
+            _bm_g = bmesh.new()
+            _gy0, _gyc, _gy1 = -4.820, -4.510, -4.200
+            _gz0, _gz1 = z_1f + 0.520, z_1f + 0.765
+            _gv0 = _bm_g.verts.new((_gx0*MM, _gy0, _gz0)); _gv1 = _bm_g.verts.new((_gx0*MM, _gy1, _gz0)); _gv2 = _bm_g.verts.new((_gx0*MM, _gyc, _gz1))
+            _gv3 = _bm_g.verts.new((_gx1*MM, _gy0, _gz0)); _gv4 = _bm_g.verts.new((_gx1*MM, _gy1, _gz0)); _gv5 = _bm_g.verts.new((_gx1*MM, _gyc, _gz1))
+            _bm_g.faces.new([_gv0, _gv1, _gv2]); _bm_g.faces.new([_gv5, _gv4, _gv3])
+            _bm_g.faces.new([_gv0, _gv2, _gv5, _gv3]); _bm_g.faces.new([_gv2, _gv1, _gv4, _gv5]); _bm_g.faces.new([_gv1, _gv0, _gv3, _gv4])
+            bmesh.ops.recalc_face_normals(_bm_g, faces=_bm_g.faces[:])
+            _me_g = bpy.data.meshes.new(f"1F_BackGarden_DogHouse_Gable_{_gside}")
+            _bm_g.to_mesh(_me_g); _bm_g.free()
+            _ob_g = bpy.data.objects.new(f"1F_BackGarden_DogHouse_Gable_{_gside}", _me_g)
+            _ob_g.data.materials.append(wmat); link_obj(_ob_g, col_1f)
+        for _rname, _ry_eave, _rz_eave in (("S", -4.875, z_1f + 0.485), ("N", -4.145, z_1f + 0.485)):
+            _bm_r = bmesh.new()
+            _rx0, _rx1 = -9.225, -8.495
+            _ryc, _rz_pk, _rt = -4.510, z_1f + 0.785, 0.036
+            _pts_b = [(_rx0, _ry_eave, _rz_eave), (_rx1, _ry_eave, _rz_eave), (_rx1, _ryc, _rz_pk), (_rx0, _ryc, _rz_pk)]
+            _pts_t = [(_rx0, _ry_eave, _rz_eave + _rt), (_rx1, _ry_eave, _rz_eave + _rt), (_rx1, _ryc, _rz_pk + _rt), (_rx0, _ryc, _rz_pk + _rt)]
+            _vb = [_bm_r.verts.new(p) for p in _pts_b]; _vt = [_bm_r.verts.new(p) for p in _pts_t]
+            _bm_r.faces.new(_vb[::-1]); _bm_r.faces.new(_vt)
+            for _ri_f in range(4):
+                _bm_r.faces.new([_vb[_ri_f], _vb[(_ri_f + 1) % 4], _vt[(_ri_f + 1) % 4], _vt[_ri_f]])
+            bmesh.ops.recalc_face_normals(_bm_r, faces=_bm_r.faces[:])
+            _me_r = bpy.data.meshes.new(f"1F_BackGarden_DogHouse_Roof_{_rname}")
+            _bm_r.to_mesh(_me_r); _bm_r.free()
+            _ob_r = bpy.data.objects.new(f"1F_BackGarden_DogHouse_Roof_{_rname}", _me_r)
+            _ob_r.data.materials.append(dog_roof_mat); link_obj(_ob_r, col_1f)
+        add_box_mm("1F_BackGarden_DogHouse_RidgeCap", -9235.0, -8485.0, -4535.0, -4485.0, z_1f + 0.785, z_1f + 0.835, dog_trim_mat, col_1f, r_corner=8.0)
+        add_box_mm("1F_BackGarden_DogHouse_BoneSign", -8560.0, -8538.0, -4585.0, -4435.0, z_1f + 0.560, z_1f + 0.625, dog_trim_mat, col_1f, r_corner=12.0)
+        add_cyl_mm("1F_BackGarden_DogHouse_BowlFood",  -8455.0, -4680.0, 72.0, z_1f + 0.035, z_1f + 0.095, dog_bowl_mat, col_1f, segs=14)
+        add_cyl_mm("1F_BackGarden_DogHouse_BowlWater", -8455.0, -4340.0, 72.0, z_1f + 0.035, z_1f + 0.095, dog_bowl_mat, col_1f, segs=14)
+        add_cyl_mm("1F_BackGarden_DogHouse_WaterPool", -8455.0, -4340.0, 56.0, z_1f + 0.088, z_1f + 0.098, water_mat, col_1f, segs=12)
         # Back Garden Solid High Perimeter Walls (1.55m masonry wall + stone coping; single open passage on North/left-hand side when facing Kitchen)
         _bwall_segs = [
             ("W",  -9405.0, -9225.0, -5070.0,  -980.0),
