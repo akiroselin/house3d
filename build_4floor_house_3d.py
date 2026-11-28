@@ -7041,38 +7041,37 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
             add_cyl_mm(f"2F_Door_SW_Balcony_Hinge_{_hi}", hx, hy, 9.0, _hz - 0.045, _hz + 0.045, hmat, col_2f, segs=12)
     _build_sw_balcony_door()
 
-    # Exterior Steel-Frame Drying Balcony (2F_SteelBalcony_*, X=-8980..-6990, Y=-4580..-2320, max Z=z_2f+2.480)
+    # Exterior Open Drying Balcony extending from SW Laundry all the way North to NW Tatami South Glass (X=-8980..-6990, Y=-4580..-1530)
     def _build_sw_steel_balcony():
         smat, dmat, gmat = MATS["Stair_Bronze_Iron"], MATS["Cabinet_Walnut"], MATS["Window_Glass"]
         rmat = MATS["B2_Chrome_Silver"]
-        x0, x1, y0, y1 = -8980.0, -6990.0, -4580.0, -2320.0
+        x0, x1, y0, y1 = -8980.0, -6990.0, -4580.0, -1530.0
         # Steel deck perimeter girders + transverse joists + cantilevered wall-anchor gussets
         add_box_mm("2F_SteelBalcony_GirderW", x0, x0 + 90.0, y0, y1, z_2f - 0.140, z_2f - 0.022, smat, col_2f)
         add_box_mm("2F_SteelBalcony_GirderE", x1 - 90.0, x1, y0, y1, z_2f - 0.140, z_2f - 0.022, smat, col_2f)
         add_box_mm("2F_SteelBalcony_GirderS", x0 + 90.0, x1 - 90.0, y0, y0 + 90.0, z_2f - 0.140, z_2f - 0.022, smat, col_2f)
         add_box_mm("2F_SteelBalcony_GirderN", x0 + 90.0, x1 - 90.0, y1 - 90.0, y1, z_2f - 0.140, z_2f - 0.022, smat, col_2f)
-        for _ji, _jy in enumerate((-4120.0, -3670.0, -3220.0, -2770.0), 1):
+        for _ji, _jy in enumerate((-4120.0, -3670.0, -3220.0, -2770.0, -2320.0, -1920.0), 1):
             add_box_mm(f"2F_SteelBalcony_Joist_{_ji}", x0 + 90.0, x1 - 90.0, _jy - 35.0, _jy + 35.0, z_2f - 0.125, z_2f - 0.022, smat, col_2f)
-        for _bi, _by in enumerate((-4480.0, -3450.0, -2420.0), 1):
+        for _bi, _by in enumerate((-4480.0, -3450.0, -2420.0, -1720.0), 1):
             add_box_mm(f"2F_SteelBalcony_BracketTop_{_bi}", -7980.0, x1, _by - 35.0, _by + 35.0, z_2f - 0.240, z_2f - 0.140, smat, col_2f)
             add_box_mm(f"2F_SteelBalcony_BracketWall_{_bi}", -7100.0, x1, _by - 35.0, _by + 35.0, z_2f - 0.560, z_2f - 0.240, smat, col_2f)
             add_box_mm(f"2F_SteelBalcony_BracketDiag_{_bi}", -7780.0, -7100.0, _by - 28.0, _by + 28.0, z_2f - 0.420, z_2f - 0.240, smat, col_2f)
-        # Slatted hardwood outdoor decking (12 slats along Y)
+        # Slatted hardwood outdoor decking extending continuously up to Tatami South glass edge (Y=-1530)
         n_slats = 12
         pitch_x = (x1 - 20.0 - (x0 + 40.0)) / n_slats
         for _si in range(n_slats):
             sx0 = x0 + 40.0 + _si * pitch_x + 8.0
             sx1 = x0 + 40.0 + (_si + 1) * pitch_x - 8.0
-            add_box_mm(f"2F_SteelBalcony_Deck_{_si+1}", sx0, sx1, y0 + 40.0, y1 - 40.0, z_2f - 0.022, z_2f - 0.002, dmat, col_2f)
-        # Open cantilevered drying balcony with PURE frameless clear glass balustrade (NO iron columns, overhead box cage, or railing metal frames)
-        add_box_mm("2F_SteelBalcony_RailGlassW", x0 + 29.0, x0 + 41.0, y0 + 29.0, y1 - 29.0, z_2f - 0.002, z_2f + 1.080, gmat, col_2f)
-        for _rtag, _ry in (("S", y0 + 35.0), ("N", y1 - 35.0)):
-            add_box_mm(f"2F_SteelBalcony_RailGlass{_rtag}", x0 + 41.0, x1 - 40.0, _ry - 6.0, _ry + 6.0, z_2f - 0.002, z_2f + 1.080, gmat, col_2f)
-        # Dual wall-mounted cantilevered drying arms anchored ONLY to East Laundry wall (-6990) + drying rods & garments
-        for _wy_arm in (-4260.0, -2640.0):
+            add_box_mm(f"2F_SteelBalcony_Deck_{_si+1}", sx0, sx1, y0 + 40.0, y1 - 5.0, z_2f - 0.022, z_2f - 0.002, dmat, col_2f)
+        # Open cantilevered drying balcony with PURE frameless clear glass balustrade on W & S (North meets NW Tatami glass wall flush)
+        add_box_mm("2F_SteelBalcony_RailGlassW", x0 + 29.0, x0 + 41.0, y0 + 29.0, y1,        z_2f - 0.002, z_2f + 1.080, gmat, col_2f)
+        add_box_mm("2F_SteelBalcony_RailGlassS", x0 + 41.0, x1 - 40.0, y0 + 29.0, y0 + 41.0, z_2f - 0.002, z_2f + 1.080, gmat, col_2f)
+        # Dual wall-mounted cantilevered drying arms anchored ONLY to solid East wall + drying rods & garments
+        for _wy_arm in (-4260.0, -2260.0):
             add_box_mm(f"2F_SteelBalcony_WallArm_{int(abs(_wy_arm))}", -8340.0, x1, _wy_arm - 12.0, _wy_arm + 12.0, z_2f + 2.178, z_2f + 2.210, rmat, col_2f)
         for _ri, _rx in enumerate((-8320.0, -7680.0), 1):
-            add_box_mm(f"2F_SteelBalcony_DryRod_{_ri}", _rx - 14.0, _rx + 14.0, -4320.0, -2580.0, z_2f + 2.150, z_2f + 2.178, rmat, col_2f)
+            add_box_mm(f"2F_SteelBalcony_DryRod_{_ri}", _rx - 14.0, _rx + 14.0, -4320.0, -2180.0, z_2f + 2.150, z_2f + 2.178, rmat, col_2f)
         _dry_items = [
             (-8320.0, -4020.0, -3520.0, 1.48, MATS["Bed_Linen"]),
             (-8320.0, -3380.0, -2880.0, 1.56, MATS["Bed_Throw"]),
