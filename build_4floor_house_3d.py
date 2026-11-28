@@ -6978,6 +6978,22 @@ def build_house_floors(msp, floor_offsets_xy=None, include_beams=True):
         for _li, (_lx, _ly) in enumerate(((10340.0, -840.0), (10340.0, 260.0), (11850.0, -80.0), (11850.0, 1060.0)), 1):
             add_box_mm(f"1F_FrontGarden_BollardPost_{_li}", _lx - 45.0, _lx + 45.0, _ly - 45.0, _ly + 45.0, z_1f - 0.02, z_1f + 0.54, fmat, col_1f)
             add_box_mm(f"1F_FrontGarden_BollardGlow_{_li}", _lx - 38.0, _lx + 38.0, _ly - 38.0, _ly + 38.0, z_1f + 0.54, z_1f + 0.62, lmat, col_1f)
+
+        # Exterior Roadside Planters OUTSIDE East Perimeter Wall (约100cm纵深: X=+12300..+13300) for trees, flowers & grass
+        add_box_mm("1F_FrontGarden_OuterEntryPad", 12300.0, 13300.0, -215.0, 1185.0, z_1f - 0.15, z_1f - 0.012, smat, col_1f)
+        for _op_id, _oy0, _oy1 in (("S", -5760.0, -215.0), ("N", 1185.0, 1765.0)):
+            add_box_mm(f"1F_FrontGarden_OuterPlanter_{_op_id}",     12300.0, 13300.0, _oy0,        _oy1,        z_1f - 0.15, z_1f + 0.34, wmat, col_1f)
+            add_box_mm(f"1F_FrontGarden_OuterPlanterCap_{_op_id}",  12300.0, 13320.0, _oy0 - 10.0, _oy1 + 10.0, z_1f + 0.34, z_1f + 0.37, smat, col_1f)
+            add_box_mm(f"1F_FrontGarden_OuterPlanterSoil_{_op_id}", 12350.0, 13250.0, _oy0 + 50.0, _oy1 - 50.0, z_1f + 0.35, z_1f + 0.39, soil_mat, col_1f)
+        _add_yard_tree("1F_FrontGarden_OuterTree_S1", 12800.0, -5050.0, 2.75, leaf_l)
+        _add_yard_tree("1F_FrontGarden_OuterTree_S2", 12800.0, -2850.0, 2.95, leaf_d)
+        _add_yard_tree("1F_FrontGarden_OuterTree_S3", 12800.0,  -920.0, 2.60, leaf_red)
+        _add_yard_tree("1F_FrontGarden_OuterTree_N1", 12800.0,  1475.0, 2.45, leaf_l)
+        for _oi, _oy in enumerate((-5450.0, -4450.0, -3650.0, -2200.0, -1500.0, -520.0), 1):
+            _add_yard_mound(f"1F_FrontGarden_OuterShrubS_{_oi}",  12800.0, _oy, z_1f + 0.60, 320.0, 290.0, 0.26, leaf_l if _oi % 2 else leaf_d)
+            _add_yard_mound(f"1F_FrontGarden_OuterFlowerS_{_oi}", 12960.0, _oy + 240.0, z_1f + 0.50, 150.0, 145.0, 0.13, flw_pk if _oi % 2 else flw_wh)
+        _add_yard_mound("1F_FrontGarden_OuterShrubN_1",  12620.0, 1475.0, z_1f + 0.58, 220.0, 210.0, 0.22, leaf_d)
+        _add_yard_mound("1F_FrontGarden_OuterFlowerN_1", 13040.0, 1475.0, z_1f + 0.50, 140.0, 140.0, 0.12, flw_pk)
     _build_1f_courtyard()
 
     # 1F -> 2F Spiral Stair: Steps 16..30 spiral COUNTER-CLOCKWISE from +25° (ENE on 1F) to +265° (S landing on 2F)
